@@ -21,6 +21,7 @@ public class AnsiMessagePrinterTest extends AbstractTestCase {
     printer.setResetCode(resetCode);
     printer.setColors(colors);
     final String encoded = printer.format("<blue>hello, world</blue>");
+    logger.debug("Encoded: {}", encoded);
     assertTrue(encoded.startsWith(blue));
     assertTrue(encoded.contains("hello"));
     assertTrue(encoded.contains("world"));

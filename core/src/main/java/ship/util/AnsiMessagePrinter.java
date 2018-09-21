@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 public class AnsiMessagePrinter implements MessagePrinter {
@@ -109,6 +110,123 @@ public class AnsiMessagePrinter implements MessagePrinter {
     colors.put("bg_bright_white", BG_BRIGHT_WHITE);
   }
 
+  final int CH_ESCAPE = '!';
+  final int CH_TAG_START = '<';
+  final int CH_TAG_CLOSE = '/';
+  final int CH_TAG_END = '>';
+
+  @RequiredArgsConstructor
+  abstract class State {
+    @Getter
+    protected final Stack<String> tags;
+
+    @Getter
+    protected final StringWriter writer;
+
+    abstract State next(int ch);
+  }
+
+  class Normal extends State {
+
+    public Normal(final Stack<String> tags, final StringWriter writer) {
+      super(tags, writer);
+    }
+
+    @Override
+    public State next(int ch) {
+      if (CH_ESCAPE == ch) {
+        return new Escape(tags, writer);
+      } else if (CH_TAG_START == ch) {
+        return new TagOpen(tags, writer);
+      } else {
+        writer.write((char) ch);
+        return this;
+      }
+    }
+  }
+
+  class Escape extends State {
+
+    public Escape(final Stack<String> tags, final StringWriter writer) {
+      super(tags, writer);
+    }
+
+    @Override
+    public State next(int ch) {
+      writer.write((char) ch);
+      return new Normal(tags, writer);
+    }
+  }
+
+  class TagOpen extends State {
+    public TagOpen(final Stack<String> tags, final StringWriter writer) {
+      super(tags, writer);
+    }
+
+    @Override
+    public State next(int ch) {
+      if (ch == CH_TAG_CLOSE) {
+        return new CloseColor(tags, writer);
+      } else {
+        return new OpenColor(tags, writer).next(ch);
+      }
+    }
+  }
+
+  class OpenColor extends State {
+    protected final StringBuilder color = new StringBuilder();
+
+    public OpenColor(final Stack<String> tags, final StringWriter writer) {
+      super(tags, writer);
+    }
+
+    @Override
+    public State next(int ch) {
+      if (ch == CH_TAG_END) {
+        final String colorName = color.toString();
+        // check valid
+        tags.push(colorName);
+        final String colorCode = colors.get(colorName);
+        assertNotNull(colorCode, "Unknown color: " + colorName);
+        writer.write(colorCode);
+        return new Normal(tags, writer);
+      } else {
+        color.append((char) ch);
+        return this;
+      }
+
+    }
+  }
+
+  class CloseColor extends State {
+    protected final StringBuilder color = new StringBuilder();
+
+    public CloseColor(final Stack<String> tags, final StringWriter writer) {
+      super(tags, writer);
+    }
+
+    @Override
+    public State next(int ch) {
+      if (ch == CH_TAG_END) {
+        final String colorName = color.toString();
+        // check valid
+        final String openColorName = tags.pop();
+        assertEquals(openColorName, colorName,
+            "The closing tag not matched: " + openColorName + ", " + colorName);
+        color.delete(0, color.length());
+        if (tags.isEmpty()) {
+          writer.write(resetCode);
+        } else {
+          writer.write(colors.get(tags.peek()));
+        }
+        return new Normal(tags, writer);
+      } else {
+        color.append((char) ch);
+        return this;
+      }
+    }
+  }
+
   /**
    * Format tagged message with ansi color.
    *
@@ -121,88 +239,19 @@ public class AnsiMessagePrinter implements MessagePrinter {
       return null;
     }
     final StringReader reader = new StringReader(message);
-    final StringWriter writer = new StringWriter();
-    final StringBuilder color = new StringBuilder();
 
-    final Stack<String> tags = new Stack<>();
     int ch = 0;
-    final int ST_NORMAL = 0;
-    final int ST_ESCAPE = 1;
-    final int ST_TAG_OPEN = 2;
-    final int ST_OPEN_COLOR = 3;
-    final int ST_CLOSE_COLOR = 4;
-    final int CH_ESCAPE = '!';
-    final int CH_TAG_START = '<';
-    final int CH_TAG_CLOSE = '/';
-    final int CH_TAG_END = '>';
-    int state = ST_NORMAL;
+    State state = new Normal(new Stack<>(), new StringWriter());
     try {
       while (0 <= (ch = reader.read())) {
-        switch (state) {
-          case ST_NORMAL:
-            if (CH_ESCAPE == ch) {
-              state = ST_ESCAPE;
-            } else if (CH_TAG_START == ch) {
-              state = ST_TAG_OPEN;
-            } else {
-              writer.write((char) ch);
-            }
-            break;
-          case ST_ESCAPE:
-            writer.write((char) ch);
-            state = ST_NORMAL;
-            break;
-          case ST_TAG_OPEN:
-            if (ch == CH_TAG_CLOSE) {
-              state = ST_CLOSE_COLOR;
-            } else {
-              state = ST_OPEN_COLOR;
-              color.append((char) ch);
-            }
-            break;
-          case ST_OPEN_COLOR:
-            if (ch == CH_TAG_END) {
-              final String colorName = color.toString();
-              // check valid
-              tags.push(colorName);
-              color.delete(0, color.length());
-              final String colorCode = colors.get(colorName);
-              assertNotNull(colorCode, "Unknown color: " + colorName);
-              writer.write(colorCode);
-              state = ST_NORMAL;
-            } else {
-              color.append((char) ch);
-            }
-            break;
-          case ST_CLOSE_COLOR:
-            if (ch == CH_TAG_END) {
-              final String colorName = color.toString();
-              // check valid
-              final String openColorName = tags.pop();
-              assertEquals(openColorName, colorName,
-                  "The closing tag not matched: " + openColorName + ", " + colorName);
-              color.delete(0, color.length());
-              if (tags.isEmpty()) {
-                writer.write(resetCode);
-              } else {
-                writer.write(colors.get(tags.peek()));
-              }
-              state = ST_NORMAL;
-            } else {
-              color.append((char) ch);
-            }
-            break;
-
-          default:
-            throw new IllegalStateException();
-        }
+        state = state.next(ch);
       }
-    } catch (IOException ex) {
+    } catch (final IOException ex) {
       throw new IllegalStateException();
     }
-    assertEquals(ST_NORMAL, state, "Expression is invalid: " + state);
-    assertTrue(tags.isEmpty(), "The closing tag missed: " + tags);
-    return writer.toString();
+    assertTrue(state instanceof Normal, "Expression is invalid: " + state);
+    assertTrue(state.getTags().isEmpty(), "The closing tag missed: " + state.getTags());
+    return state.getWriter().toString();
   }
 
   public void print(final String format, Object...args) {
