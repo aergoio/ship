@@ -1,6 +1,7 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![LoC](https://tokei.rs/b1/github/aergoio/ship)](https://github.com/aergoio/ship)
 [![Travis_ci](https://travis-ci.org/aergoio/ship.svg?branch=master)](https://travis-ci.org/aergoio/ship)
+[![codeclimate](https://codeclimate.com/github/codeclimate/codeclimate/maintainability)](https://api.codeclimate.com/v1/badges/b863c5d4835cd5c4c528/maintainability)
 [![codecov.io](http://codecov.io/github/aergoio/ship/coverage.svg?branch=master)](http://codecov.io/github/aergoio/ship?branch=master)
 
 # Introduction
