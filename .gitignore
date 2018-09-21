@@ -1,0 +1,12 @@
+.*
+*.iml
+*.ipr
+*.iws
+build
+*.proto
+Gemfile.lock
+
+!.travis.yml
+!.gitignore
+!.gitmodules
+**/bin/

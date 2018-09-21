@@ -1,0 +1,23 @@
+/*
+ * @copyright defined in LICENSE.txt
+ */
+
+apply plugin: 'distribution'
+uploadArchives.enabled = false
+
+dependencies {
+  compile project(':core')
+  compile 'ch.qos.logback:logback-classic:1.2.3'
+}
+
+distributions {
+  main {
+    baseName = 'ship'
+    contents {
+      from { 'src' }
+      into('lib') {
+        from configurations.runtime
+      }
+    }
+  }
+}

@@ -1,0 +1,36 @@
+/*
+ * @copyright defined in LICENSE.txt
+ */
+
+jar {
+  archivesBaseName = 'ship-core'
+}
+
+ext {
+  springBootVersion = '2.0.2.RELEASE'
+  heraVersion = '0.1-SNAPSHOT'
+}
+
+dependencies {
+  implementation "io.aergo:hera-util:${heraVersion}"
+  implementation "io.aergo:hera-common:${heraVersion}"
+  implementation "io.aergo:hera-transport:${heraVersion}"
+
+  implementation 'com.google.guava:guava:22.0'
+  implementation "com.fasterxml.jackson.core:jackson-databind:2.9.3"
+  implementation ('io.grpc:grpc-netty:1.13.1') {
+    exclude group: 'com.google.guava', module: 'guava'
+  }
+  implementation "org.eclipse.jgit:org.eclipse.jgit:5.0.1.201806211838-r"
+  implementation "org.luaj:luaj-jse:3.0.1"
+  implementation "javax.inject:javax.inject:1"
+  implementation ("org.springframework.boot:spring-boot-starter-web:${springBootVersion}") {
+    exclude module : 'spring-boot-starter-logging'
+  }
+  implementation ("org.springframework.boot:spring-boot-starter-websocket:${springBootVersion}") {
+    exclude module : 'spring-boot-starter-logging'
+  }
+  implementation "com.beust:jcommander:1.72"
+
+  testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
+}

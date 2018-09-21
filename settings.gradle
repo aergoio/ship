@@ -1,0 +1,8 @@
+/*
+ * @copyright defined in LICENSE.txt
+ */
+rootProject.name = 'ship'
+
+include ':core'
+include ':web'
+include ':assembly'
