@@ -44,7 +44,7 @@ function clean-workspace() {
 }
 
 function install-deps() {
-  WORKSPACE=$BUILD_WORKSPACE/deps
+  WORKSPACE="$BUILD_WORKSPACE/deps"
   rm -rf $WORKSPACE
   mkdir -p $WORKSPACE
   cd $WORKSPACE

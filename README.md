@@ -81,6 +81,11 @@ $ git clone https://github.com/aergoio/heraj.git
 $ ./build.sh clean
 ```
 
+* Install deps
+```console
+$ ./build.sh deps
+```
+
 * Create ship web ui
 ```console
 $ cd web ; npm install
