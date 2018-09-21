@@ -18,6 +18,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.ProgressMonitor;
 import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -55,40 +56,49 @@ public class CloneGit extends AbstractCommand implements ProgressMonitor {
 
     final FileSet fileSet = new FileSet();
     try (final RevWalk revWalk = new RevWalk(repository)) {
-      final RevCommit revCommit = revWalk.parseCommit(commitId);
-      final RevTree revTree = revCommit.getTree();
-      logger.debug("Having tree: " + revTree);
-
-      // now try to find a specific file
-      try (final TreeWalk treeWalk = new TreeWalk(repository)) {
-        treeWalk.addTree(revTree);
-        treeWalk.setRecursive(true);
-        while (treeWalk.next()) {
-          final String path = treeWalk.getPathString();
-          logger.debug("Path: {}", path);
-          if (treeWalk.isSubtree()) {
-            treeWalk.enterSubtree();
-          } else {
-            final ObjectId objectId = treeWalk.getObjectId(0);
-            final FileContent file = new FileContent(path, () -> {
-              try {
-                final ObjectLoader loader = repository.open(objectId);
-                final ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-                loader.copyTo(byteOut);
-                return new ByteArrayInputStream(byteOut.toByteArray());
-              } catch (final IOException e) {
-                throw new IllegalStateException(e);
-              }
-            });
-            fileSet.add(file);
-          }
-        }
-      }
-      revWalk.dispose();
+      visit(repository, revWalk, commitId);
     }
 
     this.fileSet = fileSet;
     logger.debug("FileSet: {}", fileSet);
+  }
+
+  protected void visit(final Repository repository, final RevWalk revWalk,
+      final ObjectId commitId) throws IOException {
+    final RevCommit revCommit = revWalk.parseCommit(commitId);
+    final RevTree revTree = revCommit.getTree();
+    logger.debug("Having tree: " + revTree);
+
+    // now try to find a specific file
+    try (final TreeWalk treeWalk = new TreeWalk(repository)) {
+      treeWalk.addTree(revTree);
+      treeWalk.setRecursive(true);
+      while (treeWalk.next()) {
+        visit(repository, treeWalk);
+      }
+    }
+    revWalk.dispose();
+  }
+
+  protected void visit(final Repository repository, final TreeWalk treeWalk) throws IOException {
+    final String path = treeWalk.getPathString();
+    logger.debug("Path: {}", path);
+    if (treeWalk.isSubtree()) {
+      treeWalk.enterSubtree();
+    } else {
+      final ObjectId objectId = treeWalk.getObjectId(0);
+      final FileContent file = new FileContent(path, () -> {
+        try {
+          final ObjectLoader loader = repository.open(objectId);
+          final ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+          loader.copyTo(byteOut);
+          return new ByteArrayInputStream(byteOut.toByteArray());
+        } catch (final IOException e) {
+          throw new IllegalStateException(e);
+        }
+      });
+      fileSet.add(file);
+    }
   }
 
   public Stream<FileContent> stream() {
