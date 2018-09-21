@@ -25,7 +25,8 @@ export BUILD_WORKSPACE=$PROJECT_HOME/build
 
 if [ -z "$VERSION" ]; then
   echo "The version not detected. Check build script or environment."
-  exit 1 fi
+  exit 1
+fi
 
 function print-usage() {
   echo "build.sh [command]"
@@ -125,3 +126,4 @@ else
     shift
   done
 fi
+
