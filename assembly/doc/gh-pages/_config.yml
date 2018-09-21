@@ -2,12 +2,12 @@ title: ship
 logo: /assets/img/logo.png
 description: Java Client for Aergo
 baseurl: "/ship"
-url: "https://aergo.github.com"
+url: "https://aergo.github.io"
 show_downloads: false
 google_analytics:
 github:
   is_project_page: true
-  owner_url: https://github.com/aergoio
+  owner_url: https://github.com/aergoio/ship
   owner_name: aergo
 
 markdown: kramdown
