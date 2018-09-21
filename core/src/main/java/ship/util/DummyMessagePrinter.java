@@ -1,10 +1,17 @@
 package ship.util;
 
-import java.io.IOException;
-
 public class DummyMessagePrinter implements MessagePrinter {
+  protected static DummyMessagePrinter instance = null;
   public static MessagePrinter getInstance() {
-    return new DummyMessagePrinter();
+    if (null == instance) {
+      synchronized (DummyMessagePrinter.class) {
+        if (null == instance) {
+          instance = new DummyMessagePrinter();
+        }
+        return instance;
+      }
+    }
+    return instance;
   }
 
   @Override
@@ -20,6 +27,6 @@ public class DummyMessagePrinter implements MessagePrinter {
   }
 
   @Override
-  public void flush() throws IOException {
+  public void flush() {
   }
 }
