@@ -5,6 +5,7 @@
 package ship;
 
 import static java.util.Arrays.asList;
+import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 
 import java.util.Optional;
@@ -55,6 +56,9 @@ public class CommandFactory {
    * @return command if exists
    */
   public Optional<Command> create(final String[] args) {
+    if (0 == args.length) {
+      return empty();
+    }
     Optional<Command> commandOpt = create(args[0]);
     commandOpt.ifPresent(command -> command.setArguments(asList(args).subList(1, args.length)));
     return commandOpt;
