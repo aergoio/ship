@@ -25,8 +25,7 @@ export BUILD_WORKSPACE=$PROJECT_HOME/build
 
 if [ -z "$VERSION" ]; then
   echo "The version not detected. Check build script or environment."
-  exit 1
-fi
+  exit 1 fi
 
 function print-usage() {
   echo "build.sh [command]"
@@ -43,6 +42,17 @@ function clean-workspace() {
   rm -rf $BUILD_WORKSPACE
   $PROJECT_HOME/gradlew clean
 }
+
+function install-deps() {
+  WORKSPACE=$BUILD_WORKSPACE/deps
+  rm -rf $WORKSPACE
+  mkdir -p $WORKSPACE
+  cd $WORKSPACE
+  git clone --recurse-submodule https://github.com/aergoio/heraj.git
+  cd heraj
+  ./gradlew install
+}
+
 function execute-npm() {
   cd $PROJECT_HOME/web
   npm install
@@ -88,6 +98,9 @@ else
     case $1 in
       "clean")
         clean-workspace
+        ;;
+      "deps")
+        install-deps
         ;;
       "npm")
         execute-npm
