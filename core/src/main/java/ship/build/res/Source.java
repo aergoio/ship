@@ -6,16 +6,17 @@ package ship.build.res;
 
 import static hera.util.FilepathUtils.append;
 import static hera.util.FilepathUtils.getParentPath;
+import static java.lang.Character.isWhitespace;
 import static java.util.Collections.emptyList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 import org.slf4j.Logger;
 import ship.build.Resource;
 import ship.build.ResourceManager;
@@ -27,10 +28,7 @@ public class Source extends File {
   protected static final String[] QUOTES = new String[] { "\"", "'" };
 
   protected static String fromImport(final String line) {
-    if (!line.startsWith(IMPORT_PREFIX)) {
-      return null;
-    }
-    if (!Character.isWhitespace(line.charAt(IMPORT_PREFIX.length()))) {
+    if (!line.startsWith(IMPORT_PREFIX) || !isWhitespace(line.charAt(IMPORT_PREFIX.length()))) {
       return null;
     }
     final String literals = line.substring(IMPORT_PREFIX.length()).trim();
@@ -42,6 +40,30 @@ public class Source extends File {
     return null;
   }
 
+  class BodyCollector {
+
+    protected boolean isBodyPart = false;
+
+    protected final StringJoiner joiner = new StringJoiner("\n");
+
+    public void add(final String line) {
+      if (isBodyPart) {
+        joiner.add(line);
+      } else {
+        final String importStr = fromImport(line);
+        if (null == importStr) {
+          joiner.add(line);
+          isBodyPart = true;
+        }
+      }
+    }
+
+    @Override
+    public String toString() {
+      return joiner.toString();
+    }
+  }
+
   protected final transient Logger logger = getLogger(getClass());
 
   public Source(final Project project, final String location) {
@@ -49,7 +71,7 @@ public class Source extends File {
   }
 
   @Override
-  public List<Resource> getDependencies(ResourceManager resourceManager) throws Exception {
+  public List<Resource> getDependencies(final ResourceManager resourceManager) throws Exception {
     final ArrayList<Resource> dependencies = new ArrayList<>();
     dependencies.addAll(super.getDependencies(resourceManager));
     readImports().stream()
@@ -108,26 +130,17 @@ public class Source extends File {
    */
   public Text getBody() {
     return new Text(() -> {
+      final BodyCollector collector = new BodyCollector();
       try (final BufferedReader sourceIn = open()) {
         // Read line by line
         String line = null;
-        boolean isBodyPart = false;
-        final StringWriter writer = new StringWriter();
         while (null != (line = sourceIn.readLine())) {
           logger.trace("Line: {}", line);
-          if (isBodyPart) {
-            writer.write("\n");
-            writer.write(line);
-          } else {
-            final String importStr = fromImport(line);
-            if (null == importStr) {
-              writer.write(line);
-              isBodyPart = true;
-            }
-          }
+          collector.add(sourceIn.readLine());
         }
-        return new ByteArrayInputStream(writer.toString().getBytes());
+        return new ByteArrayInputStream(collector.toString().getBytes());
       }
     });
   }
+
 }
