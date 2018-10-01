@@ -76,6 +76,33 @@ public class TestProject extends AbstractCommand {
     });
   };
 
+  protected void executeTest(final Builder builder, final String testPath) {
+    final TestResultCollector testReporter = AthenaContext.getContext().getTestReporter();
+    final BuildDetails buildDetails = builder.build(testPath);
+    final LuaSource executable = new LuaSource(buildDetails.getResult());
+    testReporter.clear();
+
+    logger.trace("Executing test...");
+    testReporter.start(testPath);
+    final TestResult testResult = new LuaRunner().run(executable);
+    final TestReportNode<LuaErrorInformation> testFile = testReporter.getCurrentTestFile();
+    if (!testResult.isSuccess()) {
+      logger.info("{} failed", testFile.getName());
+      testFile.setResult(TestReportNodeResult.Failure);
+      testFile.setResultDetail(testResult.getError());
+    }
+
+    logger.debug("Test {} => {}", testPath, testResult);
+    if (!testResult.isSuccess()) {
+      final LuaErrorInformation error = testResult.getError();
+      final int lineNumber = error.getLineNumber();
+      logger.debug("Lua Script:\n{}",
+          executable.toString(lineNumber - 5, lineNumber + 5, asList(lineNumber)));
+    }
+    testReporter.end();
+
+  }
+
   @Override
   public void execute() throws Exception {
     logger.trace("Starting {}...", this);
@@ -83,35 +110,11 @@ public class TestProject extends AbstractCommand {
     final Project project = new Project(".", projectFile);
     final Builder builder = builderFactory.create(project);
     final List<String> testPaths = nvl(projectFile.getTests(), EMPTY_LIST);
-    final Map<String, LuaSource> path2result = new HashMap<>();
 
     AthenaContext.clear();
     try {
-      final TestResultCollector testReporter = AthenaContext.getContext().getTestReporter();
       for (final String testPath : testPaths) {
-        final BuildDetails buildDetails = builder.build(testPath);
-        final LuaSource executable = new LuaSource(buildDetails.getResult());
-        testReporter.clear();
-
-        logger.trace("Executing test...");
-        testReporter.start(testPath);
-        final TestResult testResult = new LuaRunner().run(executable);
-        final TestReportNode<LuaErrorInformation> testFile = testReporter.getCurrentTestFile();
-        if (!testResult.isSuccess()) {
-          logger.info("{} failed", testFile.getName());
-          testFile.setResult(TestReportNodeResult.Failure);
-          testFile.setResultDetail(testResult.getError());
-        }
-
-        path2result.put(testPath, executable);
-        logger.debug("Test {} => {}", testPath, testResult);
-        if (!testResult.isSuccess()) {
-          final LuaErrorInformation error = testResult.getError();
-          final int lineNumber = error.getLineNumber();
-          logger.debug("Lua Script:\n{}",
-              executable.toString(lineNumber - 5, lineNumber + 5, asList(lineNumber)));
-        }
-        testReporter.end();
+        executeTest(builder, testPath);
       }
     } finally {
       final AthenaContext context = AthenaContext.getContext();

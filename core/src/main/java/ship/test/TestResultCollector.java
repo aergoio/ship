@@ -24,7 +24,7 @@ public class TestResultCollector {
   protected final transient Logger logger = getLogger(getClass());
 
   @Getter
-  protected TestReportNode currentTestFile;
+  protected TestReportNode<LuaErrorInformation> currentTestFile;
 
   @Getter
   protected TestReportNode currentTestSuite;

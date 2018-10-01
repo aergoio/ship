@@ -35,6 +35,10 @@ import ship.util.FileWatcher;
 
 public class BuildProject extends AbstractCommand {
 
+  protected static final int COMMAND_MODE = 1;
+  protected static final int CONSOLE_MODE = 2;
+  protected static final int WEB_MODE = 3;
+
   protected Builder builder;
 
   protected Project project;
@@ -49,14 +53,25 @@ public class BuildProject extends AbstractCommand {
     return fileWatcher;
   }
 
-  protected BuildDetails build(final Project project, final boolean runTests) {
-    if (logger.isTraceEnabled()) {
-      final StringJoiner joiner = new StringJoiner("\n\t", "\t", "");
-      asList(new Exception().getStackTrace()).stream()
-          .map(StackTraceElement::toString)
-          .forEach(joiner::add);
-      logger.trace("Build triggered:\n{}", joiner.toString());
+  protected void test(final BuildDetails buildDetails) {
+    try {
+      final TestProject testProject = new TestProject();
+      testProject.setBuilderFactory(p -> builder);
+      testProject.setReporter(testResultCollector -> {
+        final Collection<TestReportNode> testResults = testResultCollector.getResults();
+        if (buildDetails.getState() == SUCCESS
+            && testResults.stream().anyMatch(testFile -> !testFile.isSuccess())) {
+          buildDetails.setState(TEST_FAIL);
+        }
+        buildDetails.setUnitTestReport(testResults);
+      });
+      testProject.execute();
+    } catch (final Throwable ex) {
+      buildDetails.setError(buildExceptionMessage("Error in unit test", ex));
     }
+  }
+
+  protected BuildDetails build(final Project project, final boolean runTests) {
     final ProjectFile projectFile = project.getProjectFile();
     final String buildTarget = projectFile.getTarget();
     final BuildDetails buildDetails = new BuildDetails();
@@ -71,21 +86,7 @@ public class BuildProject extends AbstractCommand {
           out.write(contents);
         }
         if (runTests) {
-          try {
-            final TestProject testProject = new TestProject();
-            testProject.setBuilderFactory(p -> builder);
-            testProject.setReporter(testResultCollector -> {
-              final Collection<TestReportNode> testResults = testResultCollector.getResults();
-              if (buildDetails.getState() == SUCCESS
-                  && testResults.stream().anyMatch(testFile -> !testFile.isSuccess())) {
-                buildDetails.setState(TEST_FAIL);
-              }
-              buildDetails.setUnitTestReport(testResults);
-            });
-            testProject.execute();
-          } catch (final Throwable ex) {
-            buildDetails.setError(buildExceptionMessage("Error in unit test", ex));
-          }
+          test(buildDetails);
         }
       } catch (final Throwable buildException) {
         buildDetails.setState(BUILD_FAIL);
@@ -122,9 +123,6 @@ public class BuildProject extends AbstractCommand {
   @Override
   public void execute() throws Exception {
     logger.trace("Starting {}...", this);
-    final int COMMAND_MODE = 1;
-    final int CONSOLE_MODE = 2;
-    final int WEB_MODE = 3;
     int mode = COMMAND_MODE;
     int port = -1;
     for (int i = 0, n = arguments.size(); i < n; ++i) {
@@ -147,40 +145,52 @@ public class BuildProject extends AbstractCommand {
     builder = new Builder(resourceManager);
     switch (mode) {
       case COMMAND_MODE:
-        final BuildDetails buildDetails = build(project, false);
-        switch (buildDetails.getState()) {
-          case SUCCESS:
-            getPrinter().println("Successful to build.");
-            getPrinter().println("Target: <green>%s</green>",
-                projectFile.getTargetPath(getProjectHome()));
-            break;
-          case BUILD_FAIL:
-            getPrinter().println("<red>Fail to build.</red>");
-            final String errorMessage = buildDetails.getError();
-            getPrinter().println("Cause: %s", errorMessage);
-            break;
-          case TEST_FAIL:
-            throw new IllegalStateException();
-          default:
-            throw new IllegalStateException();
-        }
+        executeInCommandMode();
         break;
       case WEB_MODE:
-        startWebServer(port);
-        startConsoleServer();
-        build(project, true);
-        resourceManager.addResourceChangeListener(this::resourceChanged);
-        createFileWatcher();
+        executeInWebMode(port);
         break;
       case CONSOLE_MODE:
-        startConsoleServer();
-        build(project, true);
-        resourceManager.addResourceChangeListener(this::resourceChanged);
-        createFileWatcher();
+        executeInConsoleMode();
         break;
       default:
         throw new IllegalStateException();
     }
+  }
+
+  protected void executeInCommandMode() {
+    final BuildDetails buildDetails = build(project, false);
+    switch (buildDetails.getState()) {
+      case SUCCESS:
+        getPrinter().println("Successful to build.");
+        getPrinter().println("Target: <green>%s</green>",
+            project.getProjectFile().getTargetPath(getProjectHome()));
+        break;
+      case BUILD_FAIL:
+        getPrinter().println("<red>Fail to build.</red>");
+        final String errorMessage = buildDetails.getError();
+        getPrinter().println("Cause: %s", errorMessage);
+        break;
+      case TEST_FAIL:
+        throw new IllegalStateException();
+      default:
+        throw new IllegalStateException();
+    }
+  }
+
+  protected void executeInWebMode(final int port) {
+    startWebServer(port);
+    startConsoleServer();
+    build(project, true);
+    builder.getResourceManager().addResourceChangeListener(this::resourceChanged);
+    createFileWatcher();
+  }
+
+  protected void executeInConsoleMode() {
+    startConsoleServer();
+    build(project, true);
+    builder.getResourceManager().addResourceChangeListener(this::resourceChanged);
+    createFileWatcher();
   }
 
   protected void resourceChanged(final ResourceChangeEvent event) {

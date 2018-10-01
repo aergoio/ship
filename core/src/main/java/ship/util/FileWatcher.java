@@ -7,18 +7,24 @@ package ship.util;
 import static hera.util.ArrayUtils.isEmpty;
 import static hera.util.ObjectUtils.nvl;
 import static hera.util.ThreadUtils.trySleep;
+import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.Collections.unmodifiableCollection;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 import hera.server.ServerEvent;
 import hera.server.ThreadServer;
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -80,21 +86,14 @@ public class FileWatcher extends ThreadServer implements Runnable {
     ignores.add(name);
   }
 
-  @Override
-  protected void process() throws Exception {
-    trySleep(getInterval());
-
+  protected long rake(final Set<File> checked, final Set<File> changed) {
     logger.trace("Base: {}", base);
     final Long lastModifiedInCache = nvl(this.base2lastModified.get(base), Long.valueOf(0));
-    long max = 0;
-
     logger.trace("Base's last modified - Cache: {}", lastModifiedInCache);
 
-    final HashSet<File> checkedFiles = new HashSet<>();
-    final HashSet<File> changed = new HashSet<>();
+    long max = 0;
     final Queue<File> files = new LinkedList<>();
     files.add(base);
-
     while (!files.isEmpty()) {
       final File file = files.remove();
       logger.trace("File: {}", file);
@@ -104,7 +103,7 @@ public class FileWatcher extends ThreadServer implements Runnable {
       if (lastModifiedInCache < lastModifiedInFile) {
         changed.add(file);
       }
-      checkedFiles.add(file);
+      checked.add(file);
       final File[] children = file.listFiles();
 
       if (!isEmpty(children)) {
@@ -113,13 +112,24 @@ public class FileWatcher extends ThreadServer implements Runnable {
             .filter(child -> !ignores.contains(child.getName())).collect(toList()));
       }
     }
+
+    return max;
+  }
+
+  @Override
+  @SuppressWarnings({"unchecked", "unsafe"})
+  protected void process() throws Exception {
+    trySleep(getInterval());
+    final HashSet<File> checkedFiles = new HashSet<>();
+    final HashSet<File> changed = new HashSet<>();
+
+    final long max = rake(checkedFiles, changed);
     logger.debug("Changed: {}", changed);
 
-    HashSet<File> intersect = (HashSet<File>) checkedFiles.clone();
+    final HashSet<File> intersect = (HashSet<File>) checkedFiles.clone();
     intersect.retainAll(previouslyChecked);
 
     logger.debug("Intersection: {}", intersect);
-
     final HashSet<File> added = new HashSet<>(checkedFiles);
     added.removeAll(intersect);
     final HashSet<File> removed = new HashSet<>(previouslyChecked);
@@ -141,10 +151,8 @@ public class FileWatcher extends ThreadServer implements Runnable {
       fireEvent(new ServerEvent(this, FILE_CHANGED, unmodifiableCollection(changed)));
     }
 
-    final Set<File> any = new HashSet<>();
-    any.addAll(added);
-    any.addAll(removed);
-    any.addAll(changed);
+    final Set<File> any = asList(added, removed, changed).stream()
+        .flatMap(Collection::stream).collect(toSet());
     if (!any.isEmpty()) {
       fireEvent(new ServerEvent(this, ANY_CHANGED, unmodifiableCollection(any)));
     }
