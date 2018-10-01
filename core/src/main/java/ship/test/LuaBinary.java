@@ -17,4 +17,5 @@ public class LuaBinary {
   public InputStream getPayload() throws Exception {
     return inputSupplier.get();
   }
+
 }

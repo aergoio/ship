@@ -4,11 +4,12 @@
 
 package ship.test;
 
+import static hera.util.Base58Utils.decodeWithCheck;
 import static hera.util.IoUtils.from;
 import static hera.util.IoUtils.redirect;
+import static java.lang.System.arraycopy;
 import static org.slf4j.LoggerFactory.getLogger;
 
-import hera.util.Base58Utils;
 import hera.util.DangerousSupplier;
 import hera.util.IoUtils;
 import java.io.ByteArrayInputStream;
@@ -61,7 +62,10 @@ public class LuaCompiler {
         }
         final String base58Encoded = IoUtils.from(compilerStdOut);
         logger.info("Encoded: {}", base58Encoded);
-        return new LuaBinary(() -> new ByteArrayInputStream(Base58Utils.decode(base58Encoded)));
+        final byte[] bytes = decodeWithCheck(base58Encoded);
+        final byte[] removedBytes = new byte[bytes.length - 1];
+        arraycopy(bytes, 1, removedBytes, 0, removedBytes.length);
+        return new LuaBinary(() -> new ByteArrayInputStream(removedBytes));
       }
     } catch (final BuildException ex) {
       throw ex;

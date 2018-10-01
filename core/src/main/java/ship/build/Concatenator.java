@@ -5,10 +5,10 @@
 package ship.build;
 
 import static hera.util.FilepathUtils.getCanonicalForm;
+import static java.util.Optional.ofNullable;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.FileNotFoundException;
-import java.io.StringWriter;
 import java.nio.file.NoSuchFileException;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -23,14 +23,13 @@ import ship.build.res.Source;
 import ship.build.web.model.BuildDependency;
 import ship.build.web.model.BuildDetails;
 import ship.exception.BuildException;
-import ship.exception.CyclicDependencyException;
 
 @RequiredArgsConstructor
 public class Concatenator {
 
   protected final transient Logger logger = getLogger(getClass());
 
-  protected final Set<Resource> processing = new LinkedHashSet<>();
+  protected final CallStack callStack = new CallStack();
 
   @Getter
   protected final ResourceManager resourceManager;
@@ -93,59 +92,28 @@ public class Concatenator {
     if (visitedResources.contains(resource)) {
       return null;
     }
-    if (processing.contains(resource)) {
-      final StringJoiner joiner = new StringJoiner("->");
-      processing.stream().map(Object::toString).forEach(joiner::add);
-      joiner.add(resource.toString());
-      throw new CyclicDependencyException(joiner.toString());
-    }
 
-    boolean needsDelimiter = false;
-    final StringWriter contentWriter = new StringWriter();
+    final StringJoiner contentWriter = new StringJoiner("\n");
 
     try {
-      processing.add(resource);
-
-      final Optional<ResourceManager> resourceManagerOpt = resource.adapt(ResourceManager.class);
-      final Concatenator next = resourceManagerOpt
+      callStack.enter(resource);
+      final Concatenator next = resource.adapt(ResourceManager.class)
           .map(newResourceManager -> new Concatenator(newResourceManager, visitedResources))
           .orElse(this);
-      if (this != next) {
-        logger.info("Resource manager changed: {} -> {}", this, next);
-      }
+      logger.debug("Resource manager changed: {} -> {}", this, next);
       final ResourceManager nextResourceManager = next.getResourceManager();
       final List<Resource> dependencies = resource.getDependencies(nextResourceManager);
       logger.debug("Dependencies of {}: {}", resource, dependencies);
       for (final Resource dependency : dependencies) {
         final BuildDependency childDependency = new BuildDependency();
         childDependency.setName(dependency.getLocation());
-        final String contents = next.visit(dependency, childDependency);
+        ofNullable(next.visit(dependency, childDependency)).ifPresent(contentWriter::add);
         resourceDependency.add(childDependency);
-        if (null == contents) {
-          continue;
-        }
-        if (needsDelimiter) {
-          contentWriter.write("\n");
-        }
-        contentWriter.write(contents);
-        needsDelimiter = true;
       }
-      final String contents = resource.adapt(Source.class).map(next::visit).orElse(null);
-      if (null != contents) {
-        if (needsDelimiter) {
-          contentWriter.write("\n");
-        }
-        contentWriter.write(contents);
-        needsDelimiter = true;
-      }
-
-      processing.remove(resource);
+      resource.adapt(Source.class).map(next::visit).ifPresent(contentWriter::add);
+      callStack.exit(resource);
       visitedResources.add(resource);
-      if (needsDelimiter) {
-        return contentWriter.toString();
-      } else {
-        return null;
-      }
+      return (0 < contentWriter.length()) ? contentWriter.toString() : null;
     } catch (final BuildException e) {
       throw e;
     } catch (final Throwable ex) {
