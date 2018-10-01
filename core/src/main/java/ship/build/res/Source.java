@@ -136,7 +136,7 @@ public class Source extends File {
         String line = null;
         while (null != (line = sourceIn.readLine())) {
           logger.trace("Line: {}", line);
-          collector.add(sourceIn.readLine());
+          collector.add(line);
         }
         return new ByteArrayInputStream(collector.toString().getBytes());
       }
