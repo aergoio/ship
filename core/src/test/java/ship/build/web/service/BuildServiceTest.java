@@ -28,6 +28,7 @@ public class BuildServiceTest {
   }
 
   @Test
+  @SuppressWarnings({"unchecked", "unsafe"})
   public void testAddListener() throws Exception {
     final DangerousConsumer<BuildSummary> listener = mock(DangerousConsumer.class);
     buildService.addListener(listener);

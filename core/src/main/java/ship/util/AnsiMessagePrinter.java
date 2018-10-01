@@ -4,6 +4,7 @@ import static hera.util.StringUtils.removeSuffix;
 import static hera.util.ValidationUtils.assertEquals;
 import static hera.util.ValidationUtils.assertNotNull;
 import static hera.util.ValidationUtils.assertTrue;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -15,6 +16,7 @@ import java.util.Stack;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.slf4j.Logger;
 
 public class AnsiMessagePrinter implements MessagePrinter {
 
@@ -55,6 +57,8 @@ public class AnsiMessagePrinter implements MessagePrinter {
   public static final String BG_BRIGHT_MAGENTA = removeSuffix(BG_MAGENTA, "m") + ";1m";
   public static final String BG_BRIGHT_CYAN = removeSuffix(BG_CYAN, "m") + ";1m";
   public static final String BG_BRIGHT_WHITE = removeSuffix(BG_WHITE, "m") + ";1m";
+
+  protected final transient Logger logger = getLogger(getClass());
 
   @Getter
   @Setter
@@ -110,11 +114,6 @@ public class AnsiMessagePrinter implements MessagePrinter {
     colors.put("bg_bright_white", BG_BRIGHT_WHITE);
   }
 
-  final int CH_ESCAPE = '!';
-  final int CH_TAG_START = '<';
-  final int CH_TAG_CLOSE = '/';
-  final int CH_TAG_END = '>';
-
   @RequiredArgsConstructor
   abstract class State {
     @Getter
@@ -127,6 +126,9 @@ public class AnsiMessagePrinter implements MessagePrinter {
   }
 
   class Normal extends State {
+
+    protected static final int CH_TAG_START = '<';
+    protected static final int CH_ESCAPE = '!';
 
     public Normal(final Stack<String> tags, final StringWriter writer) {
       super(tags, writer);
@@ -159,6 +161,8 @@ public class AnsiMessagePrinter implements MessagePrinter {
   }
 
   class TagOpen extends State {
+    protected static final int CH_TAG_CLOSE = '/';
+
     public TagOpen(final Stack<String> tags, final StringWriter writer) {
       super(tags, writer);
     }
@@ -174,6 +178,8 @@ public class AnsiMessagePrinter implements MessagePrinter {
   }
 
   class OpenColor extends State {
+    protected static final int CH_TAG_END = '>';
+
     protected final StringBuilder color = new StringBuilder();
 
     public OpenColor(final Stack<String> tags, final StringWriter writer) {
@@ -186,6 +192,7 @@ public class AnsiMessagePrinter implements MessagePrinter {
         final String colorName = color.toString();
         // check valid
         tags.push(colorName);
+        logger.debug("Tags: {}", tags);
         final String colorCode = colors.get(colorName);
         assertNotNull(colorCode, "Unknown color: " + colorName);
         writer.write(colorCode);
@@ -199,6 +206,9 @@ public class AnsiMessagePrinter implements MessagePrinter {
   }
 
   class CloseColor extends State {
+
+    protected static final int CH_TAG_END = '>';
+
     protected final StringBuilder color = new StringBuilder();
 
     public CloseColor(final Stack<String> tags, final StringWriter writer) {
@@ -211,6 +221,7 @@ public class AnsiMessagePrinter implements MessagePrinter {
         final String colorName = color.toString();
         // check valid
         final String openColorName = tags.pop();
+        logger.debug("Tags: {}", tags);
         assertEquals(openColorName, colorName,
             "The closing tag not matched: " + openColorName + ", " + colorName);
         color.delete(0, color.length());
@@ -244,11 +255,18 @@ public class AnsiMessagePrinter implements MessagePrinter {
     State state = new Normal(new Stack<>(), new StringWriter());
     try {
       while (0 <= (ch = reader.read())) {
+        logger.trace("Char: {}", (char) ch);
+        final State old = state;
         state = state.next(ch);
+        if (old != state) {
+          logger.debug("{} -> {}", old, state);
+        }
       }
     } catch (final IOException ex) {
       throw new IllegalStateException();
     }
+    logger.debug("State: {}", state);
+    logger.debug("Tags: {}", state.getTags());
     assertTrue(state instanceof Normal, "Expression is invalid: " + state);
     assertTrue(state.getTags().isEmpty(), "The closing tag missed: " + state.getTags());
     return state.getWriter().toString();

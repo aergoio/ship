@@ -34,13 +34,18 @@ public class ShipLauncher {
   protected final MessagePrinter messagePrinter;
 
   protected void printHelp() {
-    messagePrinter.println("<red>No command!</red>");
+    messagePrinter.println("<red>No command!!</red>");
   }
 
   public void exit(int returnCode) {
     System.exit(returnCode);
   }
 
+  /**
+   * Create and execute command as user input.
+   *
+   * @param args user inputs
+   */
   public void run(final String[] args) {
     if (args.length < 1) {
       printHelp();
@@ -57,6 +62,14 @@ public class ShipLauncher {
     }
   }
 
+  /**
+   * Execute command.
+   *
+   * <p>
+   * Exit process with return code.
+   * </p>
+   * @param command command to execute
+   */
   public void execute(final Command command) {
     try {
       logger.trace("{} starting...", command);

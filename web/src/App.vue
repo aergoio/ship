@@ -28,7 +28,8 @@
       if (!this.running) {
         return ;
       }
-      this.socket = new WebSocket("ws://localhost:2000/event");
+      const url = ((window.location.protocol === "https:") ? "wss://" : "ws://") + window.location.host + '/event';
+      this.socket = new WebSocket(url);
       this.socket.onopen    = this.onOpen.bind(this);
       this.socket.onerror   = this.onError.bind(this);
       this.socket.onclose   = this.onClose.bind(this);
@@ -85,7 +86,7 @@
     },
     methods: {
       updateBuilds() {
-        console.log("=>Start update builds")
+        console.log('=>Start update builds')
         this.$http.get('/builds').then(res => {
           console.log('==>Response received');
           this.$data.builds = res.data;

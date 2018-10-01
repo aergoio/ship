@@ -6,12 +6,14 @@ package ship.build.web;
 
 import static hera.util.ExceptionUtils.getStackTraceOf;
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import java.io.IOException;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import org.slf4j.Logger;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -124,15 +126,17 @@ public class Router {
   }
 
   @ExceptionHandler(value = { HttpException.class })
-  protected ResponseEntity handleHttpException(HttpException ex, WebRequest request) {
+  protected ResponseEntity handleHttpException(final HttpException ex, final WebRequest request) {
+    logger.warn("Unexpected exception:", ex);
     final ServiceError serviceError = new ServiceError(ex.getMessage(), getStackTraceOf(ex));
     return ResponseEntity.status(ex.getStatusCode()).body(serviceError);
   }
 
   @ExceptionHandler(value = { Throwable.class })
-  @ResponseStatus()
+  @ResponseStatus(INTERNAL_SERVER_ERROR)
   @ResponseBody
   protected Object handleThrowable(Throwable ex, WebRequest request) {
+    logger.warn("Unexpected exception:", ex);
     return new ServiceError(ex.getMessage(), getStackTraceOf(ex));
   }
 }

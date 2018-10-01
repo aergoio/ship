@@ -12,6 +12,7 @@ import hera.server.ThreadServer;
 import hera.util.ThreadUtils;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.LogManager;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.boot.Banner.Mode;
@@ -93,6 +94,7 @@ public class WebServer extends ThreadServer {
     if (!properties.isEmpty()) {
       builder.properties(properties);
     }
+    LogManager.getLogManager().reset();
     applicationContext = builder.run();
   }
 
