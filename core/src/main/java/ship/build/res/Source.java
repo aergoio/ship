@@ -22,19 +22,22 @@ import ship.build.ResourceManager;
 
 public class Source extends File {
 
+  protected static final String IMPORT_PREFIX = "import";
+
+  protected static final String[] QUOTES = new String[] { "\"", "'" };
+
   protected static String fromImport(final String line) {
-    final String importPrefix = "import";
-    if (!line.startsWith(importPrefix)) {
+    if (!line.startsWith(IMPORT_PREFIX)) {
       return null;
     }
-    if (!Character.isWhitespace(line.charAt(importPrefix.length()))) {
+    if (!Character.isWhitespace(line.charAt(IMPORT_PREFIX.length()))) {
       return null;
     }
-    final String literals = line.substring(importPrefix.length()).trim();
-    if (literals.startsWith("\"") && literals.endsWith("\"")) {
-      return literals.substring(1, literals.length() - 1).trim();
-    } else if (literals.startsWith("'") && literals.endsWith("'")) {
-      return literals.substring(1, literals.length() - 1).trim();
+    final String literals = line.substring(IMPORT_PREFIX.length()).trim();
+    for (final String quote : QUOTES) {
+      if (literals.startsWith(quote) && literals.endsWith(quote)) {
+        return literals.substring(quote.length(), literals.length() - quote.length()).trim();
+      }
     }
     return null;
   }
@@ -55,6 +58,23 @@ public class Source extends File {
     return dependencies;
   }
 
+  protected List<String> readNextImports(final BufferedReader bufferedReader) throws IOException {
+    final String line = bufferedReader.readLine();
+    if (null == line) {
+      return new ArrayList<>();
+    }
+    if (line.trim().isEmpty()) {
+      return readNextImports(bufferedReader);
+    }
+    final String importStr = fromImport(line.trim());
+    if (null == importStr) {
+      return new ArrayList<>();
+    }
+    final List<String> results = readNextImports(bufferedReader);
+    results.add(importStr);
+    return results;
+  }
+
   /**
    * Read import clause and convert to import target.
    *
@@ -66,18 +86,7 @@ public class Source extends File {
     final List<String> imports = new ArrayList<>();
     try (final BufferedReader sourceIn = open()) {
       // Read line by line
-      String line = null;
-      while (null != (line = sourceIn.readLine())) {
-        if (line.trim().isEmpty()) {
-          continue;
-        }
-        final String importStr = fromImport(line);
-        if (null == importStr) {
-          return imports;
-        }
-        imports.add(importStr);
-      }
-      return imports;
+      return readNextImports(sourceIn);
     } catch (final NoSuchFileException e) {
       logger.trace("{} not found", location);
       return emptyList();
