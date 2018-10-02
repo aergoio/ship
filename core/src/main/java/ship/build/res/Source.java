@@ -49,12 +49,9 @@ public class Source extends File {
     public void add(final String line) {
       if (isBodyPart) {
         joiner.add(line);
-      } else {
-        final String importStr = fromImport(line);
-        if (null == importStr) {
-          joiner.add(line);
-          isBodyPart = true;
-        }
+      } else if (null == fromImport(line)) {
+        joiner.add(line);
+        isBodyPart = true;
       }
     }
 
