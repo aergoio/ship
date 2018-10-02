@@ -12,6 +12,7 @@ import static java.util.Arrays.stream;
 import static java.util.UUID.randomUUID;
 
 import hera.api.AccountOperation;
+import hera.api.AergoApi;
 import hera.api.ContractOperation;
 import hera.api.model.Account;
 import hera.api.model.AccountAddress;
@@ -22,11 +23,8 @@ import hera.api.model.ContractInferface;
 import hera.api.model.ContractResult;
 import hera.api.model.ContractTxHash;
 import hera.api.model.ContractTxReceipt;
-import hera.api.model.HostnameAndPort;
-import hera.client.AergoClient;
 import hera.exception.RpcConnectionException;
 import hera.exception.RpcException;
-import hera.strategy.NettyConnectStrategy;
 import hera.util.HexUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -39,6 +37,7 @@ import java.util.Map;
 import javax.inject.Named;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import ship.build.web.exception.AergoNodeException;
 import ship.build.web.exception.ResourceNotFoundException;
@@ -48,11 +47,14 @@ import ship.build.web.model.ExecutionResult;
 import ship.build.web.model.QueryResult;
 import ship.test.LuaBinary;
 import ship.test.LuaCompiler;
+import ship.util.AergoPool;
+import ship.util.ResourcePool;
 
 @NoArgsConstructor
 @Named
 public class ContractService extends AbstractService {
   @Getter
+  @Setter
   @Value("${project.endpoint}")
   protected String endpoint;
 
@@ -60,20 +62,25 @@ public class ContractService extends AbstractService {
 
   protected Account account;
 
-  protected LuaCompiler luaCompiler = new LuaCompiler();
+  protected final LuaCompiler luaCompiler = new LuaCompiler();
 
-  protected List<DeploymentResult> deployHistory = new ArrayList<>();
+  protected final List<DeploymentResult> deployHistory = new ArrayList<>();
 
-  protected Map<String, DeploymentResult> encodedContractTxHash2contractAddresses = new HashMap<>();
+  protected final Map<String, DeploymentResult> encodedContractTxHash2contractAddresses =
+      new HashMap<>();
+
+  protected ResourcePool<AergoApi> aergoPool;
 
   protected synchronized void ensureAccount() {
     if (null != account) {
       return;
     }
-    final NettyConnectStrategy connectStrategy = new NettyConnectStrategy();
-    final HostnameAndPort hostnameAndPort = HostnameAndPort.of(endpoint);
 
-    try (final AergoClient aergoApi = new AergoClient(connectStrategy.connect(hostnameAndPort))) {
+    if (null == aergoPool) {
+      aergoPool = new AergoPool(endpoint);
+    }
+    final AergoApi aergoApi = aergoPool.borrowResource();
+    try {
       final AccountOperation accountOperation = aergoApi.getAccountOperation();
       logger.trace("Password: {}", password);
       account = accountOperation.create(password).getResult();
@@ -86,6 +93,8 @@ public class ContractService extends AbstractService {
           "Fail to connect aergo[" + endpoint + "]. Check your aergo node.", ex);
     } catch (final RpcException ex) {
       throw new AergoNodeException("Fail to deploy contract", ex);
+    } finally {
+      aergoPool.returnResource(aergoApi);
     }
 
   }
@@ -101,10 +110,9 @@ public class ContractService extends AbstractService {
    */
   public DeploymentResult deploy(final BuildDetails buildDetails) throws Exception {
     ensureAccount();
-    final NettyConnectStrategy connectStrategy = new NettyConnectStrategy();
-    final HostnameAndPort hostnameAndPort = HostnameAndPort.of(endpoint);
-    logger.debug("Hostname and port: {}", hostnameAndPort);
-    try (final AergoClient aergoApi = new AergoClient(connectStrategy.connect(hostnameAndPort))) {
+
+    final AergoApi aergoApi = aergoPool.borrowResource();
+    try {
       final byte[] buildResult = buildDetails.getResult().getBytes();
       final LuaBinary luaBinary = luaCompiler.compile(() -> new ByteArrayInputStream(buildResult));
       logger.trace("Successful to compile:\n{}", dump(from(luaBinary.getPayload())));
@@ -125,6 +133,8 @@ public class ContractService extends AbstractService {
           "Fail to connect aergo[" + endpoint + "]. Check your aergo node.", ex);
     } catch (final RpcException ex) {
       throw new AergoNodeException("Fail to deploy contract", ex);
+    } finally {
+      aergoPool.returnResource(aergoApi);
     }
   }
 
@@ -146,10 +156,9 @@ public class ContractService extends AbstractService {
     logger.debug("Decoded contract hash:\n{}", HexUtils.dump(decoded));
     final ContractTxHash contractTxHash = ContractTxHash.of(decoded);
     ensureAccount();
-    final NettyConnectStrategy connectStrategy = new NettyConnectStrategy();
-    final HostnameAndPort hostnameAndPort = HostnameAndPort.of(endpoint);
-    try (final AergoClient client = new AergoClient(connectStrategy.connect(hostnameAndPort))) {
-      final ContractOperation contractOperation = client.getContractOperation();
+    final AergoApi aergoApi = aergoPool.borrowResource();
+    try {
+      final ContractOperation contractOperation = aergoApi.getContractOperation();
       final ContractTxReceipt contractTxReceipt =
           contractOperation.getReceipt(contractTxHash).getResult();
       logger.debug("Receipt: {}", contractTxReceipt);
@@ -171,6 +180,8 @@ public class ContractService extends AbstractService {
       final ExecutionResult executionResult = new ExecutionResult();
       executionResult.setContractTransactionHash(executionContractHash.getEncodedValue());
       return executionResult;
+    } finally {
+      aergoPool.returnResource(aergoApi);
     }
   }
 
@@ -192,10 +203,9 @@ public class ContractService extends AbstractService {
     logger.debug("Decoded contract hash:\n{}", HexUtils.dump(decoded));
     final ContractTxHash contractTxHash = ContractTxHash.of(decoded);
     ensureAccount();
-    final NettyConnectStrategy connectStrategy = new NettyConnectStrategy();
-    final HostnameAndPort hostnameAndPort = HostnameAndPort.of(endpoint);
-    try (final AergoClient client = new AergoClient(connectStrategy.connect(hostnameAndPort))) {
-      final ContractOperation contractOperation = client.getContractOperation();
+    final AergoApi aergoApi = aergoPool.borrowResource();
+    try {
+      final ContractOperation contractOperation = aergoApi.getContractOperation();
       final ContractTxReceipt contractTxReceipt =
           contractOperation.getReceipt(contractTxHash).getResult();
       logger.debug("Receipt: {}", contractTxReceipt);
@@ -220,6 +230,8 @@ public class ContractService extends AbstractService {
         }
       });
       return new QueryResult(resultString);
+    } finally {
+      aergoPool.returnResource(aergoApi);
     }
   }
 
@@ -259,15 +271,16 @@ public class ContractService extends AbstractService {
    * @return abi set
    */
   public ContractInferface getInterface(final ContractTxHash contractTxHash) {
-    final NettyConnectStrategy connectStrategy = new NettyConnectStrategy();
-    final HostnameAndPort hostnameAndPort = HostnameAndPort.of(endpoint);
-    try (final AergoClient client = new AergoClient(connectStrategy.connect(hostnameAndPort))) {
-      final ContractOperation contractOperation = client.getContractOperation();
+    final AergoApi aergoApi = aergoPool.borrowResource();
+    try {
+      final ContractOperation contractOperation = aergoApi.getContractOperation();
       return contractOperation.getReceipt(contractTxHash)
           .map(ContractTxReceipt::getContractAddress)
           .flatMap(contractOperation::getContractInterface)
           .getOrThrows(() -> new ResourceNotFoundException(
               "Application Binary Interface not found for " + contractTxHash.toString()));
+    } finally {
+      aergoPool.returnResource(aergoApi);
     }
   }
 }
