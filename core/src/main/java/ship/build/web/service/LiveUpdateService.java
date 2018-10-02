@@ -10,9 +10,15 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.inject.Named;
 
+/**
+ * LiveUpdateSession holder.
+ */
 @Named
 public class LiveUpdateService extends AbstractService {
 
+  /**
+   * Holding sessions.
+   */
   protected final Set<LiveUpdateSession> sessions = new HashSet<>();
 
   /**

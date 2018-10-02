@@ -115,11 +115,9 @@ public class FileWatcher extends ThreadServer implements Runnable {
       checked.add(file);
       final File[] children = file.listFiles();
 
-      if (!isEmpty(children)) {
-        logger.trace("Find {} files", children.length);
-        files.addAll(stream(children)
-            .filter(child -> !ignores.contains(child.getName())).collect(toList()));
-      }
+      logger.trace("Find {} files", children.length);
+      files.addAll(stream(children)
+          .filter(child -> !ignores.contains(child.getName())).collect(toList()));
     }
 
     lastModified = max;
