@@ -11,6 +11,7 @@ import static hera.util.ValidationUtils.assertTrue;
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.exists;
 import static java.util.Arrays.asList;
+import static ship.util.Messages.bind;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,6 +19,9 @@ import java.util.Optional;
 import ship.FileSet;
 
 public class InstallPackage extends AbstractCommand {
+
+  protected static final String NL_0 = InstallPackage.class.getName() + ".0";
+  protected static final String NL_1 = InstallPackage.class.getName() + ".1";
 
   @Override
   public void execute() throws Exception {
@@ -41,7 +45,7 @@ public class InstallPackage extends AbstractCommand {
     }
     createDirectories(publishPath);
     fileSet.copyTo(publishPath);
-    printer.println("Successful to install %s.", packageName);
-    printer.println("Install path: <green>%s</green>", publishPath);
+    printer.println(bind(NL_0, packageName));
+    printer.println(bind(NL_1, publishPath));
   }
 }

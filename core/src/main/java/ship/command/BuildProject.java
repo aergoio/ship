@@ -10,6 +10,7 @@ import static java.lang.System.currentTimeMillis;
 import static ship.build.web.model.BuildSummary.BUILD_FAIL;
 import static ship.build.web.model.BuildSummary.SUCCESS;
 import static ship.build.web.model.BuildSummary.TEST_FAIL;
+import static ship.util.Messages.bind;
 
 import hera.util.DangerousConsumer;
 import java.io.Writer;
@@ -32,6 +33,11 @@ import ship.test.TestReportNode;
 import ship.util.FileWatcher;
 
 public class BuildProject extends AbstractCommand {
+  protected static final String NL_0 = BuildProject.class.getName() + ".0";
+  protected static final String NL_1 = BuildProject.class.getName() + ".1";
+  protected static final String NL_2 = BuildProject.class.getName() + ".2";
+  protected static final String NL_3 = BuildProject.class.getName() + ".3";
+  protected static final String NL_4 = BuildProject.class.getName() + ".4";
 
   protected static final int COMMAND_MODE = 1;
   protected static final int CONSOLE_MODE = 2;
@@ -160,14 +166,13 @@ public class BuildProject extends AbstractCommand {
     final BuildDetails buildDetails = build(project, false);
     switch (buildDetails.getState()) {
       case SUCCESS:
-        getPrinter().println("Successful to build.");
-        getPrinter().println("Target: <green>%s</green>",
-            project.getProjectFile().getTargetPath(getProjectHome()));
+        getPrinter().println(bind(NL_0));
+        getPrinter().println(bind(NL_1, project.getProjectFile().getTargetPath(getProjectHome())));
         break;
       case BUILD_FAIL:
-        getPrinter().println("<red>Fail to build.</red>");
+        getPrinter().println(bind(NL_2));
         final String errorMessage = buildDetails.getError();
-        getPrinter().println("Cause: %s", errorMessage);
+        getPrinter().println(bind(NL_3, errorMessage));
         break;
       case TEST_FAIL:
         throw new IllegalStateException();

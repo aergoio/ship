@@ -5,6 +5,7 @@
 package ship.exec;
 
 import static org.slf4j.LoggerFactory.getLogger;
+import static ship.util.Messages.bind;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -14,10 +15,15 @@ import ship.CommandFactory;
 import ship.exception.CommandException;
 import ship.util.AnsiMessagePrinter;
 import ship.util.MessagePrinter;
+import ship.util.Messages;
 
 @RequiredArgsConstructor
 public class ShipLauncher {
   protected static final Logger logger = getLogger(ShipLauncher.class);
+
+  protected static final String NL_0 = ShipLauncher.class.getName() + ".0";
+  protected static final String NL_1 = ShipLauncher.class.getName() + ".1";
+  protected static final String NL_2 = ShipLauncher.class.getName() + ".2";
 
 
   /**
@@ -34,7 +40,7 @@ public class ShipLauncher {
   protected final MessagePrinter messagePrinter;
 
   protected void printHelp() {
-    messagePrinter.println("<red>No command!!</red>");
+    messagePrinter.println(bind(NL_0));
   }
 
   public void exit(int returnCode) {
@@ -78,14 +84,14 @@ public class ShipLauncher {
     } catch (final CommandException throwable) {
       final String userMessage = throwable.getUserMessage();
       if (null != userMessage) {
-        messagePrinter.println("<bg_red> ERROR </bg_red>: " + userMessage);
+        messagePrinter.println(bind(NL_1, userMessage));
         logger.error("Fail to execute {}", command, throwable);
       } else {
         logger.error("{}", throwable.getMessage(), throwable);
       }
       exit(-1);
     } catch (final Throwable throwable) {
-      System.err.println("Unexpected exception!! Report the bug to support@aergo.io");
+      System.err.println(bind(NL_2));
       throwable.printStackTrace();
       exit(-1);
     }

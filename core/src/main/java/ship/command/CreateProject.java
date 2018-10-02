@@ -6,6 +6,7 @@ package ship.command;
 
 import static hera.util.FilepathUtils.getFilename;
 import static java.util.Collections.singletonList;
+import static ship.util.Messages.bind;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -22,8 +23,13 @@ import lombok.ToString;
 import ship.ApmConstants;
 import ship.Command;
 import ship.ProjectFile;
+import ship.exception.DirectoryNotEmptyException;
 
 public class CreateProject extends AbstractCommand implements Command {
+
+  protected static final String NL_0 = CreateProject.class.getName() + ".0";
+  protected static final String NL_1 = CreateProject.class.getName() + ".1";
+
   @ToString
   class Options {
     @Parameter(names = {"-f", "--force"},
@@ -64,11 +70,11 @@ public class CreateProject extends AbstractCommand implements Command {
     writeProjectFile.setArguments(singletonList(projectFilePath.toAbsolutePath().toString()));
     writeProjectFile.execute();
 
-    printer.println("Congratulation!! %s initialized.", projectPath);
+    printer.println(bind(NL_0, projectPath));
     try (
         final InputStream in = Files.newInputStream(projectFilePath);
         final Reader reader = new InputStreamReader(in)) {
-      printer.println("Edit <green>%s</green> as your needs.", projectFilePath);
+      printer.println(bind(NL_1, projectFilePath));
       printer.println(IoUtils.from(reader));
     }
   }

@@ -10,6 +10,7 @@ import static hera.util.FilepathUtils.append;
 import static hera.util.ValidationUtils.assertNotNull;
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.exists;
+import static ship.util.Messages.bind;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,13 +19,17 @@ import ship.ProjectFile;
 
 public class PublishPackage extends AbstractCommand {
 
+  protected static final String NL_0 = PublishPackage.class.getName() + ".0";
+  protected static final String NL_1 = PublishPackage.class.getName() + ".1";
+  protected static final String NL_2 = PublishPackage.class.getName() + ".2";
+
   @Override
   public void execute() throws Exception {
     logger.trace("Starting {}...", this);
 
     final ProjectFile rootProject = readProject();
     final String buildTarget = rootProject.getTarget();
-    assertNotNull(buildTarget, "No target!! add target field to aergo.json.");
+    assertNotNull(buildTarget, bind(NL_0));
 
     if (!exists(Paths.get(buildTarget))) {
       new BuildProject().execute();
@@ -37,7 +42,7 @@ public class PublishPackage extends AbstractCommand {
     }
     createDirectories(publishPath);
     FileSet.from(Paths.get(".")).copyTo(publishPath);
-    printer.println("Successful to publish %s.", rootProject.getName());
-    printer.println("Publish path: <green>%s</green>", publishPath);
+    printer.println(bind(NL_1, rootProject.getName()));
+    printer.println(bind(NL_2, publishPath));
   }
 }

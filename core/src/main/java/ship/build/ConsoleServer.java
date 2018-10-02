@@ -1,6 +1,7 @@
 package ship.build;
 
 import static java.util.Optional.ofNullable;
+import static ship.util.Messages.bind;
 
 import hera.server.AbstractServer;
 import hera.server.ServerStatus;
@@ -15,6 +16,17 @@ import ship.util.DummyMessagePrinter;
 import ship.util.MessagePrinter;
 
 public class ConsoleServer extends AbstractServer {
+
+  protected static final String NL_0 = ConsoleServer.class.getName() + ".0";
+  protected static final String NL_1 = ConsoleServer.class.getName() + ".1";
+  protected static final String NL_2 = ConsoleServer.class.getName() + ".2";
+  protected static final String NL_3 = ConsoleServer.class.getName() + ".3";
+  protected static final String NL_4 = ConsoleServer.class.getName() + ".4";
+  protected static final String NL_5 = ConsoleServer.class.getName() + ".5";
+  protected static final String NL_6 = ConsoleServer.class.getName() + ".6";
+  protected static final String NL_7 = ConsoleServer.class.getName() + ".7";
+  protected static final String NL_8 = ConsoleServer.class.getName() + ".8";
+  protected static final String NL_9 = ConsoleServer.class.getName() + ".9";
 
   protected static final String CLEAR_SCREEN = "\033[2J";
   protected static final String GO_HOME = "\033[H";
@@ -49,7 +61,7 @@ public class ConsoleServer extends AbstractServer {
     if (BuildSummary.SUCCESS == details.getState() || null == details.getError()) {
       printTest(details);
     } else {
-      printError(details);
+      printer.println(bind(NL_0, details.getError()));
     }
 
     try {
@@ -68,27 +80,18 @@ public class ConsoleServer extends AbstractServer {
     final String now = new Date().toString();
     switch (summary.getState()) {
       case BuildSummary.SUCCESS:
-        printer.println("<bg_green><black> SUCCESS </black></bg_green>      "
-                + "<green>%-30s</green><bright_black>%s</bright_black>",
-            summary.getElapsedTime() + " ms elapsed", now);
+        printer.println(
+            bind(NL_1, String.format("%-30s", summary.getElapsedTime() + " ms elapsed"), now));
         break;
       case BuildSummary.BUILD_FAIL:
-        printer.println("<bg_red><black> ERROR! </black></bg_red>       "
-                + "%30s<bright_black>%s</bright_black>",
-            " ", now);
+        printer.println(bind(NL_2, String.format("%30s", " "), now));
         break;
       case BuildSummary.TEST_FAIL:
-        printer.println("<bg_red><black> TEST FAILURE! </black></bg_red>"
-                + "%30s<bright_black>%s</bright_black>",
-            " ", now);
+        printer.println(bind(NL_3, String.format("%30s", " "), now));
         break;
       default:
         throw new IllegalArgumentException("Unknown state: " + summary.getState());
     }
-  }
-
-  protected void printError(final BuildDetails buildDetails) {
-    printer.println("<red>%s</red>", buildDetails.getError());
   }
 
   protected void printTest(final BuildDetails buildDetails) {
@@ -99,32 +102,31 @@ public class ConsoleServer extends AbstractServer {
 
   protected void print(final TestReportNode node) {
     if (node.isSuccess()) {
-      printer.println(" <bg_blue> F </bg_blue> %s", node.getName());
+      printer.println(bind(NL_4, node.getName()));
     } else {
-      printer.println(" <bg_blue> F </bg_blue> <red>$s</red>", node.getName());
+      printer.println(bind(NL_5, node.getName()));
     }
     node.getChildren().forEach(child -> this.printSuite((TestReportNode) child));
   }
 
   protected void printSuite(final TestReportNode node) {
     final long nFailures = node.getTheNumberOfFailures();
+    final String name = node.getName();
+    final int successes = node.getTheNumberOfSuccesses();
+    final int runs = node.getTheNumberOfTests();
     if (0 < nFailures) {
-      printer.print("    * %s(<red>%s</red> / %s)",
-          node.getName(), node.getTheNumberOfSuccesses(), node.getTheNumberOfTests());
+      printer.print(bind(NL_6, name, successes, runs));
     } else {
-      printer.println("   * %s(%s / %s)",
-          node.getName(), node.getTheNumberOfSuccesses(), node.getTheNumberOfTests());
+      printer.print(bind(NL_7, name, successes, runs));
     }
     node.getChildren().forEach(child -> this.printCase((TestReportNode) child));
   }
 
   protected void printCase(final TestReportNode node) {
     if (node.isSuccess()) {
-      printer.println("     -  %s <bright_black>%s ms</bright_black>",
-          node.getName(), (node.getEndTime() - node.getStartTime()));
+      printer.println(bind(NL_8, node.getName(), (node.getEndTime() - node.getStartTime())));
     } else {
-      printer.println("    <bg_red> - %s - %s </bg_red>",
-          node.getName(), node.getResultDetail());
+      printer.println(bind(NL_9, node.getName(), node.getResultDetail()));
     }
   }
 }

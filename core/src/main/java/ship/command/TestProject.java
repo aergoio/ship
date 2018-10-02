@@ -5,13 +5,12 @@
 package ship.command;
 
 import static hera.util.ObjectUtils.nvl;
-import static java.util.Arrays.asList;
 import static java.util.Collections.EMPTY_LIST;
+import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
+import static ship.util.Messages.bind;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import lombok.Getter;
@@ -33,6 +32,14 @@ import ship.test.TestResultCollector;
 
 public class TestProject extends AbstractCommand {
 
+  protected static final String NL_0 = TestProject.class.getName() + ".0";
+  protected static final String NL_1 = TestProject.class.getName() + ".1";
+  protected static final String NL_2 = TestProject.class.getName() + ".2";
+  protected static final String NL_3 = TestProject.class.getName() + ".3";
+  protected static final String NL_4 = TestProject.class.getName() + ".4";
+  protected static final String NL_5 = TestProject.class.getName() + ".5";
+  protected static final String NL_6 = TestProject.class.getName() + ".6";
+
   @Getter
   @Setter
   protected BuilderFactory builderFactory = project -> new Builder(new ResourceManager(project));
@@ -41,35 +48,33 @@ public class TestProject extends AbstractCommand {
   protected Consumer<TestResultCollector> reporter = (testReporter) -> {
     testReporter.getResults().forEach(testFile -> {
       if (testFile.isSuccess()) {
-        getPrinter().println(" <green>o</green> %s", testFile.getName());
+        getPrinter().println(bind(NL_0, testFile.getName()));
       } else {
         final Optional<String> errorMessage =
             ofNullable(testFile.getResultDetail())
                 .map(obj -> (LuaErrorInformation) obj)
                 .map(LuaErrorInformation::getMessage);
         if (errorMessage.isPresent()) {
-          getPrinter().println(" <red>x</red> %s - <red>%s</red>",
-              testFile.getName(), errorMessage.get());
+          getPrinter().println(bind(NL_1, testFile.getName(), errorMessage.get()));
         } else {
-          getPrinter().println(" <red>x</red> %s",
-              testFile.getName());
+          getPrinter().println(bind(NL_2, testFile.getName()));
         }
       }
       testFile.getChildren().forEach(child -> {
         final TestReportNode<?> node = (TestReportNode<?>) child;
+        final String name = node.getName();
+        final int successes = node.getTheNumberOfSuccesses();
+        final int runs = node.getTheNumberOfTests();
         if (node.isSuccess()) {
-          getPrinter().println("  <green>o</green> %s (%d/%d)",
-              node.getName(), node.getTheNumberOfSuccesses(), node.getTheNumberOfTests());
+          getPrinter().println(bind(NL_3, name, successes, runs));
         } else {
-          getPrinter().println("  <red>x</red> %s (%d/%d)",
-              node.getName(), node.getTheNumberOfSuccesses(), node.getTheNumberOfTests());
+          getPrinter().println(bind(NL_4, name, successes, runs));
         }
         node.getChildren().forEach(testCase -> {
           if (testCase.isSuccess()) {
-            getPrinter().println("   <green>o</green> %s", testCase.getName());
+            getPrinter().println(bind(NL_5, testCase.getName()));
           } else {
-            getPrinter().println("   <red>x</red> %s - <red>%s</red>",
-                testCase.getName(), testCase.getResultDetail());
+            getPrinter().println(bind(NL_6, testCase.getName(), testCase.getResultDetail()));
           }
         });
       });
@@ -97,13 +102,14 @@ public class TestProject extends AbstractCommand {
       final LuaErrorInformation error = testResult.getError();
       final int lineNumber = error.getLineNumber();
       logger.debug("Lua Script:\n{}",
-          executable.toString(lineNumber - 5, lineNumber + 5, asList(lineNumber)));
+          executable.toString(lineNumber - 5, lineNumber + 5, singletonList(lineNumber)));
     }
     testReporter.end();
 
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public void execute() throws Exception {
     logger.trace("Starting {}...", this);
     final ProjectFile projectFile = readProject();
