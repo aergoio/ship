@@ -58,6 +58,7 @@ public class BuildDetails extends BuildSummary {
     this.state = source.getState();
     this.elapsedTime = source.getElapsedTime();
     this.error = source.getError();
+    this.sequence = source.getSequence();
     this.result = source.getResult();
     this.dependencies = source.getDependencies();
     this.unitTestReport = source.getUnitTestReport();
