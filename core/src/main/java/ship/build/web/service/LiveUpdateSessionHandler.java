@@ -6,14 +6,19 @@ package ship.build.web.service;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import lombok.Setter;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+/**
+ * Handle WebSocket event.
+ */
 @Named
 public class LiveUpdateSessionHandler extends TextWebSocketHandler {
 
   @Inject
+  @Setter
   protected LiveUpdateService manager;
 
   @Override
