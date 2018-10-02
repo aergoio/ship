@@ -5,7 +5,6 @@
 package ship.util;
 
 import static hera.util.ArrayUtils.isEmpty;
-import static hera.util.ObjectUtils.nvl;
 import static hera.util.ThreadUtils.trySleep;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
@@ -16,18 +15,18 @@ import static java.util.stream.Collectors.toSet;
 import hera.server.ServerEvent;
 import hera.server.ThreadServer;
 import java.io.File;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Monitor file changes.
+ */
 public class FileWatcher extends ThreadServer implements Runnable {
 
   /**
@@ -65,11 +64,13 @@ public class FileWatcher extends ThreadServer implements Runnable {
   /**
    * File's last changed time.
    */
-  protected HashMap<File, Long> base2lastModified = new HashMap<>();
-
-  protected Set<File> previouslyChecked = new HashSet<>();
+  protected final HashMap<File, Long> base2lastModified1 = new HashMap<>();
 
   protected final File base;
+
+  protected long lastModified = 0;
+
+  protected Set<File> previouslyChecked = new HashSet<>();
 
   protected Set<String> ignores = new HashSet<>();
 
@@ -86,21 +87,29 @@ public class FileWatcher extends ThreadServer implements Runnable {
     ignores.add(name);
   }
 
-  protected long rake(final Set<File> checked, final Set<File> changed) {
+  /**
+   * Rake file changes.
+   *
+   * <p>
+   *   Save files to be checked into {@code checked} and files to be changed into {@code changed}.
+   * </p>
+   *
+   * @param checked container to save checked files
+   * @param changed container to save changed files
+   */
+  protected void rake(final Set<File> checked, final Set<File> changed) {
     logger.trace("Base: {}", base);
-    final Long lastModifiedInCache = nvl(this.base2lastModified.get(base), Long.valueOf(0));
-    logger.trace("Base's last modified - Cache: {}", lastModifiedInCache);
+    logger.trace("Base's last modified: {}", lastModified);
 
     long max = 0;
-    final Queue<File> files = new LinkedList<>();
-    files.add(base);
+    final Queue<File> files = new LinkedList<>(asList(base));
     while (!files.isEmpty()) {
       final File file = files.remove();
       logger.trace("File: {}", file);
       final long lastModifiedInFile = file.lastModified();
       max = Math.max(lastModifiedInFile, max);
 
-      if (lastModifiedInCache < lastModifiedInFile) {
+      if (lastModified < lastModifiedInFile) {
         changed.add(file);
       }
       checked.add(file);
@@ -113,7 +122,7 @@ public class FileWatcher extends ThreadServer implements Runnable {
       }
     }
 
-    return max;
+    lastModified = max;
   }
 
   @Override
@@ -123,20 +132,17 @@ public class FileWatcher extends ThreadServer implements Runnable {
     final HashSet<File> checkedFiles = new HashSet<>();
     final HashSet<File> changed = new HashSet<>();
 
-    final long max = rake(checkedFiles, changed);
+    rake(checkedFiles, changed);
     logger.debug("Changed: {}", changed);
 
-    final HashSet<File> intersect = (HashSet<File>) checkedFiles.clone();
-    intersect.retainAll(previouslyChecked);
-
-    logger.debug("Intersection: {}", intersect);
-    final HashSet<File> added = new HashSet<>(checkedFiles);
-    added.removeAll(intersect);
-    final HashSet<File> removed = new HashSet<>(previouslyChecked);
-    removed.removeAll(intersect);
-
-    base2lastModified.put(base, max);
+    final BeforeAndAfter<File> beforeAndAfter =
+        new BeforeAndAfter<>(previouslyChecked, checkedFiles);
     previouslyChecked = checkedFiles;
+
+    final Set<File> added = beforeAndAfter.getAddedItems();
+    final Set<File> removed = beforeAndAfter.getRemovedItems();
+    final Set<File> any = asList(added, removed, changed).stream()
+        .flatMap(Collection::stream).collect(toSet());
 
     if (!added.isEmpty()) {
       logger.info("{} added", added);
@@ -150,10 +156,8 @@ public class FileWatcher extends ThreadServer implements Runnable {
       logger.info("{} changed", changed);
       fireEvent(new ServerEvent(this, FILE_CHANGED, unmodifiableCollection(changed)));
     }
-
-    final Set<File> any = asList(added, removed, changed).stream()
-        .flatMap(Collection::stream).collect(toSet());
     if (!any.isEmpty()) {
+      logger.info("{} detected", changed);
       fireEvent(new ServerEvent(this, ANY_CHANGED, unmodifiableCollection(any)));
     }
   }
