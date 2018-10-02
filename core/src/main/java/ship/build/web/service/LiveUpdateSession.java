@@ -29,8 +29,8 @@ public class LiveUpdateSession {
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (!(obj instanceof  LiveUpdateSession)) {
+  public boolean equals(final Object obj) {
+    if (!(obj instanceof LiveUpdateSession)) {
       return false;
     }
     final LiveUpdateSession other = (LiveUpdateSession) obj;
