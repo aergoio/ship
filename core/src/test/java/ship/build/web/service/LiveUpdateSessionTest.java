@@ -30,6 +30,6 @@ public class LiveUpdateSessionTest extends AbstractTestCase {
     final LiveUpdateSession session2 = new LiveUpdateSession(webSocketSession);
 
     assertTrue(session1.equals(session2));
-    assertTrue(new HashSet(asList(session1)).contains(session2));
+    assertTrue(new HashSet<>(asList(session1)).contains(session2));
   }
 }
