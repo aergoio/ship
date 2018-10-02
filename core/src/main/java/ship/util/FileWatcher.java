@@ -5,6 +5,7 @@
 package ship.util;
 
 import static hera.util.ArrayUtils.isEmpty;
+import static hera.util.ObjectUtils.nvl;
 import static hera.util.ThreadUtils.trySleep;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
@@ -113,7 +114,7 @@ public class FileWatcher extends ThreadServer implements Runnable {
         changed.add(file);
       }
       checked.add(file);
-      final File[] children = file.listFiles();
+      final File[] children = nvl(file.listFiles(), new File[0]);
 
       logger.trace("Find {} files", children.length);
       files.addAll(stream(children)

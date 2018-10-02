@@ -16,7 +16,6 @@ public class FileWatcherTest extends AbstractTestCase {
   public void testRake() {
     // Given
     final File base = mock(File.class);
-    when(base.listFiles()).thenReturn(new File[0]);
 
     // When
     final FileWatcher fileWatcher = new FileWatcher(base);
@@ -32,7 +31,6 @@ public class FileWatcherTest extends AbstractTestCase {
   public void testProcess() throws Exception {
     // Given
     final File base = mock(File.class);
-    when(base.listFiles()).thenReturn(new File[0]);
 
     // When
     final FileWatcher fileWatcher = new FileWatcher(base);
