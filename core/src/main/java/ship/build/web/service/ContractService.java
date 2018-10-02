@@ -4,8 +4,6 @@
 
 package ship.build.web.service;
 
-import static hera.api.Decoder.defaultDecoder;
-import static hera.api.Encoder.defaultEncoder;
 import static hera.util.HexUtils.dump;
 import static hera.util.IoUtils.from;
 import static java.util.Arrays.stream;
@@ -14,6 +12,7 @@ import static java.util.UUID.randomUUID;
 import hera.api.AccountOperation;
 import hera.api.AergoApi;
 import hera.api.ContractOperation;
+import hera.api.encode.Base58;
 import hera.api.model.Account;
 import hera.api.model.AccountAddress;
 import hera.api.model.Authentication;
@@ -25,11 +24,8 @@ import hera.api.model.ContractTxHash;
 import hera.api.model.ContractTxReceipt;
 import hera.exception.RpcConnectionException;
 import hera.exception.RpcException;
-import hera.util.HexUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +33,8 @@ import java.util.Map;
 import javax.inject.Named;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import ship.build.web.exception.AergoNodeException;
@@ -70,6 +68,18 @@ public class ContractService extends AbstractService {
       new HashMap<>();
 
   protected ResourcePool<AergoApi> aergoPool;
+
+  @RequiredArgsConstructor
+  class SimpleBase58 implements Base58 {
+
+    @NonNull
+    protected final String encoded;
+
+    @Override
+    public String getEncodedValue() {
+      return encoded;
+    }
+  }
 
   protected synchronized void ensureAccount() {
     if (null != account) {
@@ -121,7 +131,7 @@ public class ContractService extends AbstractService {
           contractOperation.deploy(account.getAddress(), () -> from(luaBinary.getPayload()))
               .getResult();
       logger.debug("Contract transaction hash: {}", contractTransactionHash);
-      final String encodedContractTxHash = contractTransactionHash.getEncodedValue(defaultEncoder);
+      final String encodedContractTxHash = contractTransactionHash.toString();
       final DeploymentResult deploymentResult = new DeploymentResult();
       deploymentResult.setBuildUuid(buildDetails.getUuid());
       deploymentResult.setEncodedContractTransactionHash(encodedContractTxHash);
@@ -152,9 +162,8 @@ public class ContractService extends AbstractService {
   public ExecutionResult execute(final String encodedContractTxHash, final String functionName,
       final String... args) throws IOException {
     logger.trace("Encoded tx hash: {}", encodedContractTxHash);
-    final byte[] decoded = from(defaultDecoder.decode(new StringReader(encodedContractTxHash)));
-    logger.debug("Decoded contract hash:\n{}", HexUtils.dump(decoded));
-    final ContractTxHash contractTxHash = ContractTxHash.of(decoded);
+    final Base58 encoded = new SimpleBase58(encodedContractTxHash);
+    final ContractTxHash contractTxHash = new ContractTxHash(encoded);
     ensureAccount();
     final AergoApi aergoApi = aergoPool.borrowResource();
     try {
@@ -178,7 +187,7 @@ public class ContractService extends AbstractService {
       ).getResult();
 
       final ExecutionResult executionResult = new ExecutionResult();
-      executionResult.setContractTransactionHash(executionContractHash.getEncodedValue());
+      executionResult.setContractTransactionHash(executionContractHash.toString());
       return executionResult;
     } finally {
       aergoPool.returnResource(aergoApi);
@@ -199,9 +208,8 @@ public class ContractService extends AbstractService {
   public QueryResult query(final String encodedContractTxHash, final String functionName,
       final String... args) throws IOException {
     logger.trace("Encoded tx hash: {}", encodedContractTxHash);
-    final byte[] decoded = from(defaultDecoder.decode(new StringReader(encodedContractTxHash)));
-    logger.debug("Decoded contract hash:\n{}", HexUtils.dump(decoded));
-    final ContractTxHash contractTxHash = ContractTxHash.of(decoded);
+    final Base58 base58 = new SimpleBase58(encodedContractTxHash);
+    final ContractTxHash contractTxHash = new ContractTxHash(base58);
     ensureAccount();
     final AergoApi aergoApi = aergoPool.borrowResource();
     try {
@@ -222,13 +230,7 @@ public class ContractService extends AbstractService {
           contractFunction,
           stream(args).toArray()
       ).getResult();
-      final String resultString = contractResult.getResultInRawBytes().getEncodedValue(in -> {
-        try {
-          return new InputStreamReader(in);
-        } catch (final Throwable ex) {
-          throw new IllegalStateException(ex);
-        }
-      });
+      final String resultString = new String(contractResult.getResultInRawBytes().getValue());
       return new QueryResult(resultString);
     } finally {
       aergoPool.returnResource(aergoApi);
@@ -249,15 +251,10 @@ public class ContractService extends AbstractService {
     if (null == latest.getContractInterface()) {
       final String encodedContractTxHash = latest.getEncodedContractTransactionHash();
       logger.trace("Encoded tx hash: {}", encodedContractTxHash);
-      try {
-        final byte[] decoded = from(defaultDecoder.decode(new StringReader(encodedContractTxHash)));
-        logger.debug("Decoded contract hash:\n{}", HexUtils.dump(decoded));
-        final ContractTxHash contractTxHash = ContractTxHash.of(decoded);
-        final ContractInferface contractInferface = getInterface(contractTxHash);
-        latest.setContractInterface(contractInferface);
-      } catch (IOException ex) {
-        throw new ResourceNotFoundException(latest + " not found.");
-      }
+      final Base58 base58 = new SimpleBase58(encodedContractTxHash);
+      final ContractTxHash contractTxHash = new ContractTxHash(base58);
+      final ContractInferface contractInferface = getInterface(contractTxHash);
+      latest.setContractInterface(contractInferface);
     }
     return latest;
   }
