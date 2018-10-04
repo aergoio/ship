@@ -20,9 +20,9 @@ import java.nio.file.Paths;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import ship.ApmConstants;
 import ship.Command;
 import ship.ProjectFile;
+import ship.ShipConstants;
 import ship.exception.DirectoryNotEmptyException;
 
 public class CreateProject extends AbstractCommand implements Command {
@@ -51,7 +51,7 @@ public class CreateProject extends AbstractCommand implements Command {
     final Path projectPath = Paths.get(".").toFile().getAbsoluteFile().getCanonicalFile().toPath();
     logger.trace("Project location: {}", projectPath);
 
-    final Path projectFilePath = Paths.get(projectPath.toString(), ApmConstants.PROJECT_FILENAME);
+    final Path projectFilePath = Paths.get(projectPath.toString(), ShipConstants.PROJECT_FILENAME);
 
     final WriteProjectFile writeProjectFile = new WriteProjectFile();
     final String projectDirectoryName = getFilename(projectPath.toFile().getCanonicalPath());

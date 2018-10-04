@@ -18,9 +18,9 @@ import java.util.Optional;
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
-import ship.ApmConstants;
 import ship.Command;
 import ship.ProjectFile;
+import ship.ShipConstants;
 import ship.util.DummyMessagePrinter;
 import ship.util.MessagePrinter;
 
@@ -63,7 +63,7 @@ public abstract class AbstractCommand implements Command {
   }
 
   public Path getProjectFile() {
-    return Paths.get(getProjectHome().toString(), ApmConstants.PROJECT_FILENAME);
+    return Paths.get(getProjectHome().toString(), ShipConstants.PROJECT_FILENAME);
   }
 
   public String getProjectHomePath() {

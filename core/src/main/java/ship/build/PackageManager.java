@@ -11,8 +11,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import lombok.RequiredArgsConstructor;
-import ship.ApmConstants;
 import ship.ProjectFile;
+import ship.ShipConstants;
 import ship.build.res.Project;
 import ship.exception.PackageNotFoundException;
 
@@ -23,7 +23,7 @@ public class PackageManager {
 
   public PackageManager() {
     this(append(nvl(System.getProperty("user.home"), System.getenv("HOME")),
-        ApmConstants.MODULES_BASE));
+        ShipConstants.MODULES_BASE));
   }
 
   /**
@@ -36,7 +36,7 @@ public class PackageManager {
   public ResourceManager find(final String packageName) {
     try {
       final String packageLocation = append(repositoryLocation, packageName);
-      final String projectFileLocation = append(packageLocation, ApmConstants.PROJECT_FILENAME);
+      final String projectFileLocation = append(packageLocation, ShipConstants.PROJECT_FILENAME);
       final Path projectFilePath = Paths.get(projectFileLocation);
       final ProjectFile projectFile = ProjectFile.from(projectFilePath);
       return new ResourceManager(new Project(packageLocation, projectFile));
