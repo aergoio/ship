@@ -13,7 +13,7 @@ public class MessagesTest extends AbstractTestCase {
 
   @Test
   public void testBind() {
-    final String messageId = DirectoryNotEmptyException.class.getName();
+    final String messageId = DirectoryNotEmptyException.class.getName() + ".0";
     final String uuid = randomUUID().toString();
     final String message = Messages.bind(messageId, uuid);
     logger.debug("Message: {}", message);
