@@ -274,8 +274,8 @@ public class ContractService extends AbstractService {
     try {
       final ContractOperation contractOperation = aergoApi.getContractOperation();
       ContractTxReceipt receipt = contractOperation.getReceipt(contractTxHash);
-      final ContractAddress contractAddress = receipt.getContractAddress();
-      final ContractInferface contractInferface = contractOperation.getContractInterface(contractAddress);
+      final ContractAddress address = receipt.getContractAddress();
+      final ContractInferface contractInferface = contractOperation.getContractInterface(address);
       if (null == contractInferface) {
         new ResourceNotFoundException(bind(NL_0, contractTxHash));
       }
