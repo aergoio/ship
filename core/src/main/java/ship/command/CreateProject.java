@@ -16,13 +16,11 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import ship.Command;
 import ship.ProjectFile;
-import ship.ShipConstants;
 import ship.exception.DirectoryNotEmptyException;
 
 public class CreateProject extends AbstractCommand implements Command {
@@ -39,42 +37,51 @@ public class CreateProject extends AbstractCommand implements Command {
     protected boolean force = false;
   }
 
-  @Override
-  public void execute() throws Exception {
-    logger.trace("Starting {}...", this);
-    logger.debug("Arguments: {}", arguments);
-
+  protected Options getOptions() {
     final Options options = new Options();
     JCommander.newBuilder().addObject(options).build().parse(arguments.toArray(new String[0]));
     logger.debug("Options: {}", options);
+    return options;
+  }
 
-    final Path projectPath = Paths.get(".").toFile().getAbsoluteFile().getCanonicalFile().toPath();
-    logger.trace("Project location: {}", projectPath);
-
-    final Path projectFilePath = Paths.get(projectPath.toString(), ShipConstants.PROJECT_FILENAME);
-
-    final WriteProjectFile writeProjectFile = new WriteProjectFile();
-    final String projectDirectoryName = getFilename(projectPath.toFile().getCanonicalPath());
-    if (!options.isForce() && 0 < Files.list(projectPath).count()) {
-      logger.trace("Force: {}", options.isForce());
-      throw new DirectoryNotEmptyException(projectPath);
-    }
-    final String projectName = System.getProperty("user.name") + "/" + projectDirectoryName;
+  protected ProjectFile newProjectFile(final String projectName) {
     logger.debug("Project name: {}", projectName);
-    final ProjectFile projectFile = writeProjectFile.getProject();
+    final ProjectFile projectFile = new ProjectFile();
     projectFile.setName(projectName);
     projectFile.setSource("src/main/lua/main.lua");
     projectFile.setTarget("app.lua");
     projectFile.setEndpoint(null);
     logger.trace("Project file: {}", projectFile);
-    writeProjectFile.setArguments(singletonList(projectFilePath.toAbsolutePath().toString()));
+    return projectFile;
+  }
+
+  @Override
+  public void execute() throws Exception {
+    logger.debug("Starting {} with {}...", this, arguments);
+
+    final Options options = getOptions();
+    final Path projectPath = getProjectHome();
+    final String projectPathStr = getProjectHomePath();
+    final Path projectFilePath = getProjectFile();
+    final String projectFilePathStr = getProjectFilePath();
+
+    final WriteProjectFile writeProjectFile = new WriteProjectFile();
+    final String projectDirectoryName = getFilename(projectPathStr);
+    if (!options.isForce() && 0 < Files.list(projectPath).count()) {
+      logger.trace("Force: {}", options.isForce());
+      throw new DirectoryNotEmptyException(projectPath);
+    }
+    final String projectName = System.getProperty("user.name") + "/" + projectDirectoryName;
+    final ProjectFile newProjectFile = newProjectFile(projectName);
+    writeProjectFile.setProject(newProjectFile);
+    writeProjectFile.setArguments(singletonList(projectFilePathStr));
     writeProjectFile.execute();
 
-    printer.println(bind(NL_0, projectPath));
+    printer.println(bind(NL_0, projectPathStr));
     try (
         final InputStream in = Files.newInputStream(projectFilePath);
         final Reader reader = new InputStreamReader(in)) {
-      printer.println(bind(NL_1, projectFilePath));
+      printer.println(bind(NL_1, projectFilePathStr));
       printer.println(IoUtils.from(reader));
     }
   }

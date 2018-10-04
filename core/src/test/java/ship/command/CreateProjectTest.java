@@ -43,5 +43,4 @@ public class CreateProjectTest extends AbstractTestCase {
     // Then
     verify(writeProjectFile).execute();
   }
-
 }
