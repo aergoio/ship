@@ -9,6 +9,8 @@ import static org.eclipse.jgit.lib.Constants.HEAD;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.text.MessageFormat;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.eclipse.jgit.api.Git;
@@ -30,6 +32,8 @@ import ship.FileSet;
 
 public class CloneGit extends AbstractCommand implements ProgressMonitor {
 
+  protected static final String URI_PATTERN = "https://github.com/{0}.git";
+
   @Getter
   protected FileSet fileSet = new FileSet();
 
@@ -37,16 +41,20 @@ public class CloneGit extends AbstractCommand implements ProgressMonitor {
   public void execute() throws Exception {
     final String packageName = getArgument(0);
     final String branch = getOptionalArgument(1).orElse("master");
-    final String remoteUri = "https://github.com/" + packageName + ".git";
+    logger.debug("Package name: {}, Branch: {}", packageName, branch);
 
+    final String remoteUri = MessageFormat.format(URI_PATTERN, packageName);
     final InMemoryRepository repository = new InMemoryRepository(new DfsRepositoryDescription());
     final Git git = new Git(repository);
     git.remoteAdd().setName("origin").setUri(new URIish(remoteUri)).call();
+
+    logger.trace("Git: {}", git);
 
     final FetchResult fetchResult = git.fetch()
         .setRemote("origin")
         .setRefSpecs("+refs/heads/" + branch + ":refs/remotes/origin/" + branch)
         .call();
+    logger.debug("Fetch result: {}", fetchResult);
 
     logger.debug("Refs: {}", fetchResult.getAdvertisedRefs());
     final Ref fetchHead = fetchResult.getAdvertisedRef(HEAD);
@@ -54,12 +62,9 @@ public class CloneGit extends AbstractCommand implements ProgressMonitor {
     final ObjectId commitId = fetchHead.getObjectId();
     logger.debug("Commit id: {}", commitId);
 
-    final FileSet fileSet = new FileSet();
     try (final RevWalk revWalk = new RevWalk(repository)) {
       visit(repository, revWalk, commitId);
     }
-
-    this.fileSet = fileSet;
     logger.debug("FileSet: {}", fileSet);
   }
 
@@ -83,6 +88,7 @@ public class CloneGit extends AbstractCommand implements ProgressMonitor {
   protected void visit(final Repository repository, final TreeWalk treeWalk) throws IOException {
     final String path = treeWalk.getPathString();
     logger.debug("Path: {}", path);
+    logger.trace("Subtree: {}", treeWalk.isSubtree());
     if (treeWalk.isSubtree()) {
       treeWalk.enterSubtree();
     } else {
@@ -98,6 +104,7 @@ public class CloneGit extends AbstractCommand implements ProgressMonitor {
         }
       });
       fileSet.add(file);
+      logger.debug("{} added", file);
     }
   }
 

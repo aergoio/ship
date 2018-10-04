@@ -36,7 +36,7 @@ public class InstallPackage extends AbstractCommand {
     cloneGit.setArguments(asList(packageName, checkout.orElse("master")));
     cloneGit.execute();
     final FileSet fileSet = cloneGit.getFileSet();
-    logger.debug("FileSet: {}", fileSet.getFileSet());
+    logger.debug("FileSet: {}", fileSet.getFiles());
 
     final String publishRepository = append(System.getProperty("user.home"), ".aergo_modules");
     final Path publishPath = Paths.get(append(publishRepository, packageName));

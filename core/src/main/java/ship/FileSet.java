@@ -72,26 +72,26 @@ public class FileSet {
 
   @Getter
   @Setter
-  protected Set<FileContent> fileSet;
+  protected Set<FileContent> files;
 
   public FileSet() {
     this(new TreeSet<>());
   }
 
   public FileSet(final Collection<FileContent> fileSet) {
-    this.fileSet = new TreeSet<>(fileSet);
+    this.files = new TreeSet<>(fileSet);
   }
 
   public void add(final FileContent file) {
-    ofNullable(file).ifPresent(fileSet::add);
+    ofNullable(file).ifPresent(files::add);
   }
 
   public Stream<FileContent> stream() {
-    return fileSet.stream();
+    return files.stream();
   }
 
   public void addAll(final FileSet that) {
-    this.fileSet.addAll(that.fileSet);
+    this.files.addAll(that.files);
   }
 
   /**
@@ -105,8 +105,8 @@ public class FileSet {
     logger.trace("Copying to {}...", base);
     Files.createDirectories(base);
 
-    logger.debug("Files: {}", fileSet);
-    for (final FileContent fileContent: fileSet) {
+    logger.debug("Files: {}", files);
+    for (final FileContent fileContent: files) {
       final Path filePath = base.resolve(fileContent.getPath());
       createParentDirectories(filePath);
       try (final InputStream in = fileContent.open()) {
@@ -119,6 +119,6 @@ public class FileSet {
 
   @Override
   public String toString() {
-    return fileSet.size() + " file(s)";
+    return files.size() + " file(s)";
   }
 }
