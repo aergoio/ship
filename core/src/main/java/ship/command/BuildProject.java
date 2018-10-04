@@ -5,13 +5,14 @@
 package ship.command;
 
 import static hera.util.ExceptionUtils.buildExceptionMessage;
-import static hera.util.ValidationUtils.assertTrue;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static ship.build.web.model.BuildSummary.BUILD_FAIL;
 import static ship.build.web.model.BuildSummary.SUCCESS;
 import static ship.build.web.model.BuildSummary.TEST_FAIL;
 import static ship.util.Messages.bind;
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
 import com.google.common.base.Stopwatch;
 import hera.util.DangerousConsumer;
 import java.io.ByteArrayInputStream;
@@ -20,6 +21,7 @@ import java.util.Collection;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import ship.Builder;
 import ship.ProjectFile;
 import ship.build.ConsoleServer;
@@ -58,6 +60,36 @@ public class BuildProject extends AbstractCommand {
 
   @Getter
   protected BuildDetails lastBuildResult;
+
+
+  @ToString
+  class Options {
+    @Parameter(names = "--watch", description = "Run command as server mode")
+    @Getter
+    @Setter
+    protected boolean watch = false;
+
+    @Parameter(names = "--port", description = "Specify a port for web service")
+    @Getter
+    @Setter
+    protected int port = -1;
+
+    public int getMode() {
+      return (0 < port) ? WEB_MODE : (watch) ? CONSOLE_MODE : COMMAND_MODE;
+    }
+  }
+
+  /**
+   * Parse and bind arguments.
+   *
+   * @return bound object
+   */
+  protected Options getOptions() {
+    final Options options = new Options();
+    JCommander.newBuilder().addObject(options).build().parse(arguments.toArray(new String[0]));
+    logger.debug("Options: {}", options);
+    return options;
+  }
 
   protected FileWatcher createFileWatcher() {
     final FileWatcher fileWatcher = new FileWatcher(project.getPath().toFile());
@@ -143,33 +175,18 @@ public class BuildProject extends AbstractCommand {
   @Override
   public void execute() throws Exception {
     logger.trace("Starting {}...", this);
-    int mode = COMMAND_MODE;
-    int port = -1;
-    for (int i = 0, n = arguments.size(); i < n; ++i) {
-      final String argument = arguments.get(i);
-      if ("--watch".equals(argument)) {
-        if (mode == COMMAND_MODE) {
-          mode = CONSOLE_MODE;
-        }
-      } else if ("--port".equals(argument)) {
-        mode = WEB_MODE;
-        assertTrue(++i < arguments.size());
-        final String portStr = arguments.get(i);
-        port = Integer.parseInt(portStr);
-      }
-    }
-
+    final Options options = getOptions();
     final ProjectFile projectFile = readProject();
     project = new Project(".", projectFile);
     targetWriter.setProject(project);
     final ResourceManager resourceManager = new ResourceManager(project);
     builder = new Builder(resourceManager);
-    switch (mode) {
+    switch (options.getMode()) {
       case COMMAND_MODE:
         this.lastBuildResult = executeInCommandMode();
         break;
       case WEB_MODE:
-        executeInWebMode(port);
+        executeInWebMode(options.getPort());
         break;
       case CONSOLE_MODE:
         executeInConsoleMode();
