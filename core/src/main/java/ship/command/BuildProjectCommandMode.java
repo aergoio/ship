@@ -12,6 +12,7 @@ import java.io.IOException;
 import lombok.Getter;
 import lombok.Setter;
 import ship.Builder;
+import ship.BuilderFactory;
 import ship.ProjectFile;
 import ship.build.ResourceManager;
 import ship.build.res.Project;
@@ -26,6 +27,10 @@ public class BuildProjectCommandMode extends AbstractCommand {
   protected static final String NL_4 = BuildProject.class.getName() + ".4";
 
   protected Project project;
+
+  @Getter
+  @Setter
+  protected BuilderFactory builderFactory = project -> new Builder(new ResourceManager(project));
 
   protected Builder builder;
 
@@ -67,9 +72,8 @@ public class BuildProjectCommandMode extends AbstractCommand {
   protected void initialize() throws IOException {
     final ProjectFile projectFile = readProject();
     project = new Project(".", projectFile);
-    builder = new Builder(new ResourceManager(project));
+    builder = builderFactory.create(project);
     targetWriter.setProject(project);
-
   }
 
   @Override

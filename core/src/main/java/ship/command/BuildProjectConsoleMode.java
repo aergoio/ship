@@ -49,13 +49,6 @@ public class BuildProjectConsoleMode extends BuildProjectCommandMode {
   }
 
   @Override
-  protected void initialize() throws IOException {
-    super.initialize();
-    final ResourceManager resourceManager = new ResourceManager(project);
-    builder = new Builder(resourceManager);
-  }
-
-  @Override
   public void execute() throws Exception {
     initialize();
     startConsoleServer();

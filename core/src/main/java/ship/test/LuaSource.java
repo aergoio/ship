@@ -27,15 +27,6 @@ public class LuaSource {
     return script.split("\\r?\\n");
   }
 
-  /*
-  protected static String[] select(String[] lines, final int from, final int to) {
-    assertTrue(from < to);
-    final IntRange range = new IntRange(0, lines.length).select(new IntRange(from, to));
-    final String[] part = new String[range.v2 - range.v1];
-    System.arraycopy(lines, range.v1, part, 0, part.length);
-    return part;
-  }*/
-
   @RequiredArgsConstructor
   @ToString
   class SourceLine {

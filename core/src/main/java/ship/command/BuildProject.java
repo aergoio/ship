@@ -6,6 +6,7 @@ package ship.command;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
+import java.util.function.Function;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -16,6 +17,21 @@ public class BuildProject extends AbstractCommand {
   protected static final int COMMAND_MODE = 1;
   protected static final int CONSOLE_MODE = 2;
   protected static final int WEB_MODE = 3;
+
+  @Getter
+  @Setter
+  protected Function<Options, BuildProjectCommandMode> commandFactory = options -> {
+    switch (options.getMode()) {
+      case COMMAND_MODE:
+        return new BuildProjectCommandMode();
+      case WEB_MODE:
+        return new BuildProjectWebMode(options.getPort());
+      case CONSOLE_MODE:
+        return new BuildProjectConsoleMode();
+      default:
+        throw new IllegalStateException();
+    }
+  };
 
   @Getter
   protected BuildDetails lastBuildResult;
@@ -55,20 +71,7 @@ public class BuildProject extends AbstractCommand {
   public void execute() throws Exception {
     logger.trace("Starting {}...", this);
     final Options options = getOptions();
-    BuildProjectCommandMode buildProjectCommandMode = null;
-    switch (options.getMode()) {
-      case COMMAND_MODE:
-        buildProjectCommandMode = new BuildProjectCommandMode();
-        break;
-      case WEB_MODE:
-        buildProjectCommandMode = new BuildProjectWebMode(options.getPort());
-        break;
-      case CONSOLE_MODE:
-        buildProjectCommandMode = new BuildProjectConsoleMode();
-        break;
-      default:
-        throw new IllegalStateException();
-    }
+    final BuildProjectCommandMode buildProjectCommandMode = commandFactory.apply(options);
     buildProjectCommandMode.setPrinter(getPrinter());
     buildProjectCommandMode.execute();
     this.lastBuildResult = buildProjectCommandMode.getLastBuildResult();
