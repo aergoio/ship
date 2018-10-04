@@ -10,6 +10,7 @@ import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static org.slf4j.LoggerFactory.getLogger;
 
+import com.beust.jcommander.JCommander;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,6 +39,21 @@ public abstract class AbstractCommand implements Command {
 
   public String getArgument(final int index) {
     return arguments.get(index);
+  }
+
+  /**
+   * Parse and bind arguments.
+   *
+   * @param <T> options type
+   *
+   * @param options object to bind
+   *
+   * @return bound object
+   */
+  protected <T> T parse(T options) {
+    JCommander.newBuilder().addObject(options).build().parse(arguments.toArray(new String[0]));
+    logger.debug("Options: {}", options);
+    return options;
   }
 
   /**

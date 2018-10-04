@@ -37,13 +37,6 @@ public class CreateProject extends AbstractCommand implements Command {
     protected boolean force = false;
   }
 
-  protected Options getOptions() {
-    final Options options = new Options();
-    JCommander.newBuilder().addObject(options).build().parse(arguments.toArray(new String[0]));
-    logger.debug("Options: {}", options);
-    return options;
-  }
-
   protected ProjectFile newProjectFile(final String projectName) {
     logger.debug("Project name: {}", projectName);
     final ProjectFile projectFile = new ProjectFile();
@@ -59,7 +52,7 @@ public class CreateProject extends AbstractCommand implements Command {
   public void execute() throws Exception {
     logger.debug("Starting {} with {}...", this, arguments);
 
-    final Options options = getOptions();
+    final Options options = parse(new Options());
     final Path projectPath = getProjectHome();
     final String projectPathStr = getProjectHomePath();
     final Path projectFilePath = getProjectFile();

@@ -4,7 +4,6 @@
 
 package ship.command;
 
-import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import java.util.function.Function;
 import lombok.Getter;
@@ -54,23 +53,10 @@ public class BuildProject extends AbstractCommand {
     }
   }
 
-  /**
-   * Parse and bind arguments.
-   *
-   * @return bound object
-   */
-  protected Options getOptions() {
-    final Options options = new Options();
-    JCommander.newBuilder().addObject(options).build().parse(arguments.toArray(new String[0]));
-    logger.debug("Options: {}", options);
-    return options;
-  }
-
-
   @Override
   public void execute() throws Exception {
     logger.trace("Starting {}...", this);
-    final Options options = getOptions();
+    final Options options = parse(new Options());
     final BuildProjectCommandMode buildProjectCommandMode = commandFactory.apply(options);
     buildProjectCommandMode.setPrinter(getPrinter());
     buildProjectCommandMode.execute();

@@ -2,8 +2,6 @@ package ship.command;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static ship.command.BuildProject.COMMAND_MODE;
@@ -20,22 +18,24 @@ public class BuildProjectTest extends AbstractTestCase {
   @Test
   public void testGetOptions() {
     final BuildProject commandModeBuildProject = new BuildProject();
-    final Options commandModeOptions = commandModeBuildProject.getOptions();
+    final Options commandModeOptions =
+        commandModeBuildProject.parse(commandModeBuildProject.new Options());
     assertEquals(COMMAND_MODE, commandModeOptions.getMode());
 
     final BuildProject consoleModeBuildProject = new BuildProject();
     consoleModeBuildProject.setArguments(asList("--watch"));
-    final Options consoleModeOptions = consoleModeBuildProject.getOptions();
+    final Options consoleModeOptions =
+        consoleModeBuildProject.parse(consoleModeBuildProject.new Options());
     assertEquals(CONSOLE_MODE, consoleModeOptions.getMode());
 
     final BuildProject webModeBuildProject = new BuildProject();
     webModeBuildProject.setArguments(asList("--port", "8080"));
-    final Options webModeOptions = webModeBuildProject.getOptions();
+    final Options webModeOptions = webModeBuildProject.parse(webModeBuildProject.new Options());
     assertEquals(WEB_MODE, webModeOptions.getMode());
 
     final BuildProject webModeBuildProject2 = new BuildProject();
     webModeBuildProject2.setArguments(asList("--watch", "--port", "8080"));
-    final Options webModeOptions2 = webModeBuildProject2.getOptions();
+    final Options webModeOptions2 = webModeBuildProject2.parse(webModeBuildProject2.new Options());
     assertEquals(WEB_MODE, webModeOptions2.getMode());
 
   }
