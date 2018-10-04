@@ -9,7 +9,6 @@ import static org.eclipse.jgit.lib.Constants.HEAD;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.text.MessageFormat;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -18,7 +17,6 @@ import org.eclipse.jgit.internal.storage.dfs.DfsRepositoryDescription;
 import org.eclipse.jgit.internal.storage.dfs.InMemoryRepository;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
-import org.eclipse.jgit.lib.ProgressMonitor;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -30,7 +28,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import ship.FileContent;
 import ship.FileSet;
 
-public class CloneGit extends AbstractCommand implements ProgressMonitor {
+public class CloneGit extends AbstractCommand {
 
   protected static final String URI_PATTERN = "https://github.com/{0}.git";
 
@@ -110,31 +108,5 @@ public class CloneGit extends AbstractCommand implements ProgressMonitor {
 
   public Stream<FileContent> stream() {
     return fileSet.stream();
-  }
-
-  @Override
-  public void start(final int totalTasks) {
-    logger.debug("Start: {}", totalTasks);
-  }
-
-  @Override
-  public void beginTask(final String title, final int totalWork) {
-    logger.debug("Start {}: {}", title, totalWork);
-  }
-
-  @Override
-  public void update(final int completed) {
-    logger.trace("Update {}", completed);
-  }
-
-  @Override
-  public void endTask() {
-    logger.debug("End");
-  }
-
-  @Override
-  public boolean isCancelled() {
-    logger.trace("Check cancelled");
-    return false;
   }
 }

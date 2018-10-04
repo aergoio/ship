@@ -1,8 +1,10 @@
 package ship.command;
 
+import static hera.util.IoUtils.from;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.eclipse.jgit.lib.Constants.HEAD;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,6 +35,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import ship.AbstractTestCase;
+import ship.FileContent;
 import ship.FileSet;
 
 public class CloneGitTest extends AbstractTestCase {
@@ -79,7 +82,7 @@ public class CloneGitTest extends AbstractTestCase {
       try {
         ((OutputStream) invocation.getArgument(0)).write(fileContent);
       } catch (final IOException ex) {
-        fail("Unexpected exceptioni");
+        fail("Unexpected exception");
       }
       return null;
     }).when(objectLoader).copyTo(any(OutputStream.class));
@@ -89,8 +92,14 @@ public class CloneGitTest extends AbstractTestCase {
     cloneGit.setArguments(asList(packageName));
     cloneGit.execute();
 
-    final FileSet fileSet = cloneGit.getFileSet();
-    assertFalse(fileSet.getFiles().isEmpty());
+    cloneGit.stream().forEach(file -> {
+      try {
+        assertArrayEquals(fileContent, from(file.open()));
+      } catch (final IOException e) {
+        e.printStackTrace();
+        fail();
+      }
+    });
   }
 
 }
