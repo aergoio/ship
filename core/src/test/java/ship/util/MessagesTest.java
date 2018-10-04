@@ -22,4 +22,10 @@ public class MessagesTest extends AbstractTestCase {
     assertFalse(message.contains(messageId));
   }
 
+  @Test
+  public void shouldNotThrowException() {
+    final String message = Messages.bind(randomUUID().toString(), randomUUID());
+    logger.debug("Message: {}", message);
+    assertNotNull(message);
+  }
 }
