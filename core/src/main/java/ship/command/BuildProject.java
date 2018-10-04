@@ -86,6 +86,7 @@ public class BuildProject extends AbstractCommand {
   }
 
   protected BuildDetails build(final Project project, final boolean runTests) {
+    logger.debug("Starting build...");
     final Stopwatch stopwatch = Stopwatch.createStarted();
     final ProjectFile projectFile = project.getProjectFile();
     final String buildTarget = projectFile.getTarget();
@@ -95,7 +96,9 @@ public class BuildProject extends AbstractCommand {
       buildDetails.setError(bind(NL_4));
     } else {
       try {
-        buildDetails.copyFrom(builder.build(buildTarget));
+        final BuildDetails builderResult = builder.build(buildTarget);
+        logger.debug("Builder result: {}", builderResult);
+        buildDetails.copyFrom(builderResult);
         final byte[] bytes = buildDetails.getResult().getBytes();
         targetWriter.setContents(() -> new ByteArrayInputStream(bytes));
         targetWriter.execute();
@@ -103,6 +106,7 @@ public class BuildProject extends AbstractCommand {
           test(buildDetails);
         }
       } catch (final Throwable buildException) {
+        logger.debug("Unexpected exception:", buildException);
         buildDetails.setState(BUILD_FAIL);
         buildDetails.setError(buildException.getMessage());
       }
@@ -176,7 +180,9 @@ public class BuildProject extends AbstractCommand {
   }
 
   protected BuildDetails executeInCommandMode() {
+    logger.debug("Starting command mode...");
     final BuildDetails buildDetails = build(project, false);
+    logger.debug("Build result: {}", buildDetails);
     switch (buildDetails.getState()) {
       case SUCCESS:
         getPrinter().println(bind(NL_0));
