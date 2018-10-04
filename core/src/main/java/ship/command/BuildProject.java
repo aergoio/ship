@@ -6,18 +6,20 @@ package ship.command;
 
 import static hera.util.ExceptionUtils.buildExceptionMessage;
 import static hera.util.ValidationUtils.assertTrue;
-import static java.lang.System.currentTimeMillis;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static ship.build.web.model.BuildSummary.BUILD_FAIL;
 import static ship.build.web.model.BuildSummary.SUCCESS;
 import static ship.build.web.model.BuildSummary.TEST_FAIL;
 import static ship.util.Messages.bind;
 
+import com.google.common.base.Stopwatch;
 import hera.util.DangerousConsumer;
-import java.io.Writer;
-import java.nio.file.Files;
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 import ship.Builder;
 import ship.ProjectFile;
 import ship.build.ConsoleServer;
@@ -33,6 +35,7 @@ import ship.test.TestReportNode;
 import ship.util.FileWatcher;
 
 public class BuildProject extends AbstractCommand {
+
   protected static final String NL_0 = BuildProject.class.getName() + ".0";
   protected static final String NL_1 = BuildProject.class.getName() + ".1";
   protected static final String NL_2 = BuildProject.class.getName() + ".2";
@@ -47,7 +50,14 @@ public class BuildProject extends AbstractCommand {
 
   protected Project project;
 
+  @Getter
+  @Setter
+  protected WriteProjectTarget targetWriter = new WriteProjectTarget();
+
   protected List<DangerousConsumer<BuildDetails>> buildListeners = new ArrayList<>();
+
+  @Getter
+  protected BuildDetails lastBuildResult;
 
   protected FileWatcher createFileWatcher() {
     final FileWatcher fileWatcher = new FileWatcher(project.getPath().toFile());
@@ -76,19 +86,19 @@ public class BuildProject extends AbstractCommand {
   }
 
   protected BuildDetails build(final Project project, final boolean runTests) {
+    final Stopwatch stopwatch = Stopwatch.createStarted();
     final ProjectFile projectFile = project.getProjectFile();
     final String buildTarget = projectFile.getTarget();
     final BuildDetails buildDetails = new BuildDetails();
-    final long startTimestamp = currentTimeMillis();
     if (null == buildTarget) {
       buildDetails.setState(BUILD_FAIL);
+      buildDetails.setError(bind(NL_4));
     } else {
       try {
         buildDetails.copyFrom(builder.build(buildTarget));
-        final String contents = buildDetails.getResult();
-        try (final Writer out = Files.newBufferedWriter(project.getPath().resolve(buildTarget))) {
-          out.write(contents);
-        }
+        final byte[] bytes = buildDetails.getResult().getBytes();
+        targetWriter.setContents(() -> new ByteArrayInputStream(bytes));
+        targetWriter.execute();
         if (runTests) {
           test(buildDetails);
         }
@@ -97,9 +107,12 @@ public class BuildProject extends AbstractCommand {
         buildDetails.setError(buildException.getMessage());
       }
     }
-    final long endTimestamp = currentTimeMillis();
-    buildDetails.setElapsedTime(endTimestamp - startTimestamp);
+    buildDetails.setElapsedTime(stopwatch.stop().elapsed(MILLISECONDS));
+    fireEvent(buildDetails);
+    return buildDetails;
+  }
 
+  protected void fireEvent(final BuildDetails buildDetails) {
     this.buildListeners.forEach(listener -> {
       try {
         listener.accept(buildDetails);
@@ -107,7 +120,6 @@ public class BuildProject extends AbstractCommand {
         logger.trace("Listener {} throws exception", listener, ex);
       }
     });
-    return buildDetails;
   }
 
   protected void startWebServer(final int port) {
@@ -145,11 +157,12 @@ public class BuildProject extends AbstractCommand {
 
     final ProjectFile projectFile = readProject();
     project = new Project(".", projectFile);
+    targetWriter.setProject(project);
     final ResourceManager resourceManager = new ResourceManager(project);
     builder = new Builder(resourceManager);
     switch (mode) {
       case COMMAND_MODE:
-        executeInCommandMode();
+        this.lastBuildResult = executeInCommandMode();
         break;
       case WEB_MODE:
         executeInWebMode(port);
@@ -162,7 +175,7 @@ public class BuildProject extends AbstractCommand {
     }
   }
 
-  protected void executeInCommandMode() {
+  protected BuildDetails executeInCommandMode() {
     final BuildDetails buildDetails = build(project, false);
     switch (buildDetails.getState()) {
       case SUCCESS:
@@ -179,6 +192,7 @@ public class BuildProject extends AbstractCommand {
       default:
         throw new IllegalStateException();
     }
+    return buildDetails;
   }
 
   protected void executeInWebMode(final int port) {
