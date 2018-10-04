@@ -4,7 +4,6 @@
 
 package ship.util;
 
-import static hera.util.ArrayUtils.isEmpty;
 import static hera.util.ObjectUtils.nvl;
 import static hera.util.ThreadUtils.trySleep;
 import static java.util.Arrays.asList;
@@ -15,6 +14,7 @@ import static java.util.stream.Collectors.toSet;
 
 import hera.server.ServerEvent;
 import hera.server.ThreadServer;
+import hera.util.Pair;
 import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
@@ -143,21 +143,13 @@ public class FileWatcher extends ThreadServer implements Runnable {
     final Set<File> any = asList(added, removed, changed).stream()
         .flatMap(Collection::stream).collect(toSet());
 
-    if (!added.isEmpty()) {
-      logger.info("{} added", added);
-      fireEvent(new ServerEvent(this, FILE_ADDED, unmodifiableCollection(added)));
-    }
-    if (!removed.isEmpty()) {
-      logger.info("{} removed", removed);
-      fireEvent(new ServerEvent(this, FILE_REMOVED, unmodifiableCollection(removed)));
-    }
-    if (!changed.isEmpty()) {
-      logger.info("{} changed", changed);
-      fireEvent(new ServerEvent(this, FILE_CHANGED, unmodifiableCollection(changed)));
-    }
-    if (!any.isEmpty()) {
-      logger.info("{} detected", changed);
-      fireEvent(new ServerEvent(this, ANY_CHANGED, unmodifiableCollection(any)));
-    }
+    asList(
+        new Pair<>(added, FILE_ADDED),
+        new Pair<>(removed, FILE_REMOVED),
+        new Pair<>(changed, FILE_CHANGED),
+        new Pair<>(any, ANY_CHANGED)
+    ).stream().filter(pair -> !pair.v1.isEmpty())
+        .map(pair -> new ServerEvent(this, pair.v2, unmodifiableCollection(pair.v1)))
+        .forEach(this::fireEvent);
   }
 }
