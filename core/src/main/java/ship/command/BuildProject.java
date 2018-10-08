@@ -4,6 +4,7 @@
 
 package ship.command;
 
+import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import java.util.function.Function;
 import lombok.Getter;

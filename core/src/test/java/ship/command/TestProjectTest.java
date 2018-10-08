@@ -6,7 +6,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import hera.util.IoUtils;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import org.junit.Test;
 import ship.AbstractTestCase;
 import ship.Builder;
@@ -19,7 +21,9 @@ public class TestProjectTest extends AbstractTestCase {
     // Given
     final Builder builder = mock(Builder.class);
     final BuildDetails buildDetails = new BuildDetails();
-    buildDetails.setResult("");
+    try(final InputStreamReader reader = new InputStreamReader(openWithExtensionAs("lua"))) {
+      buildDetails.setResult(IoUtils.from(reader));
+    }
     final ProjectFile projectFile = new ProjectFile();
     projectFile.setTests(asList(randomUUID().toString()));
     final TestProject testProject = new TestProject() {

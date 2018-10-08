@@ -82,6 +82,7 @@ public class TestProject extends AbstractCommand {
   };
 
   protected void executeTest(final Builder builder, final String testPath) {
+    logger.trace("Builder: {}, Test path: {}", builder, testPath);
     final TestResultCollector testReporter = AthenaContext.getContext().getTestReporter();
     final BuildDetails buildDetails = builder.build(testPath);
     final LuaSource executable = new LuaSource(buildDetails.getResult());
@@ -105,7 +106,6 @@ public class TestProject extends AbstractCommand {
           executable.toString(lineNumber - 5, lineNumber + 5, singletonList(lineNumber)));
     }
     testReporter.end();
-
   }
 
   @Override
