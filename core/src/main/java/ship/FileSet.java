@@ -5,6 +5,7 @@
 package ship;
 
 import static com.google.common.io.MoreFiles.createParentDirectories;
+import static java.nio.file.Files.newInputStream;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -36,7 +37,9 @@ public class FileSet {
    */
   public static FileSet from(final Path path) throws IOException {
     final FileSet fileSet = new FileSet();
-    rake(path, fileSet, path);
+    if (Files.exists(path)) {
+      rake(path, fileSet, path);
+    }
     return fileSet;
   }
 
@@ -51,19 +54,13 @@ public class FileSet {
    */
   public static void rake(final Path base, final FileSet fileSet, final Path path)
       throws IOException {
-    if (!Files.exists(path)) {
-      return;
-    }
     if (Files.isDirectory(path)) {
       for (final Path p : Files.list(path).collect(toList())) {
         rake(base, fileSet, p);
       }
     } else {
-      final FileContent fileContent = new FileContent(
-          base.relativize(path).toString(),
-          () -> Files.newInputStream(path)
-      );
-      fileSet.add(fileContent);
+      final String relativePath = base.relativize(path).toString();
+      fileSet.add(new FileContent(relativePath, () -> newInputStream(path)));
     }
   }
 
@@ -111,8 +108,6 @@ public class FileSet {
       createParentDirectories(filePath);
       try (final InputStream in = fileContent.open()) {
         Files.write(filePath, IoUtils.from(in));
-      } catch (final IOException e) {
-        throw new IllegalStateException(e);
       }
     }
   }
