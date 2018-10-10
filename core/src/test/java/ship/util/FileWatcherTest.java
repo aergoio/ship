@@ -1,7 +1,6 @@
 package ship.util;
 
 import static org.mockito.Mockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.io.File;
 import java.util.HashSet;

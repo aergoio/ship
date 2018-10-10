@@ -15,7 +15,6 @@ import ship.CommandFactory;
 import ship.exception.CommandException;
 import ship.util.AnsiMessagePrinter;
 import ship.util.MessagePrinter;
-import ship.util.Messages;
 
 @RequiredArgsConstructor
 public class ShipLauncher {
@@ -24,7 +23,6 @@ public class ShipLauncher {
   protected static final String NL_0 = ShipLauncher.class.getName() + ".0";
   protected static final String NL_1 = ShipLauncher.class.getName() + ".1";
   protected static final String NL_2 = ShipLauncher.class.getName() + ".2";
-
 
   /**
    * ship's entry point.
@@ -82,18 +80,28 @@ public class ShipLauncher {
       command.execute();
       exit(0);
     } catch (final CommandException throwable) {
-      final String userMessage = throwable.getUserMessage();
-      if (null != userMessage) {
-        messagePrinter.println(bind(NL_1, userMessage));
-        logger.error("Fail to execute {}", command, throwable);
-      } else {
-        logger.error("{}", throwable.getMessage(), throwable);
-      }
-      exit(-1);
+      handleCommandException(command, throwable);
     } catch (final Throwable throwable) {
-      System.err.println(bind(NL_2));
-      throwable.printStackTrace();
-      exit(-1);
+      handleThrowable(command, throwable);
     }
+  }
+
+  protected void handleCommandException(
+      final Command command,
+      final CommandException commandException) {
+    final String userMessage = commandException.getUserMessage();
+    if (null != userMessage) {
+      messagePrinter.println(bind(NL_1, userMessage));
+      logger.error("Fail to execute {}", command, commandException);
+    } else {
+      logger.error("{}", commandException.getMessage(), commandException);
+    }
+    exit(-1);
+  }
+
+  protected void handleThrowable(final Command command, final Throwable throwable) {
+    System.err.println(bind(NL_2));
+    throwable.printStackTrace();
+    exit(-1);
   }
 }

@@ -1,7 +1,7 @@
 package ship.util;
 
 import static java.util.UUID.randomUUID;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import org.junit.Test;

@@ -10,9 +10,10 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.FileNotFoundException;
 import java.nio.file.NoSuchFileException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 import lombok.Getter;
@@ -69,9 +70,9 @@ public class Concatenator {
    * @return concatenated result
    */
   public BuildDetails visit(final Resource resource) {
-    final BuildDependency dependencyRoot = new BuildDependency();
+    final BuildDependency dependencyRoot = new BuildDependency(null);
     dependencyRoot.setName(resource.getLocation());
-    String contents = visit(resource, dependencyRoot);
+    final String contents = visit(resource, dependencyRoot);
 
     final BuildDetails buildDetails = new BuildDetails();
     buildDetails.setResult(contents);
@@ -94,22 +95,18 @@ public class Concatenator {
     }
 
     final StringJoiner contentWriter = new StringJoiner("\n");
-
     try {
       callStack.enter(resource);
       final Concatenator next = resource.adapt(ResourceManager.class)
           .map(newResourceManager -> new Concatenator(newResourceManager, visitedResources))
           .orElse(this);
       logger.debug("Resource manager changed: {} -> {}", this, next);
-      final ResourceManager nextResourceManager = next.getResourceManager();
-      final List<Resource> dependencies = resource.getDependencies(nextResourceManager);
-      logger.debug("Dependencies of {}: {}", resource, dependencies);
-      for (final Resource dependency : dependencies) {
-        final BuildDependency childDependency = new BuildDependency();
-        childDependency.setName(dependency.getLocation());
-        ofNullable(next.visit(dependency, childDependency)).ifPresent(contentWriter::add);
+      visitDependencies(next, resource).forEach(childDependency -> {
+        final Resource parent = childDependency.getParent();
+        ofNullable(next.visit(parent, childDependency)).ifPresent(contentWriter::add);
         resourceDependency.add(childDependency);
-      }
+      });
+
       resource.adapt(Source.class).map(next::visit).ifPresent(contentWriter::add);
       callStack.exit(resource);
       visitedResources.add(resource);
@@ -119,5 +116,19 @@ public class Concatenator {
     } catch (final Throwable ex) {
       throw new BuildException(ex);
     }
+  }
+  
+  protected Collection<BuildDependency> visitDependencies(final Concatenator next,
+      final Resource resource) throws Exception {
+    final ResourceManager nextResourceManager = next.getResourceManager();
+    final List<Resource> dependencies = resource.getDependencies(nextResourceManager);
+    logger.debug("Dependencies of {}: {}", resource, dependencies);
+    final List<BuildDependency> resourceDependency = new ArrayList<>();
+    for (final Resource dependency : dependencies) {
+      final BuildDependency childDependency = new BuildDependency(dependency);
+      childDependency.setName(dependency.getLocation());
+      resourceDependency.add(childDependency);
+    }
+    return resourceDependency;
   }
 }

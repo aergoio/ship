@@ -18,7 +18,6 @@ import ship.AbstractTestCase;
 import ship.Command;
 import ship.CommandFactory;
 import ship.exception.BuildException;
-import ship.exception.CommandException;
 import ship.util.DummyMessagePrinter;
 
 public class ShipLauncherTest extends AbstractTestCase {

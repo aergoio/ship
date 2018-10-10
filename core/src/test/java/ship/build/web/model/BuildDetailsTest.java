@@ -1,7 +1,9 @@
 package ship.build.web.model;
 
 import static java.util.UUID.randomUUID;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -21,10 +23,9 @@ public class BuildDetailsTest extends AbstractTestCase {
     source.setState(new Random().nextInt());
     source.setSequence(new Random().nextInt());
     source.setResult(randomUUID().toString());
-    source.setDependencies(new BuildDependency());
+    source.setDependencies(new BuildDependency(null));
     source.setUnitTestReport(new ArrayList<>());
   }
-
 
   @Test
   public void testGetSummary() {

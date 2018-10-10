@@ -5,7 +5,6 @@ import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.eclipse.jgit.lib.Constants.HEAD;
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -35,8 +34,6 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import ship.AbstractTestCase;
-import ship.FileContent;
-import ship.FileSet;
 
 public class CloneGitTest extends AbstractTestCase {
 

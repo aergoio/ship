@@ -2,7 +2,8 @@ package ship;
 
 import static hera.util.IoUtils.from;
 import static java.util.UUID.randomUUID;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

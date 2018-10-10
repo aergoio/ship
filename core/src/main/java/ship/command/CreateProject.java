@@ -8,7 +8,6 @@ import static hera.util.FilepathUtils.getFilename;
 import static java.util.Collections.singletonList;
 import static ship.util.Messages.bind;
 
-import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import hera.util.IoUtils;
 import java.io.InputStream;
