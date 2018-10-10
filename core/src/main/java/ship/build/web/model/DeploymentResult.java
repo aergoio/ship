@@ -4,7 +4,7 @@
 
 package ship.build.web.model;
 
-import hera.api.model.ContractInferface;
+import hera.api.model.ContractInterface;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,7 +19,7 @@ public class DeploymentResult {
 
   @Getter
   @Setter
-  protected ContractInferface contractInterface;
+  protected ContractInterface contractInterface;
 
   public String toString() {
     return "Transaction[" + getEncodedContractTransactionHash() + "]";

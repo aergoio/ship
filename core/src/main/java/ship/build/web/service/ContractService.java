@@ -19,7 +19,7 @@ import hera.api.model.AccountAddress;
 import hera.api.model.Authentication;
 import hera.api.model.ContractAddress;
 import hera.api.model.ContractFunction;
-import hera.api.model.ContractInferface;
+import hera.api.model.ContractInterface;
 import hera.api.model.ContractResult;
 import hera.api.model.ContractTxHash;
 import hera.api.model.ContractTxReceipt;
@@ -71,6 +71,7 @@ public class ContractService extends AbstractService {
   protected final Map<String, DeploymentResult> encodedContractTxHash2contractAddresses =
       new HashMap<>();
 
+  @Setter
   protected ResourcePool<AergoApi> aergoPool;
 
   @RequiredArgsConstructor
@@ -162,11 +163,25 @@ public class ContractService extends AbstractService {
    *
    * @throws IOException Fail to execute
    */
-  public ExecutionResult execute(final String encodedContractTxHash, final String functionName,
-      final String... args) throws IOException {
+
+  public ExecutionResult tryExecute(final String encodedContractTxHash, final String functionName,
+      final String... args) {
     logger.trace("Encoded tx hash: {}", encodedContractTxHash);
     final Base58 encoded = new SimpleBase58(encodedContractTxHash);
     final ContractTxHash contractTxHash = new ContractTxHash(encoded);
+
+    final DeploymentResult deploymentResult =
+        encodedContractTxHash2contractAddresses.get(encodedContractTxHash);
+    final ContractFunction contractFunction = deploymentResult.getContractInterface()
+        .findFunctionByName(functionName)
+        .orElseThrow(() -> new ResourceNotFoundException("No " + functionName + " function."));
+    return execute(contractTxHash, contractFunction, args);
+  }
+
+  protected ExecutionResult execute(
+      final ContractTxHash contractTxHash,
+      final ContractFunction contractFunction,
+      final String... args) {
     ensureAccount();
     final AergoApi aergoApi = aergoPool.borrowResource();
     try {
@@ -175,11 +190,6 @@ public class ContractService extends AbstractService {
           contractOperation.getReceipt(contractTxHash);
       logger.debug("Receipt: {}", contractTxReceipt);
       final ContractAddress contractAddress = contractTxReceipt.getContractAddress();
-      final DeploymentResult deploymentResult =
-          encodedContractTxHash2contractAddresses.get(encodedContractTxHash);
-      final ContractFunction contractFunction = deploymentResult.getContractInterface()
-          .findFunctionByName(functionName)
-          .orElseThrow(() -> new ResourceNotFoundException("No " + functionName + " function."));
 
       logger.trace("Executing...");
       final ContractTxHash executionContractHash = contractOperation.execute(
@@ -255,7 +265,7 @@ public class ContractService extends AbstractService {
       logger.trace("Encoded tx hash: {}", encodedContractTxHash);
       final Base58 base58 = new SimpleBase58(encodedContractTxHash);
       final ContractTxHash contractTxHash = new ContractTxHash(base58);
-      final ContractInferface contractInferface = getInterface(contractTxHash);
+      final ContractInterface contractInferface = getInterface(contractTxHash);
       latest.setContractInterface(contractInferface);
     }
     return latest;
@@ -269,13 +279,13 @@ public class ContractService extends AbstractService {
    *
    * @return abi set
    */
-  public ContractInferface getInterface(final ContractTxHash contractTxHash) {
+  public ContractInterface getInterface(final ContractTxHash contractTxHash) {
     final AergoApi aergoApi = aergoPool.borrowResource();
     try {
       final ContractOperation contractOperation = aergoApi.getContractOperation();
       ContractTxReceipt receipt = contractOperation.getReceipt(contractTxHash);
       final ContractAddress address = receipt.getContractAddress();
-      final ContractInferface contractInferface = contractOperation.getContractInterface(address);
+      final ContractInterface contractInferface = contractOperation.getContractInterface(address);
       if (null == contractInferface) {
         new ResourceNotFoundException(bind(NL_0, contractTxHash));
       }

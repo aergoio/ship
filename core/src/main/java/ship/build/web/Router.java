@@ -13,7 +13,6 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import org.slf4j.Logger;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -96,7 +95,7 @@ public class Router {
       @PathVariable("function") final String functionName,
       @RequestBody final ContractInput contractInput) throws IOException {
     final String[] arguments = contractInput.getArguments();
-    return contractService.execute(contractTransactionHash, functionName, arguments);
+    return contractService.tryExecute(contractTransactionHash, functionName, arguments);
   }
 
   /**
