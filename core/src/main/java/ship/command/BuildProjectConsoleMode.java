@@ -5,15 +5,12 @@ import static ship.build.web.model.BuildSummary.SUCCESS;
 import static ship.build.web.model.BuildSummary.TEST_FAIL;
 
 import hera.util.DangerousConsumer;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import ship.Builder;
 import ship.build.ConsoleServer;
 import ship.build.Resource;
 import ship.build.ResourceChangeEvent;
-import ship.build.ResourceManager;
 import ship.build.res.BuildResource;
 import ship.build.res.PackageResource;
 import ship.build.res.Project;
@@ -23,7 +20,7 @@ import ship.util.FileWatcher;
 
 public class BuildProjectConsoleMode extends BuildProjectCommandMode {
 
-  protected List<DangerousConsumer<BuildDetails>> buildListeners = new ArrayList<>();
+  protected final List<DangerousConsumer<BuildDetails>> buildListeners = new ArrayList<>();
 
   @Override
   protected BuildDetails build(final Project project) {
@@ -98,6 +95,4 @@ public class BuildProjectConsoleMode extends BuildProjectCommandMode {
       }
     });
   }
-
-
 }
