@@ -2,7 +2,6 @@ package ship.build.web.service;
 
 import static hera.util.Base58Utils.encodeWithCheck;
 import static java.util.Arrays.asList;
-import static java.util.Collections.EMPTY_LIST;
 import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,7 +26,7 @@ import hera.api.model.ContractTxReceipt;
 import hera.util.Pair;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.util.ArrayList;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -94,7 +93,7 @@ public class ContractServiceTest extends AbstractTestCase {
     contractInterface = new ContractInterface();
     contractFunction = new ContractFunction();
     contractFunction.setName(randomUUID().toString());
-    contractFunction.setArgumentNames(EMPTY_LIST);
+    contractFunction.setArgumentNames(new ArrayList<>());
     contractInterface.setFunctions(asList(contractFunction));
 
     contractService = new ContractService();
