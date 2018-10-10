@@ -15,5 +15,5 @@ public class ContractInput {
 
   @Getter
   @Setter
-  protected String[] arguments;
+  protected String[] arguments = new String[0];
 }

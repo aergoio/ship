@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -46,12 +47,15 @@ public class Router {
   protected final transient Logger logger = getLogger(getClass());
 
   @Inject
+  @Setter
   protected BuildService buildService;
 
   @Inject
+  @Setter
   protected ContractService contractService;
 
   @Inject
+  @Setter
   protected LiveUpdateService liveUpdateService;
 
   @PostConstruct
