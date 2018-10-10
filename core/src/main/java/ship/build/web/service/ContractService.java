@@ -265,8 +265,8 @@ public class ContractService extends AbstractService {
       logger.trace("Encoded tx hash: {}", encodedContractTxHash);
       final Base58 base58 = new SimpleBase58(encodedContractTxHash);
       final ContractTxHash contractTxHash = new ContractTxHash(base58);
-      final ContractInterface contractInferface = getInterface(contractTxHash);
-      latest.setContractInterface(contractInferface);
+      final ContractInterface contractInterface = getInterface(contractTxHash);
+      latest.setContractInterface(contractInterface);
     }
     return latest;
   }
@@ -285,11 +285,11 @@ public class ContractService extends AbstractService {
       final ContractOperation contractOperation = aergoApi.getContractOperation();
       ContractTxReceipt receipt = contractOperation.getReceipt(contractTxHash);
       final ContractAddress address = receipt.getContractAddress();
-      final ContractInterface contractInferface = contractOperation.getContractInterface(address);
-      if (null == contractInferface) {
-        new ResourceNotFoundException(bind(NL_0, contractTxHash));
+      final ContractInterface contractInterface = contractOperation.getContractInterface(address);
+      if (null == contractInterface) {
+        throw new ResourceNotFoundException(bind(NL_0, contractTxHash));
       }
-      return contractInferface;
+      return contractInterface;
     } finally {
       aergoPool.returnResource(aergoApi);
     }
