@@ -118,34 +118,26 @@ public class ResourceManager implements ServerListener {
       return;
     }
 
-    final int eventType = event.getType();
-    logger.trace("Event type: {}", eventType);
-    switch (eventType) {
-      case FileWatcher.ANY_CHANGED:
-        final Collection<File> files = nvl((Collection<File>) event.getNewData(), EMPTY_LIST);
-        final Optional<Resource> cachedResourceOpt = files.stream().map(file -> {
-          final String path = getCanonicalForm(file.getAbsolutePath());
-          final String projectPath =
-              getCanonicalForm(project.getPath().toAbsolutePath().toString());
-          final Path relativePath =
-              Paths.get(projectPath).relativize(Paths.get(path));
-          logger.trace("Project path: {}, Path: {}, Relative path: {}",
-              projectPath, path, relativePath);
-          final String relativePathStr = relativePath.toString();
-          logger.debug("Relative path: {}", relativePath);
+    final Collection<File> files = nvl((Collection<File>) event.getNewData(), EMPTY_LIST);
+    final Optional<Resource> cachedResourceOpt = files.stream().map(file -> {
+      final String path = getCanonicalForm(file.getAbsolutePath());
+      final String projectPath =
+          getCanonicalForm(project.getPath().toAbsolutePath().toString());
+      final Path relativePath =
+          Paths.get(projectPath).relativize(Paths.get(path));
+      logger.trace("Project path: {}, Path: {}, Relative path: {}",
+          projectPath, path, relativePath);
+      final String relativePathStr = relativePath.toString();
+      logger.debug("Relative path: {}", relativePath);
 
-          final String canonicalPath = getCanonicalForm(relativePathStr);
-          logger.trace("Project relative path: {}", canonicalPath);
-          return cache.get(canonicalPath);
-        }).filter(Objects::nonNull).findFirst();
-        if (cachedResourceOpt.isPresent()) {
-          final Resource cached = cachedResourceOpt.get();
-          logger.info("{} changed: {}", cached, event.getType());
-          fireEvent(new ResourceChangeEvent(cached));
-        }
-        break;
-      default:
-        break;
+      final String canonicalPath = getCanonicalForm(relativePathStr);
+      logger.trace("Project relative path: {}", canonicalPath);
+      return cache.get(canonicalPath);
+    }).filter(Objects::nonNull).findFirst();
+    if (cachedResourceOpt.isPresent()) {
+      final Resource cached = cachedResourceOpt.get();
+      logger.info("{} changed: {}", cached, event.getType());
+      fireEvent(new ResourceChangeEvent(cached));
     }
   }
 }
