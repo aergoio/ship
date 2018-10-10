@@ -71,11 +71,11 @@ public class ResourceManager implements ServerListener {
   }
 
   /**
-   * Return resouce for {@code base}.
+   * Return resource for {@code base}.
    *
-   * @param path resoruce base
+   * @param path resource base
    *
-   * @return resoruce for base
+   * @return resource for base
    */
   public synchronized Resource getResource(final String path) {
     logger.trace("Path: {}", path);
@@ -86,24 +86,38 @@ public class ResourceManager implements ServerListener {
     if (null != cached) {
       return cached;
     }
-    Resource created = null;
-    if (equal(canonicalPath, getCanonicalForm(projectFile.getTarget()))) {
-      created = new BuildResource(project, canonicalPath);
-    } else {
-      if (nvl(projectFile.getTests(), Collections.<String>emptyList())
-          .stream().map(FilepathUtils::getCanonicalForm).anyMatch(canonicalPath::equals)) {
-        created = new TestResource(project, canonicalPath);
-      } else {
-        if (canonicalPath.endsWith(".lua")) {
-          created = new Source(project, canonicalPath);
-        } else {
-          created = new Resource(project, canonicalPath);
-        }
-      }
-    }
+    final Resource created = create(canonicalPath);
     cache.put(canonicalPath, created);
     logger.debug("{} added", canonicalPath);
     return created;
+  }
+
+  protected boolean isTarget(final String canonicalPath) {
+    final ProjectFile projectFile = project.getProjectFile();
+    return equal(canonicalPath, getCanonicalForm(projectFile.getTarget()));
+  }
+
+  protected boolean isTest(final String canonicalPath) {
+    final ProjectFile projectFile = project.getProjectFile();
+    return nvl(projectFile.getTests(), Collections.<String>emptyList())
+        .stream().map(FilepathUtils::getCanonicalForm).anyMatch(canonicalPath::equals);
+  }
+
+  protected Resource create(final String canonicalPath) {
+    if (isTarget(canonicalPath)) {
+      return new BuildResource(project, canonicalPath);
+    } else {
+      if (isTest(canonicalPath)) {
+        return new TestResource(project, canonicalPath);
+      } else {
+        if (canonicalPath.endsWith(".lua")) {
+          return new Source(project, canonicalPath);
+        } else {
+          return new Resource(project, canonicalPath);
+        }
+      }
+    }
+
   }
 
   public Resource getPackage(final String packageName) {
