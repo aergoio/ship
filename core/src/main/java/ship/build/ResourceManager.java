@@ -106,16 +106,12 @@ public class ResourceManager implements ServerListener {
   protected Resource create(final String canonicalPath) {
     if (isTarget(canonicalPath)) {
       return new BuildResource(project, canonicalPath);
+    } else if (isTest(canonicalPath)) {
+      return new TestResource(project, canonicalPath);
+    } else if (canonicalPath.endsWith(".lua")) {
+      return new Source(project, canonicalPath);
     } else {
-      if (isTest(canonicalPath)) {
-        return new TestResource(project, canonicalPath);
-      } else {
-        if (canonicalPath.endsWith(".lua")) {
-          return new Source(project, canonicalPath);
-        } else {
-          return new Resource(project, canonicalPath);
-        }
-      }
+      return new Resource(project, canonicalPath);
     }
 
   }
