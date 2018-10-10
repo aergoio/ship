@@ -5,6 +5,7 @@
 package ship.build.web;
 
 import static hera.util.ExceptionUtils.getStackTraceOf;
+import static hera.util.ObjectUtils.nvl;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -114,14 +115,11 @@ public class Router {
       @PathVariable("tx") final String contractTransactionHash,
       @PathVariable("function") final String functionName,
       @RequestParam(value = "arguments", required = false) final String[] arguments
-  ) throws IOException {
+  ) {
     logger.trace("Transaction Hash: {}, Function: {}, Arguments: {}",
         contractTransactionHash, functionName, arguments);
-    if (null == arguments) {
-      return contractService.query(contractTransactionHash, functionName, new String[0]);
-    } else {
-      return contractService.query(contractTransactionHash, functionName, arguments);
-    }
+    final String[] safeArguments = nvl(arguments, new String[0]);
+    return contractService.tryQuery(contractTransactionHash, functionName, safeArguments);
   }
 
   @ExceptionHandler(value = { HttpException.class })

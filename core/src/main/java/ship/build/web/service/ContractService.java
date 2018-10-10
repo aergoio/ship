@@ -218,11 +218,23 @@ public class ContractService extends AbstractService {
    *
    * @throws IOException Fail to query
    */
-  public QueryResult query(final String encodedContractTxHash, final String functionName,
+  public QueryResult tryQuery(final String encodedContractTxHash, final String functionName,
       final String... args) {
     logger.trace("Encoded tx hash: {}", encodedContractTxHash);
     final Base58 base58 = new SimpleBase58(encodedContractTxHash);
     final ContractTxHash contractTxHash = new ContractTxHash(base58);
+    final DeploymentResult deploymentResult =
+        encodedContractTxHash2contractAddresses.get(encodedContractTxHash);
+    final ContractFunction contractFunction = deploymentResult.getContractInterface()
+        .findFunctionByName(functionName)
+        .orElseThrow(() -> new ResourceNotFoundException("No " + functionName + " function."));
+    return query(contractTxHash, contractFunction, args);
+  }
+
+  protected QueryResult query(
+      final ContractTxHash contractTxHash,
+      final ContractFunction contractFunction,
+      final String... args) {
     ensureAccount();
     final AergoApi aergoApi = aergoPool.borrowResource();
     try {
@@ -231,11 +243,6 @@ public class ContractService extends AbstractService {
           contractOperation.getReceipt(contractTxHash);
       logger.debug("Receipt: {}", contractTxReceipt);
       final ContractAddress contractAddress = contractTxReceipt.getContractAddress();
-      final DeploymentResult deploymentResult =
-          encodedContractTxHash2contractAddresses.get(encodedContractTxHash);
-      final ContractFunction contractFunction = deploymentResult.getContractInterface()
-          .findFunctionByName(functionName)
-          .orElseThrow(() -> new ResourceNotFoundException("No " + functionName + " function."));
 
       logger.trace("Querying...");
       final ContractResult contractResult = contractOperation.query(

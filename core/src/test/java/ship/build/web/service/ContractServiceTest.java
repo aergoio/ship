@@ -17,8 +17,10 @@ import hera.api.ContractOperation;
 import hera.api.model.Account;
 import hera.api.model.AccountAddress;
 import hera.api.model.BytesValue;
+import hera.api.model.ContractAddress;
 import hera.api.model.ContractFunction;
 import hera.api.model.ContractInterface;
+import hera.api.model.ContractResult;
 import hera.api.model.ContractTxHash;
 import hera.api.model.ContractTxReceipt;
 import java.io.ByteArrayInputStream;
@@ -32,6 +34,7 @@ import ship.build.web.exception.ResourceNotFoundException;
 import ship.build.web.model.BuildDetails;
 import ship.build.web.model.DeploymentResult;
 import ship.build.web.model.ExecutionResult;
+import ship.build.web.model.QueryResult;
 import ship.test.LuaCompiler;
 import ship.util.ResourcePool;
 
@@ -125,4 +128,20 @@ public class ContractServiceTest extends AbstractTestCase {
     final ExecutionResult result = contractService.execute(contractTxHash, contractFunction);
     assertNotNull(result.getContractTransactionHash());
   }
+
+  @Test
+  public void testQuery() {
+    final ContractFunction contractFunction = new ContractFunction();
+    final ContractTxReceipt contractTxReceipt = new ContractTxReceipt();
+    final ContractResult contractResult = mock(ContractResult.class);
+    when(contractResult.getResultInRawBytes())
+        .thenReturn(BytesValue.of(randomUUID().toString().getBytes()));
+    when(contractOperation.getReceipt(contractTxHash)).thenReturn(contractTxReceipt);
+    when(contractOperation.query(any(ContractAddress.class), any(), any(Object[].class)))
+        .thenReturn(contractResult);
+
+    final QueryResult result = contractService.query(contractTxHash, contractFunction);
+    assertNotNull(result.getResult());
+  }
+  
 }
