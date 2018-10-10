@@ -18,10 +18,9 @@ install: true
 script:
   - ./build.sh deps
   - ./build.sh npm
-  - ./gradlew build test jacocoTestReport
+  - ./gradlew build test alljacoco
 
 after_success:
-  - ./gradlew alljacoco
   - bash <(curl -s https://codecov.io/bash)
 
 notifications:
