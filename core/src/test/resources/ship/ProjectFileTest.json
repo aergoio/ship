@@ -1,0 +1,9 @@
+{
+  "name": "aergoio/athena-343",
+  "source": "src/main/lua/main.lua",
+  "target": "athena-343.lua",
+  "tests": [
+    "src/test/lua/test-assert.lua",
+    "src/test/lua/test-runner.lua",
+    "src/test/lua/test-mockup.lua"]
+}
