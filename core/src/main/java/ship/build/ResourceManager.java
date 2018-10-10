@@ -8,6 +8,7 @@ import static hera.util.FilepathUtils.getCanonicalForm;
 import static hera.util.ObjectUtils.equal;
 import static hera.util.ObjectUtils.nvl;
 import static java.util.Arrays.asList;
+import static java.util.Collections.EMPTY_LIST;
 import static java.util.Collections.unmodifiableSet;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -121,7 +122,7 @@ public class ResourceManager implements ServerListener {
     logger.trace("Event type: {}", eventType);
     switch (eventType) {
       case FileWatcher.ANY_CHANGED:
-        final Collection<File> files = (Collection<File>) event.getNewData();
+        final Collection<File> files = nvl((Collection<File>) event.getNewData(), EMPTY_LIST);
         final Optional<Resource> cachedResourceOpt = files.stream().map(file -> {
           final String path = getCanonicalForm(file.getAbsolutePath());
           final String projectPath =
@@ -130,7 +131,10 @@ public class ResourceManager implements ServerListener {
               Paths.get(projectPath).relativize(Paths.get(path));
           logger.trace("Project path: {}, Path: {}, Relative path: {}",
               projectPath, path, relativePath);
-          final String canonicalPath = getCanonicalForm(relativePath.toString());
+          final String relativePathStr = relativePath.toString();
+          logger.debug("Relative path: {}", relativePath);
+
+          final String canonicalPath = getCanonicalForm(relativePathStr);
           logger.trace("Project relative path: {}", canonicalPath);
           return cache.get(canonicalPath);
         }).filter(Objects::nonNull).findFirst();
