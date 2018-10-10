@@ -173,7 +173,10 @@ end
 require "ship.test.Athena"
 
 local suite = TestSuite('my-suite')
-suite:add(TestCase('testcase', function()
+suite:add(TestCase('testcase1', function()
   assertEquals(3, min(3, 4))
+end))
+suite:add(TestCase('testcase2', function()
+  assertEquals(4, min(3, 4))
 end))
 suite:run()
