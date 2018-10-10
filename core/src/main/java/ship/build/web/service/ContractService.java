@@ -25,6 +25,7 @@ import hera.api.model.ContractTxHash;
 import hera.api.model.ContractTxReceipt;
 import hera.exception.RpcConnectionException;
 import hera.exception.RpcException;
+import hera.util.Pair;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -152,6 +153,20 @@ public class ContractService extends AbstractService {
     }
   }
 
+  protected Pair<ContractTxHash, ContractFunction> find(
+      final String encodedContractTxHash, final String functionName) {
+    logger.trace("Encoded tx hash: {}", encodedContractTxHash);
+    final Base58 encoded = new SimpleBase58(encodedContractTxHash);
+    final ContractTxHash contractTxHash = new ContractTxHash(encoded);
+
+    final DeploymentResult deploymentResult =
+        encodedContractTxHash2contractAddresses.get(encodedContractTxHash);
+    final ContractFunction contractFunction = deploymentResult.getContractInterface()
+        .findFunctionByName(functionName)
+        .orElseThrow(() -> new ResourceNotFoundException("No " + functionName + " function."));
+    return new Pair<>(contractTxHash, contractFunction);
+  }
+
   /**
    * Execute smart contract.
    *
@@ -163,19 +178,11 @@ public class ContractService extends AbstractService {
    *
    * @throws IOException Fail to execute
    */
-
   public ExecutionResult tryExecute(final String encodedContractTxHash, final String functionName,
       final String... args) {
     logger.trace("Encoded tx hash: {}", encodedContractTxHash);
-    final Base58 encoded = new SimpleBase58(encodedContractTxHash);
-    final ContractTxHash contractTxHash = new ContractTxHash(encoded);
-
-    final DeploymentResult deploymentResult =
-        encodedContractTxHash2contractAddresses.get(encodedContractTxHash);
-    final ContractFunction contractFunction = deploymentResult.getContractInterface()
-        .findFunctionByName(functionName)
-        .orElseThrow(() -> new ResourceNotFoundException("No " + functionName + " function."));
-    return execute(contractTxHash, contractFunction, args);
+    final Pair<ContractTxHash, ContractFunction> pair = find(encodedContractTxHash, functionName);
+    return execute(pair.v1, pair.v2, args);
   }
 
   protected ExecutionResult execute(
@@ -221,14 +228,8 @@ public class ContractService extends AbstractService {
   public QueryResult tryQuery(final String encodedContractTxHash, final String functionName,
       final String... args) {
     logger.trace("Encoded tx hash: {}", encodedContractTxHash);
-    final Base58 base58 = new SimpleBase58(encodedContractTxHash);
-    final ContractTxHash contractTxHash = new ContractTxHash(base58);
-    final DeploymentResult deploymentResult =
-        encodedContractTxHash2contractAddresses.get(encodedContractTxHash);
-    final ContractFunction contractFunction = deploymentResult.getContractInterface()
-        .findFunctionByName(functionName)
-        .orElseThrow(() -> new ResourceNotFoundException("No " + functionName + " function."));
-    return query(contractTxHash, contractFunction, args);
+    final Pair<ContractTxHash, ContractFunction> pair = find(encodedContractTxHash, functionName);
+    return query(pair.v1, pair.v2, args);
   }
 
   protected QueryResult query(

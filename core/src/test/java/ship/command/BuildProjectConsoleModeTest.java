@@ -3,7 +3,6 @@ package ship.command;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
