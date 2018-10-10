@@ -8,6 +8,8 @@ import static hera.util.FilepathUtils.append;
 import static hera.util.FilepathUtils.getParentPath;
 import static java.lang.Character.isWhitespace;
 import static java.util.Collections.emptyList;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.BufferedReader;
@@ -16,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.StringJoiner;
 import org.slf4j.Logger;
 import ship.build.Resource;
@@ -27,17 +30,22 @@ public class Source extends File {
 
   protected static final String[] QUOTES = new String[] { "\"", "'" };
 
-  protected static String fromImport(final String line) {
+  protected static Optional<String> extractLiteralPart(final String line) {
     if (!line.startsWith(IMPORT_PREFIX) || !isWhitespace(line.charAt(IMPORT_PREFIX.length()))) {
-      return null;
+      return empty();
     }
-    final String literals = line.substring(IMPORT_PREFIX.length()).trim();
-    for (final String quote : QUOTES) {
-      if (literals.startsWith(quote) && literals.endsWith(quote)) {
-        return literals.substring(quote.length(), literals.length() - quote.length()).trim();
+    return of(line.substring(IMPORT_PREFIX.length()).trim());
+  }
+
+  protected static String fromImport(final String line) {
+    return extractLiteralPart(line).flatMap(literal -> {
+      for (final String quote : QUOTES) {
+        if (literal.startsWith(quote) && literal.endsWith(quote)) {
+          return of(literal.substring(quote.length(), literal.length() - quote.length()).trim());
+        }
       }
-    }
-    return null;
+      return empty();
+    }).orElse(null);
   }
 
   class BodyCollector {
