@@ -129,8 +129,7 @@ public class Router {
   @ExceptionHandler(value = { HttpException.class })
   protected ResponseEntity handleHttpException(final HttpException ex, final WebRequest request) {
     logger.warn("Unexpected exception:", ex);
-    final ServiceError serviceError = new ServiceError(ex.getMessage(), getStackTraceOf(ex));
-    return ResponseEntity.status(ex.getStatusCode()).body(serviceError);
+    return ResponseEntity.status(ex.getStatusCode()).body(handleThrowable(ex, request));
   }
 
   @ExceptionHandler(value = { Throwable.class })

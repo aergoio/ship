@@ -13,6 +13,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.WebRequest;
 import ship.AbstractTestCase;
 import ship.build.web.exception.HttpException;
@@ -90,7 +91,8 @@ public class RouterTest extends AbstractTestCase {
   public void testHandleHttpException() {
     final HttpException httpException = new HttpException(500);
     final WebRequest webRequest = mock(WebRequest.class);
-    assertNotNull(router.handleHttpException(httpException, webRequest));
+    final ResponseEntity responseEntity = router.handleHttpException(httpException, webRequest);
+    assertNotNull(responseEntity);
   }
 
   @Test
