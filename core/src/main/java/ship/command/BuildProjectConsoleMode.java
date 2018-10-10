@@ -22,6 +22,10 @@ public class BuildProjectConsoleMode extends BuildProjectCommandMode {
 
   protected final List<DangerousConsumer<BuildDetails>> buildListeners = new ArrayList<>();
 
+  public void addListener(final DangerousConsumer<BuildDetails> listener) {
+    this.buildListeners.add(listener);
+  }
+
   @Override
   protected BuildDetails build(final Project project) {
     final BuildDetails buildDetails = super.build(project);
@@ -33,7 +37,7 @@ public class BuildProjectConsoleMode extends BuildProjectCommandMode {
   protected void startConsoleServer() {
     final ConsoleServer consoleServer = new ConsoleServer();
     consoleServer.setPrinter(getPrinter());
-    buildListeners.add(consoleServer::process);
+    addListener(consoleServer::process);
     consoleServer.boot();
   }
 
