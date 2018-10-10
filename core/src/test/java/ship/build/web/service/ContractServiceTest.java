@@ -23,7 +23,6 @@ import hera.api.model.ContractInterface;
 import hera.api.model.ContractResult;
 import hera.api.model.ContractTxHash;
 import hera.api.model.ContractTxReceipt;
-import hera.util.Pair;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -129,40 +128,28 @@ public class ContractServiceTest extends AbstractTestCase {
   }
 
   @Test
-  @PrepareForTest(LuaCompiler.class)
-  public void testFind() throws Exception {
+  public void testTryExecute() throws Exception {
     when(contractOperation.deploy(any(AccountAddress.class), any())).thenReturn(contractTxHash);
-
-    // When
-    final BuildDetails buildDetails = new BuildDetails();
-    buildDetails.setResult(randomUUID().toString());
-    final DeploymentResult result = contractService.deploy(buildDetails);
-    result.setContractInterface(contractInterface);
-    final Pair<ContractTxHash, ContractFunction> pair =
-        contractService.find(contractTxHash.toString(), contractFunction.getName());
-    assertNotNull(pair);
-    assertNotNull(pair.v1);
-    assertNotNull(pair.v2);
-  }
-
-  @Test
-  public void testExecute() {
-    // Given
     final ContractTxHash executedContractTxHash =
         ContractTxHash.of(BytesValue.of(randomUUID().toString().getBytes()));
     when(contractOperation.execute(any(AccountAddress.class), any(), any(), any(Object[].class)))
         .thenReturn(executedContractTxHash);
 
     // When
-    final ExecutionResult result = contractService.execute(contractTxHash, contractFunction);
+    final BuildDetails buildDetails = new BuildDetails();
+    buildDetails.setResult(randomUUID().toString());
+    final DeploymentResult result = contractService.deploy(buildDetails);
+    result.setContractInterface(contractInterface);
+    final ExecutionResult executionResult =
+        contractService.tryExecute(contractTxHash.toString(), contractFunction.getName());
 
     // Then
-    assertNotNull(result.getContractTransactionHash());
+    assertNotNull(executionResult.getContractTransactionHash());
   }
 
   @Test
-  public void testQuery() {
-    // Given
+  public void testTryQuery() throws Exception {
+    when(contractOperation.deploy(any(AccountAddress.class), any())).thenReturn(contractTxHash);
     final ContractResult contractResult = mock(ContractResult.class);
     when(contractResult.getResultInRawBytes())
         .thenReturn(BytesValue.of(randomUUID().toString().getBytes()));
@@ -170,10 +157,14 @@ public class ContractServiceTest extends AbstractTestCase {
         .thenReturn(contractResult);
 
     // When
-    final QueryResult result = contractService.query(contractTxHash, contractFunction);
+    final BuildDetails buildDetails = new BuildDetails();
+    buildDetails.setResult(randomUUID().toString());
+    final DeploymentResult result = contractService.deploy(buildDetails);
+    result.setContractInterface(contractInterface);
+    final QueryResult queryResult =
+        contractService.tryQuery(contractTxHash.toString(), contractFunction.getName());
 
     // Then
-    assertNotNull(result.getResult());
+    assertNotNull(queryResult.getResult());
   }
-  
 }

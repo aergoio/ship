@@ -117,7 +117,7 @@ public class Concatenator {
       throw new BuildException(ex);
     }
   }
-  
+
   protected Collection<BuildDependency> visitDependencies(final Concatenator next,
       final Resource resource) throws Exception {
     final ResourceManager nextResourceManager = next.getResourceManager();
