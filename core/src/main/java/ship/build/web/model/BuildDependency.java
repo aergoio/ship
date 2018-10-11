@@ -1,5 +1,6 @@
 package ship.build.web.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -9,7 +10,9 @@ import ship.build.Resource;
 
 @RequiredArgsConstructor
 public class BuildDependency {
+
   @Getter
+  @JsonIgnore
   protected final Resource parent;
 
   @Getter

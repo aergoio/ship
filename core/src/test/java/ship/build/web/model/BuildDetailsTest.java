@@ -5,11 +5,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 import ship.AbstractTestCase;
+import ship.ProjectFile;
+import ship.build.Resource;
+import ship.build.res.Project;
 
 public class BuildDetailsTest extends AbstractTestCase {
 
@@ -49,6 +54,20 @@ public class BuildDetailsTest extends AbstractTestCase {
     assertEquals(source.getResult(), target.getResult());
     assertEquals(source.getDependencies(), target.getDependencies());
     assertEquals(source.getUnitTestReport(), target.getUnitTestReport());
+  }
+
+  @Test
+  public void testMarshall() throws JsonProcessingException {
+    final ProjectFile projectFile = new ProjectFile();
+    final Project project = new Project(randomUUID().toString(), projectFile);
+    final Resource parent = new Resource(project, randomUUID().toString());
+    final BuildDependency parentDependency = new BuildDependency(null);
+    final BuildDependency childDependency = new BuildDependency(parent);
+    parentDependency.add(childDependency);
+    final BuildDetails buildDetails = new BuildDetails();
+    buildDetails.setDependencies(parentDependency);
+
+    assertNotNull(new ObjectMapper().writeValueAsString(buildDetails));
   }
 
 }
