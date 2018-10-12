@@ -87,8 +87,8 @@ function execute-documentation() {
 
 function execute-assemble() {
   rm -rf $PROJECT_HOME/assembly/build/distributions
-  $PROJECT_HOME/gradlew --stop assemble
-  $PROJECT_HOME/gradlew --stop assemble && \
+  $PROJECT_HOME/gradlew --stop
+  $PROJECT_HOME/gradlew assemble && \
     (cd $PROJECT_HOME/assembly/build/distributions && tar -xvf *.tar && cd -)
 }
 
