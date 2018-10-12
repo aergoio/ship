@@ -4,6 +4,7 @@ import static hera.util.IoUtils.tryClose;
 
 import hera.api.AergoApi;
 import hera.client.AergoClient;
+import hera.client.AergoClientBuilder;
 import hera.strategy.ConnectStrategy;
 import hera.strategy.NettyConnectStrategy;
 import hera.util.Configuration;
@@ -31,7 +32,9 @@ public class AergoPool implements ResourcePool<AergoApi> {
 
   @Override
   public AergoApi borrowResource() {
-    return new AergoClient(connectStrategy.connect());
+    return new AergoClientBuilder()
+        .addStrategy(connectStrategy)
+        .build();
   }
 
   @Override

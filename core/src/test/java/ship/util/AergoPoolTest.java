@@ -9,6 +9,7 @@ import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 import hera.api.AergoApi;
 import hera.client.AergoClient;
+import hera.client.AergoClientBuilder;
 import hera.strategy.ConnectStrategy;
 import hera.strategy.NettyConnectStrategy;
 import io.grpc.ManagedChannel;
@@ -34,7 +35,7 @@ public class AergoPoolTest extends AbstractTestCase {
   }
 
   @Test
-  @PrepareForTest(AergoPool.class)
+  @PrepareForTest(AergoClientBuilder.class)
   @SuppressWarnings("unchecked")
   public void testReturnResource() throws Exception {
     // Given
