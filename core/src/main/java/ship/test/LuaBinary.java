@@ -4,17 +4,18 @@
 
 package ship.test;
 
-import hera.util.DangerousSupplier;
-import java.io.InputStream;
+import hera.api.encode.Base58WithCheckSum;
+import hera.api.encode.Encoded;
+import java.util.function.Supplier;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class LuaBinary {
   @Getter
-  protected final DangerousSupplier<InputStream> inputSupplier;
+  protected final Supplier<Base58WithCheckSum> inputSupplier;
 
-  public InputStream getPayload() throws Exception {
+  public Base58WithCheckSum getPayload() {
     return inputSupplier.get();
   }
 

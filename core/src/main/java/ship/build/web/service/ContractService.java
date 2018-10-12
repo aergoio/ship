@@ -4,9 +4,7 @@
 
 package ship.build.web.service;
 
-import static hera.util.HexUtils.dump;
-import static hera.util.IoUtils.from;
-import static java.util.Arrays.stream;
+import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static ship.util.Messages.bind;
 
@@ -14,10 +12,12 @@ import hera.api.AccountOperation;
 import hera.api.AergoApi;
 import hera.api.ContractOperation;
 import hera.api.encode.Base58;
+import hera.api.encode.Base58WithCheckSum;
 import hera.api.model.Account;
 import hera.api.model.AccountAddress;
 import hera.api.model.Authentication;
 import hera.api.model.ContractAddress;
+import hera.api.model.ContractCall;
 import hera.api.model.ContractFunction;
 import hera.api.model.ContractInterface;
 import hera.api.model.ContractResult;
@@ -131,10 +131,14 @@ public class ContractService extends AbstractService {
     try {
       final byte[] buildResult = buildDetails.getResult().getBytes();
       final LuaBinary luaBinary = luaCompiler.compile(() -> new ByteArrayInputStream(buildResult));
-      logger.trace("Successful to compile:\n{}", dump(from(luaBinary.getPayload())));
+      logger.trace("Successful to compile:\n{}", luaBinary.getPayload());
+      final AccountOperation accountOperation = aergoApi.getAccountOperation();
+      final Account syncedAccount = accountOperation.get(account);
       final ContractOperation contractOperation = aergoApi.getContractOperation();
+      final Base58WithCheckSum encodedPayload = () -> luaBinary.getPayload().getEncodedValue();
+
       final ContractTxHash contractTransactionHash =
-          contractOperation.deploy(account.getAddress(), () -> from(luaBinary.getPayload()));
+          contractOperation.deploy(null, account, syncedAccount.getNonce() + 1, encodedPayload);
       logger.debug("Contract transaction hash: {}", contractTransactionHash);
       final String encodedContractTxHash = contractTransactionHash.toString();
       final DeploymentResult deploymentResult = new DeploymentResult();
@@ -192,18 +196,22 @@ public class ContractService extends AbstractService {
     ensureAccount();
     final AergoApi aergoApi = aergoPool.borrowResource();
     try {
+      final AccountOperation accountOperation = aergoApi.getAccountOperation();
       final ContractOperation contractOperation = aergoApi.getContractOperation();
       final ContractTxReceipt contractTxReceipt =
           contractOperation.getReceipt(contractTxHash);
       logger.debug("Receipt: {}", contractTxReceipt);
+      final Account syncedAccount = accountOperation.get(account);
       final ContractAddress contractAddress = contractTxReceipt.getContractAddress();
 
       logger.trace("Executing...");
+      final ContractCall contractCall =
+          new ContractCall(contractAddress, contractFunction, asList(args));
       final ContractTxHash executionContractHash = contractOperation.execute(
-          account.getAddress(),
-          contractAddress,
-          contractFunction,
-          stream(args).toArray()
+          null,
+          syncedAccount,
+          syncedAccount.getNonce(),
+          contractCall
       );
 
       final ExecutionResult executionResult = new ExecutionResult();
@@ -245,11 +253,10 @@ public class ContractService extends AbstractService {
       logger.debug("Receipt: {}", contractTxReceipt);
       final ContractAddress contractAddress = contractTxReceipt.getContractAddress();
 
+      final ContractCall contractCall =
+          new ContractCall(contractAddress, contractFunction, asList(args));
       logger.trace("Querying...");
-      final ContractResult contractResult = contractOperation.query(
-          contractAddress,
-          contractFunction,
-          stream(args).toArray());
+      final ContractResult contractResult = contractOperation.query(contractCall);
       final String resultString = new String(contractResult.getResultInRawBytes().getValue());
       return new QueryResult(resultString);
     } finally {

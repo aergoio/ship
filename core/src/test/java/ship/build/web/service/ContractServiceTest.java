@@ -5,6 +5,7 @@ import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -17,7 +18,6 @@ import hera.api.ContractOperation;
 import hera.api.model.Account;
 import hera.api.model.AccountAddress;
 import hera.api.model.BytesValue;
-import hera.api.model.ContractAddress;
 import hera.api.model.ContractFunction;
 import hera.api.model.ContractInterface;
 import hera.api.model.ContractResult;
@@ -102,6 +102,7 @@ public class ContractServiceTest extends AbstractTestCase {
     when(aergoApi.getContractOperation()).thenReturn(contractOperation);
 
     when(accountOperation.create(anyString())).thenReturn(account);
+    when(accountOperation.get(account)).thenReturn(account);
     when(contractOperation.getReceipt(contractTxHash)).thenReturn(contractTxReceipt);
     when(contractOperation.getContractInterface(contractTxReceipt.getContractAddress())).thenReturn(contractInterface);
   }
@@ -109,7 +110,7 @@ public class ContractServiceTest extends AbstractTestCase {
   @Test
   public void testDeployAndGetLatestContractInformation() throws Exception {
     // Given
-    when(contractOperation.deploy(any(AccountAddress.class), any())).thenReturn(contractTxHash);
+    when(contractOperation.deploy(any(), any(Account.class), anyLong(), any())).thenReturn(contractTxHash);
 
     // When
     final BuildDetails buildDetails = new BuildDetails();
@@ -129,10 +130,11 @@ public class ContractServiceTest extends AbstractTestCase {
 
   @Test
   public void testTryExecute() throws Exception {
-    when(contractOperation.deploy(any(AccountAddress.class), any())).thenReturn(contractTxHash);
+    when(contractOperation.deploy(any(), any(Account.class), anyLong(), any()))
+        .thenReturn(contractTxHash);
     final ContractTxHash executedContractTxHash =
         ContractTxHash.of(BytesValue.of(randomUUID().toString().getBytes()));
-    when(contractOperation.execute(any(AccountAddress.class), any(), any(), any(Object[].class)))
+    when(contractOperation.execute(any(), any(Account.class), anyLong(), any()))
         .thenReturn(executedContractTxHash);
 
     // When
@@ -149,12 +151,11 @@ public class ContractServiceTest extends AbstractTestCase {
 
   @Test
   public void testTryQuery() throws Exception {
-    when(contractOperation.deploy(any(AccountAddress.class), any())).thenReturn(contractTxHash);
+    when(contractOperation.deploy(any(), any(Account.class), anyLong(), any())).thenReturn(contractTxHash);
     final ContractResult contractResult = mock(ContractResult.class);
     when(contractResult.getResultInRawBytes())
         .thenReturn(BytesValue.of(randomUUID().toString().getBytes()));
-    when(contractOperation.query(any(ContractAddress.class), any(), any(Object[].class)))
-        .thenReturn(contractResult);
+    when(contractOperation.query(any())).thenReturn(contractResult);
 
     // When
     final BuildDetails buildDetails = new BuildDetails();
