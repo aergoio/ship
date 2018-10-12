@@ -62,6 +62,7 @@ function execute-npm() {
   rm -rf $PUBLIC_DIR
   mkdir -p $PUBLIC_DIR
   cp -r $PROJECT_HOME/web/dist/* $PUBLIC_DIR
+  cd -
 }
 function execute-gradle() {
   $PROJECT_HOME/gradlew clean build test alljacoco
