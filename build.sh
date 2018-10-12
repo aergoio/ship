@@ -12,9 +12,7 @@ if [ -z "$PROJECT_HOME" ];then
     fi
   done
   
-  cd $(dirname $PRG)
-  export PROJECT_HOME=`pwd`
-  cd -&>/dev/null
+  cd $(dirname $PRG) && ( export PROJECT_HOME=`pwd` ; cd -&>/dev/null )
 fi
 
 ################################################################################
@@ -48,10 +46,8 @@ function install-deps() {
   WORKSPACE="$BUILD_WORKSPACE/deps"
   rm -rf $WORKSPACE
   mkdir -p $WORKSPACE
-  cd $WORKSPACE
-  git clone --recurse-submodule https://github.com/aergoio/heraj.git
-  cd heraj
-  ./gradlew install
+  cd $WORKSPACE && ( git clone --recurse-submodule https://github.com/aergoio/heraj.git ; cd -&>/dev/null )
+  cd $WORKSPACE/heraj && ( ./gradlew install ; cd -&>/dev/null )
 }
 
 function execute-npm() {
@@ -62,7 +58,7 @@ function execute-npm() {
   rm -rf $PUBLIC_DIR
   mkdir -p $PUBLIC_DIR
   cp -r $PROJECT_HOME/web/dist/* $PUBLIC_DIR
-  cd -
+  cd -&>/dev/null
 }
 function execute-gradle() {
   $PROJECT_HOME/gradlew clean build test alljacoco
@@ -89,7 +85,7 @@ function execute-assemble() {
   rm -rf $PROJECT_HOME/assembly/build/distributions
   $PROJECT_HOME/gradlew --stop
   $PROJECT_HOME/gradlew assemble && \
-    (cd $PROJECT_HOME/assembly/build/distributions && tar -xvf *.tar && cd -)
+    ( cd $PROJECT_HOME/assembly/build/distributions && tar -xvf *.tar ; cd -&>/dev/null )
 }
 
 
