@@ -12,7 +12,7 @@ if [ -z "$PROJECT_HOME" ];then
     fi
   done
   
-  cd $(dirname $PRG) && ( export PROJECT_HOME=`pwd` ; cd -&>/dev/null )
+  cd $(dirname $PRG) && export PROJECT_HOME=`pwd` ; cd -&>/dev/null
 fi
 
 ################################################################################
@@ -46,8 +46,8 @@ function install-deps() {
   WORKSPACE="$BUILD_WORKSPACE/deps"
   rm -rf $WORKSPACE
   mkdir -p $WORKSPACE
-  cd $WORKSPACE && ( git clone --recurse-submodule https://github.com/aergoio/heraj.git ; cd -&>/dev/null )
-  cd $WORKSPACE/heraj && ( ./gradlew install ; cd -&>/dev/null )
+  (cd $WORKSPACE && git clone --recurse-submodule https://github.com/aergoio/heraj.git)
+  (cd $WORKSPACE/heraj && ./gradlew install)
 }
 
 function execute-npm() {
