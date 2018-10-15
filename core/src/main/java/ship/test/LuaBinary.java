@@ -5,7 +5,6 @@
 package ship.test;
 
 import hera.api.encode.Base58WithCheckSum;
-import hera.api.encode.Encoded;
 import java.util.function.Supplier;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,8 @@
 package ship.build;
 
 import static org.junit.Assert.assertTrue;
+import static ship.build.ResourceManagerMock.dir;
+import static ship.build.ResourceManagerMock.file;
 
 import org.junit.Test;
 import ship.AbstractTestCase;
@@ -21,12 +23,12 @@ public class ConcatenatorTest extends AbstractTestCase {
     final String base = "/" + getClass().getName().replace('.', '/') + "/";
     final ResourceManager resourceManager = new ResourceManagerMock(
         project,
-        ResourceManagerMock.dir(
+        dir(
             ".",
-            ResourceManagerMock.file("aergo.json", () -> open(base + "aergo.json")),
-            ResourceManagerMock.file("source.lua", () -> open(base + "source.lua")),
-            ResourceManagerMock.dir("subdir",
-                ResourceManagerMock.file("ref1.lua", () -> open(base + "subdir/ref1.lua"))
+            file("aergo.json", () -> open(base + "aergo.json")),
+            file("source.lua", () -> open(base + "source.lua")),
+            dir("subdir",
+                file("ref1.lua", () -> open(base + "subdir/ref1.lua"))
             )
         )
     );

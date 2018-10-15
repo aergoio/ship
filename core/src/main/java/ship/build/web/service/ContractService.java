@@ -5,7 +5,9 @@
 package ship.build.web.service;
 
 import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
 import static ship.util.Messages.bind;
 
 import hera.api.AccountOperation;
@@ -17,9 +19,9 @@ import hera.api.model.Account;
 import hera.api.model.AccountAddress;
 import hera.api.model.Authentication;
 import hera.api.model.ContractAddress;
-import hera.api.model.ContractCall;
 import hera.api.model.ContractFunction;
 import hera.api.model.ContractInterface;
+import hera.api.model.ContractInvocation;
 import hera.api.model.ContractResult;
 import hera.api.model.ContractTxHash;
 import hera.api.model.ContractTxReceipt;
@@ -29,9 +31,11 @@ import hera.util.Pair;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.inject.Named;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -165,8 +169,8 @@ public class ContractService extends AbstractService {
 
     final DeploymentResult deploymentResult =
         encodedContractTxHash2contractAddresses.get(encodedContractTxHash);
-    final ContractFunction contractFunction = deploymentResult.getContractInterface()
-        .findFunctionByName(functionName)
+    final ContractInterface contractInterface = deploymentResult.getContractInterface();
+    final ContractFunction contractFunction = contractInterface.findFunction(functionName)
         .orElseThrow(() -> new ResourceNotFoundException("No " + functionName + " function."));
     return new Pair<>(contractTxHash, contractFunction);
   }
@@ -205,8 +209,8 @@ public class ContractService extends AbstractService {
       final ContractAddress contractAddress = contractTxReceipt.getContractAddress();
 
       logger.trace("Executing...");
-      final ContractCall contractCall =
-          new ContractCall(contractAddress, contractFunction, asList(args));
+      final ContractInvocation contractCall =
+          new ContractInvocation(contractAddress, contractFunction, stream(args).collect(toList()));
       final ContractTxHash executionContractHash = contractOperation.execute(
           null,
           syncedAccount,
@@ -253,8 +257,8 @@ public class ContractService extends AbstractService {
       logger.debug("Receipt: {}", contractTxReceipt);
       final ContractAddress contractAddress = contractTxReceipt.getContractAddress();
 
-      final ContractCall contractCall =
-          new ContractCall(contractAddress, contractFunction, asList(args));
+      final ContractInvocation contractCall =
+          new ContractInvocation(contractAddress, contractFunction, stream(args).collect(toList()));
       logger.trace("Querying...");
       final ContractResult contractResult = contractOperation.query(contractCall);
       final String resultString = new String(contractResult.getResultInRawBytes().getValue());
