@@ -12,4 +12,9 @@ public class BuildException extends CommandException {
   public BuildException(final Throwable cause) {
     super(cause);
   }
+
+  public BuildException(final String message, final Throwable cause) {
+    super(message, cause);
+  }
+
 }

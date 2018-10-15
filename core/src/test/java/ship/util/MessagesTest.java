@@ -28,4 +28,12 @@ public class MessagesTest extends AbstractTestCase {
     logger.debug("Message: {}", message);
     assertNotNull(message);
   }
+
+  @Test
+  public void shouldKeepSpace() {
+    final String message = Messages.bind("ship.command.TestProject.2", randomUUID());
+    logger.debug("Message: {}", message);
+    assertTrue(message.startsWith(" "));
+  }
+
 }

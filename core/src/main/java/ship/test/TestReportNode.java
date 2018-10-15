@@ -112,16 +112,7 @@ public class TestReportNode<ResultDetailT> {
    * @return the number of successes
    */
   public int getTheNumberOfSuccesses() {
-    if (children.isEmpty()) {
-      if (this.resultDetail == Success) {
-        return 1;
-      } else {
-        return 0;
-      }
-    } else {
-      return children.stream().map(TestReportNode::getTheNumberOfSuccesses)
-          .reduce((a, b) -> a + b).orElse(0);
-    }
+    return aggregate(Success);
   }
 
   /**
@@ -130,14 +121,18 @@ public class TestReportNode<ResultDetailT> {
    * @return the number of failures
    */
   public int getTheNumberOfFailures() {
+    return aggregate(Failure);
+  }
+
+  protected int aggregate(final TestReportNodeResult filterValue) {
     if (children.isEmpty()) {
-      if (this.resultDetail == Failure) {
+      if (this.result == filterValue) {
         return 1;
       } else {
         return 0;
       }
     } else {
-      return children.stream().map(TestReportNode::getTheNumberOfFailures)
+      return children.stream().map(child -> child.aggregate(filterValue))
           .reduce((a, b) -> a + b).orElse(0);
     }
   }

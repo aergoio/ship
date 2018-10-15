@@ -4,13 +4,15 @@
 
 package ship.exception;
 
-public class PackageNotFoundException extends BuildException {
-  public PackageNotFoundException(final String message) {
-    super(message);
-  }
+import ship.util.Messages;
 
-  public PackageNotFoundException(final Throwable cause) {
-    super(cause);
+public class PackageNotFoundException extends BuildException {
+
+  protected static final String NL_0 = PackageNotFoundException.class.getName() + ".0";
+
+  public PackageNotFoundException(final String packageName, final String location,
+      final Throwable cause) {
+    super(Messages.bind(NL_0, packageName, location), cause);
   }
 
 }

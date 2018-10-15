@@ -10,6 +10,7 @@ import static hera.util.ValidationUtils.assertTrue;
 import static java.lang.System.currentTimeMillis;
 import static org.slf4j.LoggerFactory.getLogger;
 import static ship.test.TestReportNodeResult.Failure;
+import static ship.test.TestReportNodeResult.Success;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -125,6 +126,9 @@ public class TestResultCollector {
   public void endCase(final String testCaseName) {
     assertNotNull(currentTestCase);
     assertTrue(currentTestCase.getName().equals(testCaseName));
+    if (!currentTestCase.isFailure()) {
+      currentTestCase.setResult(Success);
+    }
     currentTestCase.setEndTime(currentTimeMillis());
     this.currentTestCase = null;
   }

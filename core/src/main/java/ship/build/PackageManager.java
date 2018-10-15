@@ -8,6 +8,7 @@ import static hera.util.FilepathUtils.append;
 import static hera.util.StringUtils.nvl;
 
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import lombok.RequiredArgsConstructor;
@@ -34,14 +35,14 @@ public class PackageManager {
    * @return resource manager
    */
   public ResourceManager find(final String packageName) {
+    final String packageLocation = append(repositoryLocation, packageName);
+    final String projectFileLocation = append(packageLocation, ShipConstants.PROJECT_FILENAME);
     try {
-      final String packageLocation = append(repositoryLocation, packageName);
-      final String projectFileLocation = append(packageLocation, ShipConstants.PROJECT_FILENAME);
       final Path projectFilePath = Paths.get(projectFileLocation);
       final ProjectFile projectFile = ProjectFile.from(projectFilePath);
       return new ResourceManager(new Project(packageLocation, projectFile));
     } catch (final IOException ex) {
-      throw new PackageNotFoundException(ex);
+      throw new PackageNotFoundException(packageName, projectFileLocation, ex);
     }
   }
 }

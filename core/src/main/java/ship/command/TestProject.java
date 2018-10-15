@@ -61,16 +61,16 @@ public class TestProject extends AbstractCommand {
         }
       }
       testFile.getChildren().forEach(child -> {
-        final TestReportNode<?> node = (TestReportNode<?>) child;
-        final String name = node.getName();
-        final int successes = node.getTheNumberOfSuccesses();
-        final int runs = node.getTheNumberOfTests();
-        if (node.isSuccess()) {
+        final TestReportNode<?> testSuite = (TestReportNode<?>) child;
+        final String name = testSuite.getName();
+        final int successes = testSuite.getTheNumberOfSuccesses();
+        final int runs = testSuite.getTheNumberOfTests();
+        if (testSuite.isSuccess()) {
           getPrinter().println(bind(NL_3, name, successes, runs));
         } else {
           getPrinter().println(bind(NL_4, name, successes, runs));
         }
-        node.getChildren().forEach(testCase -> {
+        testSuite.getChildren().forEach(testCase -> {
           if (testCase.isSuccess()) {
             getPrinter().println(bind(NL_5, testCase.getName()));
           } else {
