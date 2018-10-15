@@ -3,10 +3,10 @@ package ship.util;
 import static hera.util.IoUtils.tryClose;
 
 import hera.api.AergoApi;
-import hera.client.AergoClient;
 import hera.client.AergoClientBuilder;
 import hera.strategy.ConnectStrategy;
 import hera.strategy.NettyConnectStrategy;
+import hera.strategy.RemoteSignStrategy;
 import hera.util.Configuration;
 import hera.util.conf.InMemoryConfiguration;
 import io.grpc.ManagedChannel;
@@ -33,6 +33,7 @@ public class AergoPool implements ResourcePool<AergoApi> {
   @Override
   public AergoApi borrowResource() {
     return new AergoClientBuilder()
+        .addStrategy(new RemoteSignStrategy())
         .addStrategy(connectStrategy)
         .build();
   }
