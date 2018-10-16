@@ -7,8 +7,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -26,6 +28,7 @@ import hera.api.model.ContractTxReceipt;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -136,6 +139,8 @@ public class ContractServiceTest extends AbstractTestCase {
         ContractTxHash.of(BytesValue.of(randomUUID().toString().getBytes()));
     when(contractOperation.execute(any(), any(Account.class), anyLong(), any()))
         .thenReturn(executedContractTxHash);
+    long nonce = new Random().nextLong();
+    account.setNonce(nonce);
 
     // When
     final BuildDetails buildDetails = new BuildDetails();
@@ -147,6 +152,7 @@ public class ContractServiceTest extends AbstractTestCase {
 
     // Then
     assertNotNull(executionResult.getContractTransactionHash());
+    verify(contractOperation).execute(any(), any(Account.class), eq(nonce + 1), any());
   }
 
   @Test

@@ -211,7 +211,7 @@ public class ContractService extends AbstractService {
       final ContractTxHash executionContractHash = contractOperation.execute(
           null,
           syncedAccount,
-          syncedAccount.getNonce(),
+          syncedAccount.getNonce() + 1,
           contractCall
       );
 
