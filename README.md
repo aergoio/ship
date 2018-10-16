@@ -89,13 +89,17 @@ $ ./build.sh deps
 
 * Create ship web ui
 ```console
-$ cd web ; npm install
-$ cd $PROJECT_HOME ; ./build.sh npm
+$ ./build.sh npm
 ```
 
 * Run gradle
 ```console
 $ ./build.sh gradle
+```
+
+* Assemble distributions
+```console
+$ ./build.sh assemble
 ```
 
 # Test
