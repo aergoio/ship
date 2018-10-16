@@ -3,12 +3,11 @@ package ship.util;
 import static hera.util.IoUtils.tryClose;
 
 import hera.api.AergoApi;
+import hera.api.model.HostnameAndPort;
 import hera.client.AergoClientBuilder;
 import hera.strategy.ConnectStrategy;
 import hera.strategy.NettyConnectStrategy;
 import hera.strategy.RemoteSignStrategy;
-import hera.util.Configuration;
-import hera.util.conf.InMemoryConfiguration;
 import io.grpc.ManagedChannel;
 import lombok.RequiredArgsConstructor;
 
@@ -23,10 +22,8 @@ public class AergoPool implements ResourcePool<AergoApi> {
    * @param endpoint endpoint as string
    */
   public AergoPool(final String endpoint) {
-    final NettyConnectStrategy nettyConnectStrategy = new NettyConnectStrategy();
-    final Configuration configuration = new InMemoryConfiguration();
-    configuration.define("endpoint", endpoint);
-    nettyConnectStrategy.setConfiguration(configuration);
+    final HostnameAndPort hostnameAndPort = HostnameAndPort.of(endpoint);
+    final NettyConnectStrategy nettyConnectStrategy = new NettyConnectStrategy(hostnameAndPort);
     this.connectStrategy = nettyConnectStrategy;
   }
 
