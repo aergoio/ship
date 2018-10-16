@@ -27,7 +27,10 @@ public class CommandException extends RuntimeException {
   public String getMessage() {
     if (null != userMessage) {
       return userMessage;
+    } else if (null != getCause()) {
+      return getCause().getMessage();
+    } else {
+      return super.getMessage();
     }
-    return super.getMessage();
   }
 }

@@ -3,6 +3,8 @@ package ship.command;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import ship.build.WebServer;
+import ship.build.web.service.BuildService;
+import ship.exception.CommandException;
 
 @RequiredArgsConstructor
 public class BuildProjectWebMode extends BuildProjectConsoleMode {
@@ -13,7 +15,17 @@ public class BuildProjectWebMode extends BuildProjectConsoleMode {
     final WebServer webServer = new WebServer(port);
     webServer.setProjectFile(this.project.getProjectFile());
     webServer.boot(true);
-    buildListeners.add(webServer.getBuildService()::save);
+    final Throwable webServerError = webServer.getException();
+    if (null == webServerError) {
+      final BuildService buildService = webServer.getBuildService();
+      buildListeners.add(buildService::save);
+    } else {
+      if (webServerError instanceof CommandException) {
+        throw (CommandException) webServerError;
+      } else {
+        throw new CommandException(webServerError);
+      }
+    }
   }
 
   @Override

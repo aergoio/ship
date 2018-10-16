@@ -89,9 +89,9 @@ public class ShipLauncher {
   protected void handleCommandException(
       final Command command,
       final CommandException commandException) {
-    final String userMessage = commandException.getUserMessage();
-    if (null != userMessage) {
-      messagePrinter.println(bind(NL_1, userMessage));
+    final String message = commandException.getMessage();
+    if (null != message) {
+      messagePrinter.println(bind(NL_1, message));
       logger.error("Fail to execute {}", command, commandException);
     } else {
       logger.error("{}", commandException.getMessage(), commandException);
@@ -101,7 +101,7 @@ public class ShipLauncher {
 
   protected void handleThrowable(final Command command, final Throwable throwable) {
     System.err.println(bind(NL_2));
-    throwable.printStackTrace();
+    logger.debug("Unexpected exception: {}", throwable.getClass(), throwable);
     exit(-1);
   }
 }
