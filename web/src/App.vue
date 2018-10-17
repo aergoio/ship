@@ -129,7 +129,7 @@
   }
 
   html, body {
-    font-family: NanumSquareOTFB;
+    font-family: NanumSquareOTFB, sans-serif;
     position: relative;
     margin: 0;
     height: 100%;
