@@ -16,6 +16,7 @@ import hera.api.encode.Base58;
 import hera.api.encode.Base58WithCheckSum;
 import hera.api.model.Account;
 import hera.api.model.AccountAddress;
+import hera.api.model.AccountState;
 import hera.api.model.Authentication;
 import hera.api.model.ContractAddress;
 import hera.api.model.ContractFunction;
@@ -134,7 +135,7 @@ public class ContractService extends AbstractService {
       final LuaBinary luaBinary = luaCompiler.compile(() -> new ByteArrayInputStream(buildResult));
       logger.trace("Successful to compile:\n{}", luaBinary.getPayload());
       final AccountOperation accountOperation = aergoApi.getAccountOperation();
-      final Account syncedAccount = accountOperation.get(account);
+      final AccountState syncedAccount = accountOperation.getState(account);
       final ContractOperation contractOperation = aergoApi.getContractOperation();
       final Base58WithCheckSum encodedPayload = () -> luaBinary.getPayload().getEncodedValue();
 
@@ -202,7 +203,7 @@ public class ContractService extends AbstractService {
       final ContractTxReceipt contractTxReceipt =
           contractOperation.getReceipt(contractTxHash);
       logger.debug("Receipt: {}", contractTxReceipt);
-      final Account syncedAccount = accountOperation.get(account);
+      final AccountState syncedAccount = accountOperation.getState(account);
       final ContractAddress contractAddress = contractTxReceipt.getContractAddress();
 
       logger.trace("Executing...");
@@ -210,7 +211,7 @@ public class ContractService extends AbstractService {
           new ContractInvocation(contractAddress, contractFunction, stream(args).collect(toList()));
       final ContractTxHash executionContractHash = contractOperation.execute(
           null,
-          syncedAccount,
+          account,
           syncedAccount.getNonce() + 1,
           contractCall
       );

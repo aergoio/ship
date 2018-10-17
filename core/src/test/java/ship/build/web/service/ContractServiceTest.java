@@ -18,7 +18,7 @@ import hera.api.AccountOperation;
 import hera.api.AergoApi;
 import hera.api.ContractOperation;
 import hera.api.model.Account;
-import hera.api.model.AccountAddress;
+import hera.api.model.AccountState;
 import hera.api.model.BytesValue;
 import hera.api.model.ContractFunction;
 import hera.api.model.ContractInterface;
@@ -91,6 +91,8 @@ public class ContractServiceTest extends AbstractTestCase {
     when(p.getOutputStream()).thenReturn(new ByteArrayOutputStream());
     when(p.waitFor()).thenReturn(0);
 
+    final AccountState accountState = new AccountState();
+
     contractTxReceipt = new ContractTxReceipt();
     contractInterface = new ContractInterface();
     contractFunction = new ContractFunction();
@@ -105,7 +107,7 @@ public class ContractServiceTest extends AbstractTestCase {
     when(aergoApi.getContractOperation()).thenReturn(contractOperation);
 
     when(accountOperation.create(anyString())).thenReturn(account);
-    when(accountOperation.get(account)).thenReturn(account);
+    when(accountOperation.getState(account)).thenReturn(accountState);
     when(contractOperation.getReceipt(contractTxHash)).thenReturn(contractTxReceipt);
     when(contractOperation.getContractInterface(contractTxReceipt.getContractAddress())).thenReturn(contractInterface);
   }
@@ -140,7 +142,9 @@ public class ContractServiceTest extends AbstractTestCase {
     when(contractOperation.execute(any(), any(Account.class), anyLong(), any()))
         .thenReturn(executedContractTxHash);
     long nonce = new Random().nextLong();
-    account.setNonce(nonce);
+    final AccountState accountState = new AccountState();
+    accountState.setNonce(nonce);
+    when(accountOperation.getState(account)).thenReturn(accountState);
 
     // When
     final BuildDetails buildDetails = new BuildDetails();
