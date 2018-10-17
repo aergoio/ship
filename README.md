@@ -73,7 +73,7 @@ TBD
 
 ## Clone
 ```console
-$ git clone https://github.com/aergoio/heraj.git
+$ git clone https://github.com/aergoio/ship.git
 ```
 
 ## Build and package
