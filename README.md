@@ -96,6 +96,10 @@ $ ./build.sh npm
 ```console
 $ ./build.sh gradle
 ```
+if you use JDK 9 or over
+```console
+$ ./gradlew build -x test
+```
 
 * Assemble distributions
 ```console

@@ -18,18 +18,6 @@ buildscript {
 }
 group 'io.aergo'
 
-repositories {
-  mavenLocal()
-  maven {
-    url "http://sevntu-checkstyle.github.com/sevntu.checkstyle/maven2"
-  }
-  maven {
-    url "http://dist.wso2.org/maven2"
-  }
-  mavenCentral()
-  jcenter()
-}
-
 allprojects {
   group 'io.aergo'
   version '0.1-SNAPSHOT'
@@ -75,6 +63,12 @@ configure(javaProjects) {
   repositories {
     mavenLocal()
     maven {
+      url "http://repo.spring.io/milestone"
+    }
+    maven {
+      url "http://repo.spring.io/libs-milestone"
+    }
+    maven {
       url "http://dist.wso2.org/maven2"
     }
     mavenCentral()
@@ -88,7 +82,10 @@ configure(javaProjects) {
     runtime 'ch.qos.logback:logback-classic:1.2.3'
     testImplementation 'org.projectlombok:lombok:1.18.2'
     testImplementation 'junit:junit:4.12'
-    testImplementation 'org.powermock:powermock-api-mockito2:2.0.0-beta.5'
+    testImplementation('org.powermock:powermock-api-mockito2:2.0.0-beta.5') {
+      exclude group: 'org.mockito', module: 'mockito-core'
+    }
+    testImplementation 'org.mockito:mockito-core:2.23.0'
     testImplementation 'org.powermock:powermock-module-junit4:2.0.0-beta.5'
   }
 
@@ -126,6 +123,8 @@ configure(javaProjects) {
   test.dependsOn instrument
 
   test {
+    jvmArgs('--add-opens', 'java.base/java.lang=ALL-UNNAMED')
+    jvmArgs('--add-opens', 'java.base/java.lang.invoke=ALL-UNNAMED')
     maxParallelForks = Math.max(1, Runtime.runtime.availableProcessors())
     exclude '**/*Tests.class'
     exclude '**/*IT.class'
@@ -172,7 +171,7 @@ configure(javaProjects) {
   }
 
   jacoco {
-    toolVersion = "0.8.1"
+    toolVersion = "0.8.2"
   }
   jacocoTestReport {
     group = "Reporting"
@@ -196,7 +195,7 @@ task alljavadoc(type: Javadoc) {
 apply plugin: 'java'
 apply plugin: 'jacoco'
 jacoco {
-  toolVersion = "0.8.1"
+  toolVersion = "0.8.2"
 }
 
 task alljacoco(type: JacocoReport) {
