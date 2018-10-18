@@ -7,6 +7,7 @@ package ship.exec;
 import static org.slf4j.LoggerFactory.getLogger;
 import static ship.util.Messages.bind;
 
+import hera.util.ExceptionUtils;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -100,6 +101,8 @@ public class ShipLauncher {
   }
 
   protected void handleThrowable(final Command command, final Throwable throwable) {
+    final String mainMessage = ExceptionUtils.buildExceptionMessage(null, throwable);
+    System.err.println(mainMessage);
     System.err.println(bind(NL_2));
     logger.debug("Unexpected exception: {}", throwable.getClass(), throwable);
     exit(-1);
