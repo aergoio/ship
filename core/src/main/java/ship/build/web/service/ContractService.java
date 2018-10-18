@@ -140,7 +140,7 @@ public class ContractService extends AbstractService {
       final Base58WithCheckSum encodedPayload = () -> luaBinary.getPayload().getEncodedValue();
 
       final ContractTxHash contractTransactionHash =
-          contractOperation.deploy(null, account, syncedAccount.getNonce() + 1, encodedPayload);
+          contractOperation.deploy(account, syncedAccount.getNonce() + 1, encodedPayload);
       logger.debug("Contract transaction hash: {}", contractTransactionHash);
       final String encodedContractTxHash = contractTransactionHash.toString();
       final DeploymentResult deploymentResult = new DeploymentResult();
@@ -210,7 +210,6 @@ public class ContractService extends AbstractService {
       final ContractInvocation contractCall =
           new ContractInvocation(contractAddress, contractFunction, stream(args).collect(toList()));
       final ContractTxHash executionContractHash = contractOperation.execute(
-          null,
           account,
           syncedAccount.getNonce() + 1,
           contractCall

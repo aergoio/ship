@@ -25,6 +25,7 @@ import hera.api.model.ContractInterface;
 import hera.api.model.ContractResult;
 import hera.api.model.ContractTxHash;
 import hera.api.model.ContractTxReceipt;
+import hera.api.model.ServerManagedAccount;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -61,7 +62,7 @@ public class ContractServiceTest extends AbstractTestCase {
 
   protected ContractService contractService;
 
-  protected Account account = new Account();
+  protected ServerManagedAccount account = mock(ServerManagedAccount.class);
 
   protected ContractTxReceipt contractTxReceipt;
 
@@ -115,7 +116,7 @@ public class ContractServiceTest extends AbstractTestCase {
   @Test
   public void testDeployAndGetLatestContractInformation() throws Exception {
     // Given
-    when(contractOperation.deploy(any(), any(Account.class), anyLong(), any())).thenReturn(contractTxHash);
+    when(contractOperation.deploy(any(Account.class), anyLong(), any())).thenReturn(contractTxHash);
 
     // When
     final BuildDetails buildDetails = new BuildDetails();
@@ -135,11 +136,11 @@ public class ContractServiceTest extends AbstractTestCase {
 
   @Test
   public void testTryExecute() throws Exception {
-    when(contractOperation.deploy(any(), any(Account.class), anyLong(), any()))
+    when(contractOperation.deploy(any(Account.class), anyLong(), any()))
         .thenReturn(contractTxHash);
     final ContractTxHash executedContractTxHash =
         ContractTxHash.of(BytesValue.of(randomUUID().toString().getBytes()));
-    when(contractOperation.execute(any(), any(Account.class), anyLong(), any()))
+    when(contractOperation.execute(any(Account.class), anyLong(), any()))
         .thenReturn(executedContractTxHash);
     long nonce = new Random().nextLong();
     final AccountState accountState = new AccountState();
@@ -156,12 +157,12 @@ public class ContractServiceTest extends AbstractTestCase {
 
     // Then
     assertNotNull(executionResult.getContractTransactionHash());
-    verify(contractOperation).execute(any(), any(Account.class), eq(nonce + 1), any());
+    verify(contractOperation).execute(any(Account.class), eq(nonce + 1), any());
   }
 
   @Test
   public void testTryQuery() throws Exception {
-    when(contractOperation.deploy(any(), any(Account.class), anyLong(), any())).thenReturn(contractTxHash);
+    when(contractOperation.deploy(any(Account.class), anyLong(), any())).thenReturn(contractTxHash);
     final ContractResult contractResult = mock(ContractResult.class);
     when(contractResult.getResultInRawBytes())
         .thenReturn(BytesValue.of(randomUUID().toString().getBytes()));

@@ -7,7 +7,6 @@ import hera.api.model.HostnameAndPort;
 import hera.client.AergoClientBuilder;
 import hera.strategy.ConnectStrategy;
 import hera.strategy.NettyConnectStrategy;
-import hera.strategy.RemoteSignStrategy;
 import io.grpc.ManagedChannel;
 import lombok.RequiredArgsConstructor;
 
@@ -30,7 +29,6 @@ public class AergoPool implements ResourcePool<AergoApi> {
   @Override
   public AergoApi borrowResource() {
     return new AergoClientBuilder()
-        .addStrategy(new RemoteSignStrategy())
         .addStrategy(connectStrategy)
         .build();
   }
