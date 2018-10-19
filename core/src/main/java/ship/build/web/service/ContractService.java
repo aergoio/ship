@@ -6,7 +6,6 @@ package ship.build.web.service;
 
 import static java.util.Arrays.stream;
 import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.toList;
 import static ship.util.Messages.bind;
 
 import hera.api.AccountOperation;
@@ -19,6 +18,7 @@ import hera.api.model.AccountAddress;
 import hera.api.model.AccountState;
 import hera.api.model.Authentication;
 import hera.api.model.ContractAddress;
+import hera.api.model.ContractDefinition;
 import hera.api.model.ContractFunction;
 import hera.api.model.ContractInterface;
 import hera.api.model.ContractInvocation;
@@ -139,8 +139,10 @@ public class ContractService extends AbstractService {
       final ContractOperation contractOperation = aergoApi.getContractOperation();
       final Base58WithCheckSum encodedPayload = () -> luaBinary.getPayload().getEncodedValue();
 
+      account.setNonce(syncedAccount.getNonce() + 1);
+      final ContractDefinition contractDefinition = ContractDefinition.of(encodedPayload);
       final ContractTxHash contractTransactionHash =
-          contractOperation.deploy(account, syncedAccount.getNonce() + 1, encodedPayload);
+          contractOperation.deploy(account, contractDefinition);
       logger.debug("Contract transaction hash: {}", contractTransactionHash);
       final String encodedContractTxHash = contractTransactionHash.toString();
       final DeploymentResult deploymentResult = new DeploymentResult();
@@ -208,10 +210,10 @@ public class ContractService extends AbstractService {
 
       logger.trace("Executing...");
       final ContractInvocation contractCall =
-          new ContractInvocation(contractAddress, contractFunction, stream(args).collect(toList()));
+          new ContractInvocation(contractAddress, contractFunction, stream(args).toArray());
+      account.setNonce(syncedAccount.getNonce() + 1);
       final ContractTxHash executionContractHash = contractOperation.execute(
           account,
-          syncedAccount.getNonce() + 1,
           contractCall
       );
 
@@ -255,7 +257,7 @@ public class ContractService extends AbstractService {
       final ContractAddress contractAddress = contractTxReceipt.getContractAddress();
 
       final ContractInvocation contractCall =
-          new ContractInvocation(contractAddress, contractFunction, stream(args).collect(toList()));
+          new ContractInvocation(contractAddress, contractFunction, stream(args).toArray());
       logger.trace("Querying...");
       final ContractResult contractResult = contractOperation.query(contractCall);
       final String resultString = new String(contractResult.getResultInRawBytes().getValue());
