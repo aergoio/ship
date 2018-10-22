@@ -25,6 +25,7 @@ import hera.api.model.ContractInvocation;
 import hera.api.model.ContractResult;
 import hera.api.model.ContractTxHash;
 import hera.api.model.ContractTxReceipt;
+import hera.api.model.Fee;
 import hera.exception.RpcConnectionException;
 import hera.exception.RpcException;
 import hera.util.Pair;
@@ -66,6 +67,9 @@ public class ContractService extends AbstractService {
   protected String password = randomUUID().toString();
 
   protected Account account;
+
+
+  protected Fee fee = new Fee(1000, 1000);
 
   protected final LuaCompiler luaCompiler = new LuaCompiler();
 
@@ -142,7 +146,7 @@ public class ContractService extends AbstractService {
       account.setNonce(syncedAccount.getNonce() + 1);
       final ContractDefinition contractDefinition = ContractDefinition.of(encodedPayload);
       final ContractTxHash contractTransactionHash =
-          contractOperation.deploy(account, contractDefinition);
+          contractOperation.deploy(account, contractDefinition, fee);
       logger.debug("Contract transaction hash: {}", contractTransactionHash);
       final String encodedContractTxHash = contractTransactionHash.toString();
       final DeploymentResult deploymentResult = new DeploymentResult();
@@ -214,7 +218,8 @@ public class ContractService extends AbstractService {
       account.setNonce(syncedAccount.getNonce() + 1);
       final ContractTxHash executionContractHash = contractOperation.execute(
           account,
-          contractCall
+          contractCall,
+          fee
       );
 
       final ExecutionResult executionResult = new ExecutionResult();
