@@ -5,9 +5,7 @@ import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -116,7 +114,7 @@ public class ContractServiceTest extends AbstractTestCase {
   @Test
   public void testDeployAndGetLatestContractInformation() throws Exception {
     // Given
-    when(contractOperation.deploy(any(Account.class), any())).thenReturn(contractTxHash);
+    when(contractOperation.deploy(any(Account.class), any(), any())).thenReturn(contractTxHash);
 
     // When
     final BuildDetails buildDetails = new BuildDetails();
@@ -136,11 +134,11 @@ public class ContractServiceTest extends AbstractTestCase {
 
   @Test
   public void testTryExecute() throws Exception {
-    when(contractOperation.deploy(any(Account.class), any()))
+    when(contractOperation.deploy(any(Account.class), any(), any()))
         .thenReturn(contractTxHash);
     final ContractTxHash executedContractTxHash =
         ContractTxHash.of(BytesValue.of(randomUUID().toString().getBytes()));
-    when(contractOperation.execute(any(Account.class), any()))
+    when(contractOperation.execute(any(Account.class), any(), any()))
         .thenReturn(executedContractTxHash);
     long nonce = new Random().nextLong();
     final AccountState accountState = new AccountState();
@@ -157,12 +155,12 @@ public class ContractServiceTest extends AbstractTestCase {
 
     // Then
     assertNotNull(executionResult.getContractTransactionHash());
-    verify(contractOperation).execute(any(Account.class), any());
+    verify(contractOperation).execute(any(Account.class), any(), any());
   }
 
   @Test
   public void testTryQuery() throws Exception {
-    when(contractOperation.deploy(any(Account.class), any())).thenReturn(contractTxHash);
+    when(contractOperation.deploy(any(Account.class), any(), any())).thenReturn(contractTxHash);
     final ContractResult contractResult = mock(ContractResult.class);
     when(contractResult.getResultInRawBytes())
         .thenReturn(BytesValue.of(randomUUID().toString().getBytes()));
