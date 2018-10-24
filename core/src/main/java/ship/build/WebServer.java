@@ -91,6 +91,8 @@ public class WebServer extends ThreadServer {
       properties.put("server.port", port);
     }
     properties.put("project.endpoint", nvl(projectFile.getEndpoint(), DEFAULT_ENDPOINT));
+    properties.put("project.privatekey", projectFile.getPrivateKey());
+    properties.put("project.password", projectFile.getPassword());
     if (!properties.isEmpty()) {
       builder.properties(properties);
     }

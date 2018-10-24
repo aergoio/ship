@@ -82,6 +82,14 @@ public class ProjectFile {
   @Setter
   protected String endpoint = DEFAULT_ENDPOINT;
 
+  @Getter
+  @Setter
+  protected String privateKey;
+
+  @Getter
+  @Setter
+  protected String password;
+
   public String toJson() throws JsonProcessingException {
     return new ObjectMapper().writeValueAsString(this);
   }

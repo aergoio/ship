@@ -25,12 +25,12 @@ import hera.api.model.ContractInvocation;
 import hera.api.model.ContractResult;
 import hera.api.model.ContractTxHash;
 import hera.api.model.ContractTxReceipt;
+import hera.api.model.EncryptedPrivateKey;
 import hera.api.model.Fee;
 import hera.exception.RpcConnectionException;
 import hera.exception.RpcException;
 import hera.util.Pair;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -64,10 +64,17 @@ public class ContractService extends AbstractService {
   @Value("${project.endpoint}")
   protected String endpoint;
 
-  protected String password = randomUUID().toString();
+  @Getter
+  @Setter
+  @Value("${project.privatekey}")
+  protected String encodedEncryptedPrivateKey;
+
+  @Getter
+  @Setter
+  @Value("${project.password}")
+  protected String password;
 
   protected Account account;
-
 
   protected Fee fee = new Fee(1000, 1000);
 
@@ -105,7 +112,9 @@ public class ContractService extends AbstractService {
     try {
       final AccountOperation accountOperation = aergoApi.getAccountOperation();
       logger.trace("Password: {}", password);
-      account = accountOperation.create(password);
+      final EncryptedPrivateKey encryptedKey =
+          EncryptedPrivateKey.of(this::getEncodedEncryptedPrivateKey);
+      account = accountOperation.importKey(encryptedKey, getPassword(), getPassword());
       final AccountAddress accountAddress = account.getAddress();
       final Authentication authentication = new Authentication(accountAddress, password);
       accountOperation.unlock(authentication);
