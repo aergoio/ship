@@ -187,8 +187,6 @@ public class ContractService extends AbstractService {
    * @param args                  function's arguments to execute
    *
    * @return execution result
-   *
-   * @throws IOException Fail to execute
    */
   public ExecutionResult tryExecute(final String encodedContractTxHash, final String functionName,
       final String... args) {
@@ -238,8 +236,6 @@ public class ContractService extends AbstractService {
    * @param args                  function's arguments to execute
    *
    * @return query result
-   *
-   * @throws IOException Fail to query
    */
   public QueryResult tryQuery(final String encodedContractTxHash, final String functionName,
       final String... args) {

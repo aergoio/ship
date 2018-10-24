@@ -111,8 +111,6 @@ public class Router {
    * @param arguments               argument for function
    *
    * @return function's result
-   *
-   * @throws IOException Fail to invoke function
    */
   @GetMapping(value = "contract/{tx}/{function}")
   public QueryResult query(
