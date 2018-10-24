@@ -117,15 +117,15 @@ public class ContractService extends AbstractService {
       final AccountOperation accountOperation = aergoApi.getAccountOperation();
       logger.trace("Password: {}", password);
       if (null == encodedEncryptedPrivateKey) {
+        password = randomUUID().toString();
+        account = accountOperation.create(password);
+      } else {
         try {
           final AergoKey pk = AergoKey.of(encodedEncryptedPrivateKey, password);
           account = new ClientManagedAccount(pk);
         } catch (final Exception e) {
           throw new IllegalArgumentException(e);
         }
-      } else {
-        password = randomUUID().toString();
-        accountOperation.create(password);
       }
       final AccountAddress accountAddress = account.getAddress();
       final Authentication authentication = new Authentication(accountAddress, password);
