@@ -5,6 +5,7 @@
 package ship.build.web.service;
 
 import static java.util.Arrays.stream;
+import static java.util.Optional.ofNullable;
 import static java.util.UUID.randomUUID;
 import static ship.util.Messages.bind;
 
@@ -13,10 +14,12 @@ import hera.api.AergoApi;
 import hera.api.ContractOperation;
 import hera.api.encode.Base58;
 import hera.api.encode.Base58WithCheckSum;
+import hera.api.encode.EncodedString;
 import hera.api.model.Account;
 import hera.api.model.AccountAddress;
 import hera.api.model.AccountState;
 import hera.api.model.Authentication;
+import hera.api.model.ClientManagedAccount;
 import hera.api.model.ContractAddress;
 import hera.api.model.ContractDefinition;
 import hera.api.model.ContractFunction;
@@ -29,6 +32,7 @@ import hera.api.model.EncryptedPrivateKey;
 import hera.api.model.Fee;
 import hera.exception.RpcConnectionException;
 import hera.exception.RpcException;
+import hera.key.AergoKey;
 import hera.util.Pair;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
@@ -112,9 +116,17 @@ public class ContractService extends AbstractService {
     try {
       final AccountOperation accountOperation = aergoApi.getAccountOperation();
       logger.trace("Password: {}", password);
-      final EncryptedPrivateKey encryptedKey =
-          EncryptedPrivateKey.of(this::getEncodedEncryptedPrivateKey);
-      account = accountOperation.importKey(encryptedKey, getPassword(), getPassword());
+      if (null == encodedEncryptedPrivateKey) {
+        try {
+          final AergoKey pk = AergoKey.of(encodedEncryptedPrivateKey, password);
+          account = new ClientManagedAccount(pk);
+        } catch (final Exception e) {
+          throw new IllegalArgumentException(e);
+        }
+      } else {
+        password = randomUUID().toString();
+        accountOperation.create(password);
+      }
       final AccountAddress accountAddress = account.getAddress();
       final Authentication authentication = new Authentication(accountAddress, password);
       accountOperation.unlock(authentication);

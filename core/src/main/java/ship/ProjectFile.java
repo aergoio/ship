@@ -84,7 +84,7 @@ public class ProjectFile {
 
   @Getter
   @Setter
-  protected String privateKey;
+  protected String privatekey;
 
   @Getter
   @Setter
