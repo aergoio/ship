@@ -18,9 +18,9 @@ import ship.build.web.model.BuildDetails;
 
 public class Builder {
 
-<span class="nc" id="L21">  protected final transient Logger logger = getLogger(getClass());</span>
+<span class="fc" id="L21">  protected final transient Logger logger = getLogger(getClass());</span>
 
-<span class="nc" id="L23">  @Getter</span>
+<span class="fc" id="L23">  @Getter</span>
   protected final ResourceManager resourceManager;
 
   /**
@@ -28,9 +28,9 @@ public class Builder {
    *
    * @param resourceManager manager for resource
    */
-<span class="nc" id="L31">  public Builder(final ResourceManager resourceManager) {</span>
-<span class="nc" id="L32">    this.resourceManager = resourceManager;</span>
-<span class="nc" id="L33">  }</span>
+<span class="fc" id="L31">  public Builder(final ResourceManager resourceManager) {</span>
+<span class="fc" id="L32">    this.resourceManager = resourceManager;</span>
+<span class="fc" id="L33">  }</span>
 
   /**
    * Build {@link BuildResource} or {@link TestResource}.
@@ -40,18 +40,18 @@ public class Builder {
    * @return Build result fileset
    */
   public BuildDetails build(final String resourcePath) {
-<span class="nc" id="L43">    final Resource resource = resourceManager.getResource(resourcePath);</span>
-<span class="nc" id="L44">    logger.trace(&quot;{}: {}&quot;, resourcePath, resource);</span>
-<span class="nc" id="L45">    final Concatenator concatenator = new Concatenator(resourceManager);</span>
-<span class="nc" id="L46">    final Optional&lt;BuildResource&gt; buildResourceOpt = resource.adapt(BuildResource.class);</span>
-<span class="nc" id="L47">    final Optional&lt;TestResource&gt; testResourceOpt = resource.adapt(TestResource.class);</span>
-<span class="nc bnc" id="L48" title="All 2 branches missed.">    if (buildResourceOpt.isPresent()) {</span>
+<span class="fc" id="L43">    final Resource resource = resourceManager.getResource(resourcePath);</span>
+<span class="fc" id="L44">    logger.trace(&quot;{}: {}&quot;, resourcePath, resource);</span>
+<span class="fc" id="L45">    final Concatenator concatenator = new Concatenator(resourceManager);</span>
+<span class="fc" id="L46">    final Optional&lt;BuildResource&gt; buildResourceOpt = resource.adapt(BuildResource.class);</span>
+<span class="fc" id="L47">    final Optional&lt;TestResource&gt; testResourceOpt = resource.adapt(TestResource.class);</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">    if (buildResourceOpt.isPresent()) {</span>
 <span class="nc" id="L49">      return concatenator.visit(buildResourceOpt.get());</span>
-<span class="nc bnc" id="L50" title="All 2 branches missed.">    } else if (testResourceOpt.isPresent()) {</span>
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">    } else if (testResourceOpt.isPresent()) {</span>
 <span class="nc" id="L51">      return concatenator.visit(testResourceOpt.get());</span>
     }
 
-<span class="nc" id="L54">    return new BuildDetails();</span>
+<span class="fc" id="L54">    return new BuildDetails();</span>
   }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

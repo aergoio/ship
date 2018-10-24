@@ -11,38 +11,42 @@ import static hera.util.ValidationUtils.assertTrue;
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.exists;
 import static java.util.Arrays.asList;
+import static ship.util.Messages.bind;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import ship.FileSet;
 
-<span class="nc" id="L20">public class InstallPackage extends AbstractCommand {</span>
+<span class="fc" id="L21">public class InstallPackage extends AbstractCommand {</span>
+
+<span class="fc" id="L23">  protected static final String NL_0 = InstallPackage.class.getName() + &quot;.0&quot;;</span>
+<span class="fc" id="L24">  protected static final String NL_1 = InstallPackage.class.getName() + &quot;.1&quot;;</span>
 
   @Override
   public void execute() throws Exception {
-<span class="nc bnc" id="L24" title="All 4 branches missed.">    assertTrue(0 &lt; arguments.size() &amp;&amp; arguments.size() &lt; 3);</span>
-<span class="nc" id="L25">    final String packageName = getArgument(0);</span>
-<span class="nc" id="L26">    logger.debug(&quot;URL: {}&quot;, packageName);</span>
-<span class="nc" id="L27">    final int separatorIndex = packageName.indexOf(&quot;/&quot;);</span>
-<span class="nc bnc" id="L28" title="All 2 branches missed.">    assertTrue(0 &lt; separatorIndex, &quot;Invalid argument: &quot; + packageName);</span>
-<span class="nc" id="L29">    final Optional&lt;String&gt; checkout = getOptionalArgument(1);</span>
+<span class="pc bpc" id="L28" title="2 of 4 branches missed.">    assertTrue(0 &lt; arguments.size() &amp;&amp; arguments.size() &lt; 3);</span>
+<span class="fc" id="L29">    final String packageName = getArgument(0);</span>
+<span class="fc" id="L30">    logger.debug(&quot;URL: {}&quot;, packageName);</span>
+<span class="fc" id="L31">    final int separatorIndex = packageName.indexOf(&quot;/&quot;);</span>
+<span class="pc bpc" id="L32" title="1 of 2 branches missed.">    assertTrue(0 &lt; separatorIndex, &quot;Invalid argument: &quot; + packageName);</span>
+<span class="fc" id="L33">    final Optional&lt;String&gt; checkout = getOptionalArgument(1);</span>
 
-<span class="nc" id="L31">    final CloneGit cloneGit = new CloneGit();</span>
-<span class="nc" id="L32">    cloneGit.setArguments(asList(packageName, checkout.orElse(&quot;master&quot;)));</span>
-<span class="nc" id="L33">    cloneGit.execute();</span>
-<span class="nc" id="L34">    final FileSet fileSet = cloneGit.getFileSet();</span>
-<span class="nc" id="L35">    logger.debug(&quot;FileSet: {}&quot;, fileSet.getFileSet());</span>
+<span class="fc" id="L35">    final CloneGit cloneGit = new CloneGit();</span>
+<span class="fc" id="L36">    cloneGit.setArguments(asList(packageName, checkout.orElse(&quot;master&quot;)));</span>
+<span class="fc" id="L37">    cloneGit.execute();</span>
+<span class="fc" id="L38">    final FileSet fileSet = cloneGit.getFileSet();</span>
+<span class="fc" id="L39">    logger.debug(&quot;FileSet: {}&quot;, fileSet.getFiles());</span>
 
-<span class="nc" id="L37">    final String publishRepository = append(System.getProperty(&quot;user.home&quot;), &quot;.aergo_modules&quot;);</span>
-<span class="nc" id="L38">    final Path publishPath = Paths.get(append(publishRepository, packageName));</span>
-<span class="nc bnc" id="L39" title="All 2 branches missed.">    if (exists(publishPath)) {</span>
-<span class="nc" id="L40">      deleteRecursively(publishPath, ALLOW_INSECURE);</span>
+<span class="fc" id="L41">    final String publishRepository = append(System.getProperty(&quot;user.home&quot;), &quot;.aergo_modules&quot;);</span>
+<span class="fc" id="L42">    final Path publishPath = Paths.get(append(publishRepository, packageName));</span>
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">    if (exists(publishPath)) {</span>
+<span class="nc" id="L44">      deleteRecursively(publishPath, ALLOW_INSECURE);</span>
     }
-<span class="nc" id="L42">    createDirectories(publishPath);</span>
-<span class="nc" id="L43">    fileSet.copyTo(publishPath);</span>
-<span class="nc" id="L44">    printer.println(&quot;Successful to install %s.&quot;, packageName);</span>
-<span class="nc" id="L45">    printer.println(&quot;Install path: &lt;green&gt;%s&lt;/green&gt;&quot;, publishPath);</span>
-<span class="nc" id="L46">  }</span>
+<span class="fc" id="L46">    createDirectories(publishPath);</span>
+<span class="fc" id="L47">    fileSet.copyTo(publishPath);</span>
+<span class="fc" id="L48">    printer.println(bind(NL_0, packageName));</span>
+<span class="fc" id="L49">    printer.println(bind(NL_1, publishPath));</span>
+<span class="fc" id="L50">  }</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConsoleServer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ship</a> &gt; <a href="index.source.html" class="el_package">ship.build</a> &gt; <span class="el_source">ConsoleServer.java</span></div><h1>ConsoleServer.java</h1><pre class="source lang-java linenums">package ship.build;
 
 import static java.util.Optional.ofNullable;
+import static ship.util.Messages.bind;
 
 import hera.server.AbstractServer;
 import hera.server.ServerStatus;
@@ -14,24 +15,35 @@ import ship.test.TestReportNode;
 import ship.util.DummyMessagePrinter;
 import ship.util.MessagePrinter;
 
-<span class="fc" id="L17">public class ConsoleServer extends AbstractServer {</span>
+<span class="fc" id="L18">public class ConsoleServer extends AbstractServer {</span>
+
+<span class="fc" id="L20">  protected static final String NL_0 = ConsoleServer.class.getName() + &quot;.0&quot;;</span>
+<span class="fc" id="L21">  protected static final String NL_1 = ConsoleServer.class.getName() + &quot;.1&quot;;</span>
+<span class="fc" id="L22">  protected static final String NL_2 = ConsoleServer.class.getName() + &quot;.2&quot;;</span>
+<span class="fc" id="L23">  protected static final String NL_3 = ConsoleServer.class.getName() + &quot;.3&quot;;</span>
+<span class="fc" id="L24">  protected static final String NL_4 = ConsoleServer.class.getName() + &quot;.4&quot;;</span>
+<span class="fc" id="L25">  protected static final String NL_5 = ConsoleServer.class.getName() + &quot;.5&quot;;</span>
+<span class="fc" id="L26">  protected static final String NL_6 = ConsoleServer.class.getName() + &quot;.6&quot;;</span>
+<span class="fc" id="L27">  protected static final String NL_7 = ConsoleServer.class.getName() + &quot;.7&quot;;</span>
+<span class="fc" id="L28">  protected static final String NL_8 = ConsoleServer.class.getName() + &quot;.8&quot;;</span>
+<span class="fc" id="L29">  protected static final String NL_9 = ConsoleServer.class.getName() + &quot;.9&quot;;</span>
 
   protected static final String CLEAR_SCREEN = &quot;\033[2J&quot;;
   protected static final String GO_HOME = &quot;\033[H&quot;;
 
-<span class="fc" id="L22">  @Getter</span>
-<span class="fc" id="L23">  @Setter</span>
-<span class="fc" id="L24">  protected MessagePrinter printer = DummyMessagePrinter.getInstance();</span>
+<span class="fc" id="L34">  @Getter</span>
+<span class="fc" id="L35">  @Setter</span>
+<span class="fc" id="L36">  protected MessagePrinter printer = DummyMessagePrinter.getInstance();</span>
 
   @Override
   public void boot() {
-<span class="fc" id="L28">    changeStatus(ServerStatus.PROCESSING);</span>
-<span class="fc" id="L29">  }</span>
+<span class="fc" id="L40">    changeStatus(ServerStatus.PROCESSING);</span>
+<span class="fc" id="L41">  }</span>
 
   @Override
   public void down() {
-<span class="fc" id="L33">    changeStatus(ServerStatus.TERMINATED);</span>
-<span class="fc" id="L34">  }</span>
+<span class="fc" id="L45">    changeStatus(ServerStatus.TERMINATED);</span>
+<span class="fc" id="L46">  }</span>
 
   /**
    * Process build result.
@@ -39,93 +51,83 @@ import ship.util.MessagePrinter;
    * @param details build result
    */
   public void process(final BuildDetails details) {
-<span class="pc bpc" id="L42" title="1 of 2 branches missed.">    if (!isStatus(ServerStatus.PROCESSING)) {</span>
-<span class="nc" id="L43">      return;</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">    if (!isStatus(ServerStatus.PROCESSING)) {</span>
+<span class="nc" id="L55">      return;</span>
     }
 
-<span class="fc" id="L46">    clearScreen();</span>
-<span class="fc" id="L47">    printResult(details);</span>
-<span class="fc" id="L48">    printer.println();</span>
-<span class="pc bpc" id="L49" title="3 of 4 branches missed.">    if (BuildSummary.SUCCESS == details.getState() || null == details.getError()) {</span>
-<span class="fc" id="L50">      printTest(details);</span>
+<span class="fc" id="L58">    clearScreen();</span>
+<span class="fc" id="L59">    printResult(details);</span>
+<span class="fc" id="L60">    printer.println();</span>
+<span class="pc bpc" id="L61" title="1 of 4 branches missed.">    if (BuildSummary.SUCCESS == details.getState() || null == details.getError()) {</span>
+<span class="fc" id="L62">      printTest(details);</span>
     } else {
-<span class="nc" id="L52">      printError(details);</span>
+<span class="fc" id="L64">      printer.println(bind(NL_0, details.getError()));</span>
     }
 
     try {
-<span class="fc" id="L56">      printer.flush();</span>
-<span class="nc" id="L57">    } catch (final IOException e) {</span>
-<span class="nc" id="L58">      logger.trace(&quot;Ignore exception&quot;, e);</span>
-<span class="fc" id="L59">    }</span>
-<span class="fc" id="L60">  }</span>
+<span class="fc" id="L68">      printer.flush();</span>
+<span class="nc" id="L69">    } catch (final IOException e) {</span>
+<span class="nc" id="L70">      logger.trace(&quot;Ignore exception&quot;, e);</span>
+<span class="fc" id="L71">    }</span>
+<span class="fc" id="L72">  }</span>
 
   protected void clearScreen() {
-<span class="fc" id="L63">    printer.print(CLEAR_SCREEN);</span>
-<span class="fc" id="L64">    printer.print(GO_HOME);</span>
-<span class="fc" id="L65">  }</span>
+<span class="fc" id="L75">    printer.print(CLEAR_SCREEN);</span>
+<span class="fc" id="L76">    printer.print(GO_HOME);</span>
+<span class="fc" id="L77">  }</span>
 
   protected void printResult(final BuildSummary summary) {
-<span class="fc" id="L68">    final String now = new Date().toString();</span>
-<span class="pc bpc" id="L69" title="3 of 4 branches missed.">    switch (summary.getState()) {</span>
+<span class="fc" id="L80">    final String now = new Date().toString();</span>
+<span class="pc bpc" id="L81" title="2 of 4 branches missed.">    switch (summary.getState()) {</span>
       case BuildSummary.SUCCESS:
-<span class="fc" id="L71">        printer.println(&quot;&lt;bg_green&gt;&lt;black&gt; SUCCESS &lt;/black&gt;&lt;/bg_green&gt;      &quot;</span>
-                + &quot;&lt;green&gt;%-30s&lt;/green&gt;&lt;bright_black&gt;%s&lt;/bright_black&gt;&quot;,
-<span class="fc" id="L73">            summary.getElapsedTime() + &quot; ms elapsed&quot;, now);</span>
-<span class="fc" id="L74">        break;</span>
+<span class="fc" id="L83">        printer.println(</span>
+<span class="fc" id="L84">            bind(NL_1, String.format(&quot;%-30s&quot;, summary.getElapsedTime() + &quot; ms elapsed&quot;), now));</span>
+<span class="fc" id="L85">        break;</span>
       case BuildSummary.BUILD_FAIL:
-<span class="nc" id="L76">        printer.println(&quot;&lt;bg_red&gt;&lt;black&gt; ERROR! &lt;/black&gt;&lt;/bg_red&gt;       &quot;</span>
-                + &quot;%30s&lt;bright_black&gt;%s&lt;/bright_black&gt;&quot;,
-            &quot; &quot;, now);
-<span class="nc" id="L79">        break;</span>
+<span class="fc" id="L87">        printer.println(bind(NL_2, String.format(&quot;%30s&quot;, &quot; &quot;), now));</span>
+<span class="fc" id="L88">        break;</span>
       case BuildSummary.TEST_FAIL:
-<span class="nc" id="L81">        printer.println(&quot;&lt;bg_red&gt;&lt;black&gt; TEST FAILURE! &lt;/black&gt;&lt;/bg_red&gt;&quot;</span>
-                + &quot;%30s&lt;bright_black&gt;%s&lt;/bright_black&gt;&quot;,
-            &quot; &quot;, now);
-<span class="nc" id="L84">        break;</span>
+<span class="nc" id="L90">        printer.println(bind(NL_3, String.format(&quot;%30s&quot;, &quot; &quot;), now));</span>
+<span class="nc" id="L91">        break;</span>
       default:
-<span class="nc" id="L86">        throw new IllegalArgumentException(&quot;Unknown state: &quot; + summary.getState());</span>
+<span class="nc" id="L93">        throw new IllegalArgumentException(&quot;Unknown state: &quot; + summary.getState());</span>
     }
-<span class="fc" id="L88">  }</span>
-
-  protected void printError(final BuildDetails buildDetails) {
-<span class="nc" id="L91">    printer.println(&quot;&lt;red&gt;%s&lt;/red&gt;&quot;, buildDetails.getError());</span>
-<span class="nc" id="L92">  }</span>
+<span class="fc" id="L95">  }</span>
 
   protected void printTest(final BuildDetails buildDetails) {
-<span class="fc" id="L95">    ofNullable(buildDetails).map(BuildDetails::getUnitTestReport).ifPresent(testReport -&gt; {</span>
-<span class="fc" id="L96">      testReport.forEach(this::print);</span>
-<span class="fc" id="L97">    });</span>
-<span class="fc" id="L98">  }</span>
+<span class="fc" id="L98">    ofNullable(buildDetails).map(BuildDetails::getUnitTestReport).ifPresent(testReport -&gt; {</span>
+<span class="fc" id="L99">      testReport.forEach(this::print);</span>
+<span class="fc" id="L100">    });</span>
+<span class="fc" id="L101">  }</span>
 
   protected void print(final TestReportNode node) {
-<span class="pc bpc" id="L101" title="1 of 2 branches missed.">    if (node.isSuccess()) {</span>
-<span class="fc" id="L102">      printer.println(&quot; &lt;bg_blue&gt; F &lt;/bg_blue&gt; %s&quot;, node.getName());</span>
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">    if (node.isSuccess()) {</span>
+<span class="nc" id="L105">      printer.println(bind(NL_4, node.getName()));</span>
     } else {
-<span class="nc" id="L104">      printer.println(&quot; &lt;bg_blue&gt; F &lt;/bg_blue&gt; &lt;red&gt;$s&lt;/red&gt;&quot;, node.getName());</span>
+<span class="fc" id="L107">      printer.println(bind(NL_5, node.getName()));</span>
     }
-<span class="pc" id="L106">    node.getChildren().forEach(child -&gt; this.printSuite((TestReportNode) child));</span>
-<span class="fc" id="L107">  }</span>
+<span class="fc" id="L109">    node.getChildren().forEach(child -&gt; this.printSuite((TestReportNode) child));</span>
+<span class="fc" id="L110">  }</span>
 
   protected void printSuite(final TestReportNode node) {
-<span class="nc" id="L110">    final long nFailures = node.getTheNumberOfFailures();</span>
-<span class="nc bnc" id="L111" title="All 2 branches missed.">    if (0 &lt; nFailures) {</span>
-<span class="nc" id="L112">      printer.print(&quot;    * %s(&lt;red&gt;%s&lt;/red&gt; / %s)&quot;,</span>
-<span class="nc" id="L113">          node.getName(), node.getTheNumberOfSuccesses(), node.getTheNumberOfTests());</span>
+<span class="fc" id="L113">    final long nFailures = node.getTheNumberOfFailures();</span>
+<span class="fc" id="L114">    final String name = node.getName();</span>
+<span class="fc" id="L115">    final int successes = node.getTheNumberOfSuccesses();</span>
+<span class="fc" id="L116">    final int runs = node.getTheNumberOfTests();</span>
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">    if (0 &lt; nFailures) {</span>
+<span class="fc" id="L118">      printer.print(bind(NL_6, name, successes, runs));</span>
     } else {
-<span class="nc" id="L115">      printer.println(&quot;   * %s(%s / %s)&quot;,</span>
-<span class="nc" id="L116">          node.getName(), node.getTheNumberOfSuccesses(), node.getTheNumberOfTests());</span>
+<span class="nc" id="L120">      printer.print(bind(NL_7, name, successes, runs));</span>
     }
-<span class="nc" id="L118">    node.getChildren().forEach(child -&gt; this.printCase((TestReportNode) child));</span>
-<span class="nc" id="L119">  }</span>
+<span class="fc" id="L122">    node.getChildren().forEach(child -&gt; this.printCase((TestReportNode) child));</span>
+<span class="fc" id="L123">  }</span>
 
   protected void printCase(final TestReportNode node) {
-<span class="nc bnc" id="L122" title="All 2 branches missed.">    if (node.isSuccess()) {</span>
-<span class="nc" id="L123">      printer.println(&quot;     -  %s &lt;bright_black&gt;%s ms&lt;/bright_black&gt;&quot;,</span>
-<span class="nc" id="L124">          node.getName(), (node.getEndTime() - node.getStartTime()));</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">    if (node.isSuccess()) {</span>
+<span class="fc" id="L127">      printer.println(bind(NL_8, node.getName(), (node.getEndTime() - node.getStartTime())));</span>
     } else {
-<span class="nc" id="L126">      printer.println(&quot;    &lt;bg_red&gt; - %s - %s &lt;/bg_red&gt;&quot;,</span>
-<span class="nc" id="L127">          node.getName(), node.getResultDetail());</span>
+<span class="fc" id="L129">      printer.println(bind(NL_9, node.getName(), node.getResultDetail()));</span>
     }
-<span class="nc" id="L129">  }</span>
+<span class="fc" id="L131">  }</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

@@ -10,35 +10,40 @@ import static hera.util.FilepathUtils.append;
 import static hera.util.ValidationUtils.assertNotNull;
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.exists;
+import static ship.util.Messages.bind;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import ship.FileSet;
 import ship.ProjectFile;
 
-<span class="nc" id="L19">public class PublishPackage extends AbstractCommand {</span>
+<span class="fc" id="L20">public class PublishPackage extends AbstractCommand {</span>
+
+<span class="fc" id="L22">  protected static final String NL_0 = PublishPackage.class.getName() + &quot;.0&quot;;</span>
+<span class="fc" id="L23">  protected static final String NL_1 = PublishPackage.class.getName() + &quot;.1&quot;;</span>
+<span class="fc" id="L24">  protected static final String NL_2 = PublishPackage.class.getName() + &quot;.2&quot;;</span>
 
   @Override
   public void execute() throws Exception {
-<span class="nc" id="L23">    logger.trace(&quot;Starting {}...&quot;, this);</span>
+<span class="fc" id="L28">    logger.trace(&quot;Starting {}...&quot;, this);</span>
 
-<span class="nc" id="L25">    final ProjectFile rootProject = readProject();</span>
-<span class="nc" id="L26">    final String buildTarget = rootProject.getTarget();</span>
-<span class="nc" id="L27">    assertNotNull(buildTarget, &quot;No target!! add target field to aergo.json.&quot;);</span>
+<span class="fc" id="L30">    final ProjectFile rootProject = readProject();</span>
+<span class="fc" id="L31">    final String buildTarget = rootProject.getTarget();</span>
+<span class="fc" id="L32">    assertNotNull(buildTarget, bind(NL_0));</span>
 
-<span class="nc bnc" id="L29" title="All 2 branches missed.">    if (!exists(Paths.get(buildTarget))) {</span>
-<span class="nc" id="L30">      new BuildProject().execute();</span>
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">    if (!exists(Paths.get(buildTarget))) {</span>
+<span class="fc" id="L35">      new BuildProject().execute();</span>
     }
 
-<span class="nc" id="L33">    final String publishRepository = append(System.getProperty(&quot;user.home&quot;), &quot;.aergo_modules&quot;);</span>
-<span class="nc" id="L34">    final Path publishPath = Paths.get(append(publishRepository, rootProject.getName()));</span>
-<span class="nc bnc" id="L35" title="All 2 branches missed.">    if (exists(publishPath)) {</span>
-<span class="nc" id="L36">      deleteRecursively(publishPath, ALLOW_INSECURE);</span>
+<span class="fc" id="L38">    final String publishRepository = append(System.getProperty(&quot;user.home&quot;), &quot;.aergo_modules&quot;);</span>
+<span class="fc" id="L39">    final Path publishPath = Paths.get(append(publishRepository, rootProject.getName()));</span>
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">    if (exists(publishPath)) {</span>
+<span class="nc" id="L41">      deleteRecursively(publishPath, ALLOW_INSECURE);</span>
     }
-<span class="nc" id="L38">    createDirectories(publishPath);</span>
-<span class="nc" id="L39">    FileSet.from(Paths.get(&quot;.&quot;)).copyTo(publishPath);</span>
-<span class="nc" id="L40">    printer.println(&quot;Successful to publish %s.&quot;, rootProject.getName());</span>
-<span class="nc" id="L41">    printer.println(&quot;Publish path: &lt;green&gt;%s&lt;/green&gt;&quot;, publishPath);</span>
-<span class="nc" id="L42">  }</span>
+<span class="fc" id="L43">    createDirectories(publishPath);</span>
+<span class="fc" id="L44">    FileSet.from(Paths.get(&quot;.&quot;)).copyTo(publishPath);</span>
+<span class="fc" id="L45">    printer.println(bind(NL_1, rootProject.getName()));</span>
+<span class="fc" id="L46">    printer.println(bind(NL_2, publishPath));</span>
+<span class="fc" id="L47">  }</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

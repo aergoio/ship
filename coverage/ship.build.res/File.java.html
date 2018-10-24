@@ -35,12 +35,12 @@ public class File extends Resource {
   public BufferedReader open() throws IOException {
     try {
 <span class="fc" id="L37">      return new BufferedReader(new InputStreamReader(contentProvider.get()));</span>
-<span class="nc" id="L38">    } catch (final IOException ex) {</span>
-<span class="nc" id="L39">      logger.error(&quot;Fail to open {}&quot;, getPath());</span>
-<span class="nc" id="L40">      throw ex;</span>
+<span class="fc" id="L38">    } catch (final IOException ex) {</span>
+<span class="fc" id="L39">      logger.error(&quot;Fail to open {}&quot;, getPath());</span>
+<span class="fc" id="L40">      throw ex;</span>
 <span class="nc" id="L41">    } catch (final Throwable ex) {</span>
 <span class="nc" id="L42">      throw new IllegalStateException(ex);</span>
     }
   }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

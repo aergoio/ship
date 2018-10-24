@@ -5,14 +5,15 @@
 package ship.build;
 
 import static hera.util.FilepathUtils.getCanonicalForm;
+import static java.util.Optional.ofNullable;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.FileNotFoundException;
-import java.io.StringWriter;
 import java.nio.file.NoSuchFileException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 import lombok.Getter;
@@ -23,14 +24,13 @@ import ship.build.res.Source;
 import ship.build.web.model.BuildDependency;
 import ship.build.web.model.BuildDetails;
 import ship.exception.BuildException;
-import ship.exception.CyclicDependencyException;
 
 <span class="fc" id="L28">@RequiredArgsConstructor</span>
 public class Concatenator {
 
 <span class="fc" id="L31">  protected final transient Logger logger = getLogger(getClass());</span>
 
-<span class="fc" id="L33">  protected final Set&lt;Resource&gt; processing = new LinkedHashSet&lt;&gt;();</span>
+<span class="fc" id="L33">  protected final CallStack callStack = new CallStack();</span>
 
 <span class="fc" id="L35">  @Getter</span>
   protected final ResourceManager resourceManager;
@@ -70,9 +70,9 @@ public class Concatenator {
    * @return concatenated result
    */
   public BuildDetails visit(final Resource resource) {
-<span class="fc" id="L73">    final BuildDependency dependencyRoot = new BuildDependency();</span>
+<span class="fc" id="L73">    final BuildDependency dependencyRoot = new BuildDependency(null);</span>
 <span class="fc" id="L74">    dependencyRoot.setName(resource.getLocation());</span>
-<span class="fc" id="L75">    String contents = visit(resource, dependencyRoot);</span>
+<span class="fc" id="L75">    final String contents = visit(resource, dependencyRoot);</span>
 
 <span class="fc" id="L77">    final BuildDetails buildDetails = new BuildDetails();</span>
 <span class="fc" id="L78">    buildDetails.setResult(contents);</span>
@@ -93,64 +93,43 @@ public class Concatenator {
 <span class="pc bpc" id="L93" title="1 of 2 branches missed.">    if (visitedResources.contains(resource)) {</span>
 <span class="nc" id="L94">      return null;</span>
     }
-<span class="pc bpc" id="L96" title="1 of 2 branches missed.">    if (processing.contains(resource)) {</span>
-<span class="nc" id="L97">      final StringJoiner joiner = new StringJoiner(&quot;-&gt;&quot;);</span>
-<span class="nc" id="L98">      processing.stream().map(Object::toString).forEach(joiner::add);</span>
-<span class="nc" id="L99">      joiner.add(resource.toString());</span>
-<span class="nc" id="L100">      throw new CyclicDependencyException(joiner.toString());</span>
-    }
 
-<span class="fc" id="L103">    boolean needsDelimiter = false;</span>
-<span class="fc" id="L104">    final StringWriter contentWriter = new StringWriter();</span>
-
+<span class="fc" id="L97">    final StringJoiner contentWriter = new StringJoiner(&quot;\n&quot;);</span>
     try {
-<span class="fc" id="L107">      processing.add(resource);</span>
+<span class="fc" id="L99">      callStack.enter(resource);</span>
+<span class="fc" id="L100">      final Concatenator next = resource.adapt(ResourceManager.class)</span>
+<span class="pc" id="L101">          .map(newResourceManager -&gt; new Concatenator(newResourceManager, visitedResources))</span>
+<span class="fc" id="L102">          .orElse(this);</span>
+<span class="fc" id="L103">      logger.debug(&quot;Resource manager changed: {} -&gt; {}&quot;, this, next);</span>
+<span class="fc" id="L104">      visitDependencies(next, resource).forEach(childDependency -&gt; {</span>
+<span class="fc" id="L105">        final Resource parent = childDependency.getParent();</span>
+<span class="fc" id="L106">        ofNullable(next.visit(parent, childDependency)).ifPresent(contentWriter::add);</span>
+<span class="fc" id="L107">        resourceDependency.add(childDependency);</span>
+<span class="fc" id="L108">      });</span>
 
-<span class="fc" id="L109">      final Optional&lt;ResourceManager&gt; resourceManagerOpt = resource.adapt(ResourceManager.class);</span>
-<span class="fc" id="L110">      final Concatenator next = resourceManagerOpt</span>
-<span class="pc" id="L111">          .map(newResourceManager -&gt; new Concatenator(newResourceManager, visitedResources))</span>
-<span class="fc" id="L112">          .orElse(this);</span>
-<span class="pc bpc" id="L113" title="1 of 2 branches missed.">      if (this != next) {</span>
-<span class="nc" id="L114">        logger.info(&quot;Resource manager changed: {} -&gt; {}&quot;, this, next);</span>
-      }
-<span class="fc" id="L116">      final ResourceManager nextResourceManager = next.getResourceManager();</span>
-<span class="fc" id="L117">      final List&lt;Resource&gt; dependencies = resource.getDependencies(nextResourceManager);</span>
-<span class="fc" id="L118">      logger.debug(&quot;Dependencies of {}: {}&quot;, resource, dependencies);</span>
-<span class="fc bfc" id="L119" title="All 2 branches covered.">      for (final Resource dependency : dependencies) {</span>
-<span class="fc" id="L120">        final BuildDependency childDependency = new BuildDependency();</span>
-<span class="fc" id="L121">        childDependency.setName(dependency.getLocation());</span>
-<span class="fc" id="L122">        final String contents = next.visit(dependency, childDependency);</span>
-<span class="fc" id="L123">        resourceDependency.add(childDependency);</span>
-<span class="pc bpc" id="L124" title="1 of 2 branches missed.">        if (null == contents) {</span>
-<span class="nc" id="L125">          continue;</span>
-        }
-<span class="pc bpc" id="L127" title="1 of 2 branches missed.">        if (needsDelimiter) {</span>
-<span class="nc" id="L128">          contentWriter.write(&quot;\n&quot;);</span>
-        }
-<span class="fc" id="L130">        contentWriter.write(contents);</span>
-<span class="fc" id="L131">        needsDelimiter = true;</span>
-<span class="fc" id="L132">      }</span>
-<span class="fc" id="L133">      final String contents = resource.adapt(Source.class).map(next::visit).orElse(null);</span>
-<span class="fc bfc" id="L134" title="All 2 branches covered.">      if (null != contents) {</span>
-<span class="fc bfc" id="L135" title="All 2 branches covered.">        if (needsDelimiter) {</span>
-<span class="fc" id="L136">          contentWriter.write(&quot;\n&quot;);</span>
-        }
-<span class="fc" id="L138">        contentWriter.write(contents);</span>
-<span class="fc" id="L139">        needsDelimiter = true;</span>
-      }
-
-<span class="fc" id="L142">      processing.remove(resource);</span>
-<span class="fc" id="L143">      visitedResources.add(resource);</span>
-<span class="pc bpc" id="L144" title="1 of 2 branches missed.">      if (needsDelimiter) {</span>
-<span class="fc" id="L145">        return contentWriter.toString();</span>
-      } else {
-<span class="nc" id="L147">        return null;</span>
-      }
-<span class="nc" id="L149">    } catch (final BuildException e) {</span>
-<span class="nc" id="L150">      throw e;</span>
-<span class="nc" id="L151">    } catch (final Throwable ex) {</span>
-<span class="nc" id="L152">      throw new BuildException(ex);</span>
+<span class="fc" id="L110">      resource.adapt(Source.class).map(next::visit).ifPresent(contentWriter::add);</span>
+<span class="fc" id="L111">      callStack.exit(resource);</span>
+<span class="fc" id="L112">      visitedResources.add(resource);</span>
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">      return (0 &lt; contentWriter.length()) ? contentWriter.toString() : null;</span>
+<span class="nc" id="L114">    } catch (final BuildException e) {</span>
+<span class="nc" id="L115">      throw e;</span>
+<span class="nc" id="L116">    } catch (final Throwable ex) {</span>
+<span class="nc" id="L117">      throw new BuildException(ex);</span>
     }
   }
+
+  protected Collection&lt;BuildDependency&gt; visitDependencies(final Concatenator next,
+      final Resource resource) throws Exception {
+<span class="fc" id="L123">    final ResourceManager nextResourceManager = next.getResourceManager();</span>
+<span class="fc" id="L124">    final List&lt;Resource&gt; dependencies = resource.getDependencies(nextResourceManager);</span>
+<span class="fc" id="L125">    logger.debug(&quot;Dependencies of {}: {}&quot;, resource, dependencies);</span>
+<span class="fc" id="L126">    final List&lt;BuildDependency&gt; resourceDependency = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L127" title="All 2 branches covered.">    for (final Resource dependency : dependencies) {</span>
+<span class="fc" id="L128">      final BuildDependency childDependency = new BuildDependency(dependency);</span>
+<span class="fc" id="L129">      childDependency.setName(dependency.getLocation());</span>
+<span class="fc" id="L130">      resourceDependency.add(childDependency);</span>
+<span class="fc" id="L131">    }</span>
+<span class="fc" id="L132">    return resourceDependency;</span>
+  }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

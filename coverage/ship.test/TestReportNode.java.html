@@ -17,23 +17,23 @@ import lombok.Setter;
 public class TestReportNode&lt;ResultDetailT&gt; {
 
 <span class="fc" id="L19">  @Getter</span>
-<span class="nc" id="L20">  @Setter</span>
+<span class="fc" id="L20">  @Setter</span>
   protected String name;
 
 <span class="pc" id="L23">  @Getter</span>
-<span class="nc" id="L24">  @Setter</span>
+<span class="fc" id="L24">  @Setter</span>
   protected TestReportNodeResult result = Unknown;
 
 <span class="pc" id="L27">  @Getter</span>
 <span class="nc" id="L28">  @Setter</span>
 <span class="pc" id="L29">  protected long startTime = currentTimeMillis();</span>
 
-<span class="nc" id="L31">  @Getter</span>
-<span class="nc" id="L32">  @Setter</span>
+<span class="fc" id="L31">  @Getter</span>
+<span class="fc" id="L32">  @Setter</span>
   protected long endTime;
 
-<span class="nc" id="L35">  @Getter</span>
-<span class="nc" id="L36">  @Setter</span>
+<span class="fc" id="L35">  @Getter</span>
+<span class="fc" id="L36">  @Setter</span>
   protected ResultDetailT resultDetail;
 
 <span class="pc" id="L39">  @Getter</span>
@@ -66,13 +66,13 @@ public class TestReportNode&lt;ResultDetailT&gt; {
    * @return if success
    */
   public boolean isSuccess() {
-<span class="pc bpc" id="L69" title="2 of 3 branches missed.">    switch (this.result) {</span>
+<span class="fc bfc" id="L69" title="All 3 branches covered.">    switch (this.result) {</span>
       case Success:
-<span class="nc" id="L71">        return true;</span>
+<span class="fc" id="L71">        return true;</span>
       case Failure:
-<span class="nc" id="L73">        return false;</span>
+<span class="fc" id="L73">        return false;</span>
       default:
-<span class="pc" id="L75">        return children.stream().allMatch(child -&gt; child.isSuccess());</span>
+<span class="fc" id="L75">        return children.stream().allMatch(child -&gt; child.isSuccess());</span>
     }
   }
 
@@ -82,13 +82,13 @@ public class TestReportNode&lt;ResultDetailT&gt; {
    * @return if failure
    */
   public boolean isFailure() {
-<span class="nc bnc" id="L85" title="All 3 branches missed.">    switch (this.result) {</span>
+<span class="pc bpc" id="L85" title="1 of 3 branches missed.">    switch (this.result) {</span>
       case Success:
 <span class="nc" id="L87">        return false;</span>
       case Failure:
-<span class="nc" id="L89">        return true;</span>
+<span class="fc" id="L89">        return true;</span>
       default:
-<span class="nc" id="L91">        return children.stream().anyMatch(child -&gt; child.isFailure());</span>
+<span class="pc" id="L91">        return children.stream().anyMatch(child -&gt; child.isFailure());</span>
     }
   }
 
@@ -98,11 +98,11 @@ public class TestReportNode&lt;ResultDetailT&gt; {
    * @return the number of tests
    */
   public int getTheNumberOfTests() {
-<span class="nc bnc" id="L101" title="All 2 branches missed.">    if (children.isEmpty()) {</span>
-<span class="nc" id="L102">      return 1;</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">    if (children.isEmpty()) {</span>
+<span class="fc" id="L102">      return 1;</span>
     } else {
-<span class="nc" id="L104">      return children.stream().map(TestReportNode::getTheNumberOfTests)</span>
-<span class="nc" id="L105">          .reduce((a, b) -&gt; a + b).orElse(0);</span>
+<span class="fc" id="L104">      return children.stream().map(TestReportNode::getTheNumberOfTests)</span>
+<span class="fc" id="L105">          .reduce((a, b) -&gt; a + b).orElse(0);</span>
     }
   }
 
@@ -112,16 +112,7 @@ public class TestReportNode&lt;ResultDetailT&gt; {
    * @return the number of successes
    */
   public int getTheNumberOfSuccesses() {
-<span class="nc bnc" id="L115" title="All 2 branches missed.">    if (children.isEmpty()) {</span>
-<span class="nc bnc" id="L116" title="All 2 branches missed.">      if (this.resultDetail == Success) {</span>
-<span class="nc" id="L117">        return 1;</span>
-      } else {
-<span class="nc" id="L119">        return 0;</span>
-      }
-    } else {
-<span class="nc" id="L122">      return children.stream().map(TestReportNode::getTheNumberOfSuccesses)</span>
-<span class="nc" id="L123">          .reduce((a, b) -&gt; a + b).orElse(0);</span>
-    }
+<span class="fc" id="L115">    return aggregate(Success);</span>
   }
 
   /**
@@ -130,15 +121,19 @@ public class TestReportNode&lt;ResultDetailT&gt; {
    * @return the number of failures
    */
   public int getTheNumberOfFailures() {
-<span class="nc bnc" id="L133" title="All 2 branches missed.">    if (children.isEmpty()) {</span>
-<span class="nc bnc" id="L134" title="All 2 branches missed.">      if (this.resultDetail == Failure) {</span>
-<span class="nc" id="L135">        return 1;</span>
+<span class="fc" id="L124">    return aggregate(Failure);</span>
+  }
+
+  protected int aggregate(final TestReportNodeResult filterValue) {
+<span class="fc bfc" id="L128" title="All 2 branches covered.">    if (children.isEmpty()) {</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">      if (this.result == filterValue) {</span>
+<span class="fc" id="L130">        return 1;</span>
       } else {
-<span class="nc" id="L137">        return 0;</span>
+<span class="fc" id="L132">        return 0;</span>
       }
     } else {
-<span class="nc" id="L140">      return children.stream().map(TestReportNode::getTheNumberOfFailures)</span>
-<span class="nc" id="L141">          .reduce((a, b) -&gt; a + b).orElse(0);</span>
+<span class="fc" id="L135">      return children.stream().map(child -&gt; child.aggregate(filterValue))</span>
+<span class="fc" id="L136">          .reduce((a, b) -&gt; a + b).orElse(0);</span>
     }
   }
 
@@ -148,7 +143,7 @@ public class TestReportNode&lt;ResultDetailT&gt; {
    * @param child node to add
    */
   public void addChild(TestReportNode&lt;?&gt; child) {
-<span class="nc" id="L151">    this.children.add(child);</span>
-<span class="nc" id="L152">  }</span>
+<span class="fc" id="L146">    this.children.add(child);</span>
+<span class="fc" id="L147">  }</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

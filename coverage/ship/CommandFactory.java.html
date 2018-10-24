@@ -5,6 +5,7 @@
 package ship;
 
 import static java.util.Arrays.asList;
+import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 
 import java.util.Optional;
@@ -17,34 +18,34 @@ import ship.command.PublishPackage;
 import ship.command.TestProject;
 import ship.util.MessagePrinter;
 
-<span class="nc" id="L20">@RequiredArgsConstructor</span>
+<span class="fc" id="L21">@RequiredArgsConstructor</span>
 public class CommandFactory {
 
   protected final MessagePrinter printer;
 
   protected Command createInternal(final String keyword) {
-<span class="nc bnc" id="L26" title="All 6 branches missed.">    switch (keyword) {</span>
+<span class="fc bfc" id="L27" title="All 6 branches covered.">    switch (keyword) {</span>
       case &quot;init&quot;:
-<span class="nc" id="L28">        return new CreateProject();</span>
+<span class="fc" id="L29">        return new CreateProject();</span>
       case &quot;install&quot;:
-<span class="nc" id="L30">        return new InstallPackage();</span>
+<span class="fc" id="L31">        return new InstallPackage();</span>
       case &quot;build&quot;:
-<span class="nc" id="L32">        return new BuildProject();</span>
+<span class="fc" id="L33">        return new BuildProject();</span>
       case &quot;test&quot;:
-<span class="nc" id="L34">        return new TestProject();</span>
+<span class="fc" id="L35">        return new TestProject();</span>
       case &quot;publish&quot;:
-<span class="nc" id="L36">        return new PublishPackage();</span>
+<span class="fc" id="L37">        return new PublishPackage();</span>
       default:
-<span class="nc" id="L38">        return null;</span>
+<span class="fc" id="L39">        return null;</span>
     }
   }
 
   protected Optional&lt;Command&gt; create(final String keyword) {
-<span class="nc" id="L43">    final Command command = createInternal(keyword);</span>
-<span class="nc bnc" id="L44" title="All 2 branches missed.">    if (command instanceof AbstractCommand) {</span>
-<span class="nc" id="L45">      ((AbstractCommand) command).setPrinter(printer);</span>
+<span class="fc" id="L44">    final Command command = createInternal(keyword);</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">    if (command instanceof AbstractCommand) {</span>
+<span class="fc" id="L46">      ((AbstractCommand) command).setPrinter(printer);</span>
     }
-<span class="nc" id="L47">    return ofNullable(command);</span>
+<span class="fc" id="L48">    return ofNullable(command);</span>
   }
 
   /**
@@ -55,10 +56,13 @@ public class CommandFactory {
    * @return command if exists
    */
   public Optional&lt;Command&gt; create(final String[] args) {
-<span class="nc" id="L58">    Optional&lt;Command&gt; commandOpt = create(args[0]);</span>
-<span class="nc" id="L59">    commandOpt.ifPresent(command -&gt; command.setArguments(asList(args).subList(1, args.length)));</span>
-<span class="nc" id="L60">    return commandOpt;</span>
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">    if (0 == args.length) {</span>
+<span class="nc" id="L60">      return empty();</span>
+    }
+<span class="fc" id="L62">    Optional&lt;Command&gt; commandOpt = create(args[0]);</span>
+<span class="fc" id="L63">    commandOpt.ifPresent(command -&gt; command.setArguments(asList(args).subList(1, args.length)));</span>
+<span class="fc" id="L64">    return commandOpt;</span>
   }
 
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

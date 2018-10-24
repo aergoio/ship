@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BuildProjectCommandMode.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ship</a> &gt; <a href="index.source.html" class="el_package">ship.command</a> &gt; <span class="el_source">BuildProjectCommandMode.java</span></div><h1>BuildProjectCommandMode.java</h1><pre class="source lang-java linenums">package ship.command;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static ship.build.web.model.BuildSummary.BUILD_FAIL;
+import static ship.build.web.model.BuildSummary.SUCCESS;
+import static ship.build.web.model.BuildSummary.TEST_FAIL;
+import static ship.util.Messages.bind;
+
+import com.google.common.base.Stopwatch;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import lombok.Getter;
+import lombok.Setter;
+import ship.Builder;
+import ship.BuilderFactory;
+import ship.ProjectFile;
+import ship.build.ResourceManager;
+import ship.build.res.Project;
+import ship.build.web.model.BuildDetails;
+
+<span class="fc" id="L21">public class BuildProjectCommandMode extends AbstractCommand {</span>
+
+<span class="fc" id="L23">  protected static final String NL_0 = BuildProject.class.getName() + &quot;.0&quot;;</span>
+<span class="fc" id="L24">  protected static final String NL_1 = BuildProject.class.getName() + &quot;.1&quot;;</span>
+<span class="fc" id="L25">  protected static final String NL_2 = BuildProject.class.getName() + &quot;.2&quot;;</span>
+<span class="fc" id="L26">  protected static final String NL_3 = BuildProject.class.getName() + &quot;.3&quot;;</span>
+<span class="fc" id="L27">  protected static final String NL_4 = BuildProject.class.getName() + &quot;.4&quot;;</span>
+
+  protected Project project;
+
+<span class="pc" id="L31">  @Getter</span>
+<span class="nc" id="L32">  @Setter</span>
+<span class="fc" id="L33">  protected BuilderFactory builderFactory = project -&gt; new Builder(new ResourceManager(project));</span>
+
+  protected Builder builder;
+
+<span class="fc" id="L37">  @Getter</span>
+  protected BuildDetails lastBuildResult;
+
+<span class="pc" id="L40">  @Getter</span>
+<span class="fc" id="L41">  @Setter</span>
+  protected WriteProjectTarget targetWriter = new WriteProjectTarget();
+
+  protected BuildDetails build(final Project project) {
+<span class="fc" id="L45">    logger.debug(&quot;Starting build...&quot;);</span>
+<span class="fc" id="L46">    final Stopwatch stopwatch = Stopwatch.createStarted();</span>
+<span class="fc" id="L47">    final ProjectFile projectFile = project.getProjectFile();</span>
+<span class="fc" id="L48">    final String buildTarget = projectFile.getTarget();</span>
+<span class="fc" id="L49">    final BuildDetails buildDetails = new BuildDetails();</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">    if (null == buildTarget) {</span>
+<span class="fc" id="L51">      buildDetails.setState(BUILD_FAIL);</span>
+<span class="fc" id="L52">      buildDetails.setError(bind(NL_4));</span>
+    } else {
+      try {
+<span class="fc" id="L55">        final BuildDetails builderResult = builder.build(buildTarget);</span>
+<span class="fc" id="L56">        logger.debug(&quot;Builder result: {}&quot;, builderResult);</span>
+<span class="fc" id="L57">        buildDetails.copyFrom(builderResult);</span>
+<span class="fc" id="L58">        final byte[] bytes = buildDetails.getResult().getBytes();</span>
+<span class="pc" id="L59">        targetWriter.setContents(() -&gt; new ByteArrayInputStream(bytes));</span>
+<span class="fc" id="L60">        targetWriter.execute();</span>
+<span class="nc" id="L61">      } catch (final Throwable buildException) {</span>
+<span class="nc" id="L62">        logger.debug(&quot;Unexpected exception:&quot;, buildException);</span>
+<span class="nc" id="L63">        buildDetails.setState(BUILD_FAIL);</span>
+<span class="nc" id="L64">        buildDetails.setError(buildException.getMessage());</span>
+<span class="fc" id="L65">      }</span>
+    }
+<span class="fc" id="L67">    buildDetails.setElapsedTime(stopwatch.stop().elapsed(MILLISECONDS));</span>
+<span class="fc" id="L68">    lastBuildResult = buildDetails;</span>
+<span class="fc" id="L69">    return buildDetails;</span>
+  }
+
+  protected void initialize() throws IOException {
+<span class="fc" id="L73">    final ProjectFile projectFile = readProject();</span>
+<span class="fc" id="L74">    project = new Project(&quot;.&quot;, projectFile);</span>
+<span class="fc" id="L75">    builder = builderFactory.create(project);</span>
+<span class="fc" id="L76">    targetWriter.setProject(project);</span>
+<span class="fc" id="L77">  }</span>
+
+  @Override
+  public void execute() throws Exception {
+<span class="fc" id="L81">    initialize();</span>
+<span class="fc" id="L82">    final BuildDetails buildDetails = build(project);</span>
+<span class="fc" id="L83">    handle(buildDetails);</span>
+<span class="fc" id="L84">    this.lastBuildResult = buildDetails;</span>
+<span class="fc" id="L85">  }</span>
+
+  protected void handle(BuildDetails result) {
+<span class="fc" id="L88">    logger.debug(&quot;Build result: {}&quot;, result);</span>
+<span class="pc bpc" id="L89" title="3 of 4 branches missed.">    switch (result.getState()) {</span>
+      case SUCCESS:
+<span class="fc" id="L91">        getPrinter().println(bind(NL_0));</span>
+<span class="fc" id="L92">        getPrinter().println(bind(NL_1, project.getProjectFile().getTargetPath(getProjectHome())));</span>
+<span class="fc" id="L93">        break;</span>
+      case BUILD_FAIL:
+<span class="nc" id="L95">        getPrinter().println(bind(NL_2));</span>
+<span class="nc" id="L96">        final String errorMessage = result.getError();</span>
+<span class="nc" id="L97">        getPrinter().println(bind(NL_3, errorMessage));</span>
+<span class="nc" id="L98">        break;</span>
+      case TEST_FAIL:
+<span class="nc" id="L100">        throw new IllegalStateException();</span>
+      default:
+<span class="nc" id="L102">        throw new IllegalStateException();</span>
+    }
+<span class="fc" id="L104">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

@@ -6,8 +6,8 @@ package ship.command;
 
 import static hera.util.FilepathUtils.getFilename;
 import static java.util.Collections.singletonList;
+import static ship.util.Messages.bind;
 
-import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import hera.util.IoUtils;
 import java.io.InputStream;
@@ -15,62 +15,67 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import ship.ApmConstants;
 import ship.Command;
 import ship.ProjectFile;
+import ship.exception.DirectoryNotEmptyException;
 
-<span class="nc" id="L26">public class CreateProject extends AbstractCommand implements Command {</span>
-<span class="nc" id="L27">  @ToString</span>
-<span class="nc" id="L28">  class Options {</span>
-<span class="nc" id="L29">    @Parameter(names = {&quot;-f&quot;, &quot;--force&quot;},</span>
+<span class="fc" id="L25">public class CreateProject extends AbstractCommand implements Command {</span>
+
+<span class="fc" id="L27">  protected static final String NL_0 = CreateProject.class.getName() + &quot;.0&quot;;</span>
+<span class="fc" id="L28">  protected static final String NL_1 = CreateProject.class.getName() + &quot;.1&quot;;</span>
+
+<span class="fc" id="L30">  @ToString</span>
+<span class="fc" id="L31">  class Options {</span>
+<span class="fc" id="L32">    @Parameter(names = {&quot;-f&quot;, &quot;--force&quot;},</span>
         description = &quot;Force to set aergo.json up though it exists.&quot;)
-<span class="nc" id="L31">    @Getter</span>
-<span class="nc" id="L32">    @Setter</span>
+<span class="fc" id="L34">    @Getter</span>
+<span class="nc" id="L35">    @Setter</span>
     protected boolean force = false;
+  }
+
+  protected ProjectFile newProjectFile(final String projectName) {
+<span class="fc" id="L40">    logger.debug(&quot;Project name: {}&quot;, projectName);</span>
+<span class="fc" id="L41">    final ProjectFile projectFile = new ProjectFile();</span>
+<span class="fc" id="L42">    projectFile.setName(projectName);</span>
+<span class="fc" id="L43">    projectFile.setSource(&quot;src/main/lua/main.lua&quot;);</span>
+<span class="fc" id="L44">    projectFile.setTarget(&quot;app.lua&quot;);</span>
+<span class="fc" id="L45">    projectFile.setEndpoint(null);</span>
+<span class="fc" id="L46">    logger.trace(&quot;Project file: {}&quot;, projectFile);</span>
+<span class="fc" id="L47">    return projectFile;</span>
   }
 
   @Override
   public void execute() throws Exception {
-<span class="nc" id="L38">    logger.trace(&quot;Starting {}...&quot;, this);</span>
-<span class="nc" id="L39">    logger.debug(&quot;Arguments: {}&quot;, arguments);</span>
+<span class="fc" id="L52">    logger.debug(&quot;Starting {} with {}...&quot;, this, arguments);</span>
 
-<span class="nc" id="L41">    final Options options = new Options();</span>
-<span class="nc" id="L42">    JCommander.newBuilder().addObject(options).build().parse(arguments.toArray(new String[0]));</span>
-<span class="nc" id="L43">    logger.debug(&quot;Options: {}&quot;, options);</span>
+<span class="fc" id="L54">    final Options options = parse(new Options());</span>
+<span class="fc" id="L55">    final Path projectPath = getProjectHome();</span>
+<span class="fc" id="L56">    final String projectPathStr = getProjectHomePath();</span>
+<span class="fc" id="L57">    final Path projectFilePath = getProjectFile();</span>
+<span class="fc" id="L58">    final String projectFilePathStr = getProjectFilePath();</span>
 
-<span class="nc" id="L45">    final Path projectPath = Paths.get(&quot;.&quot;).toFile().getAbsoluteFile().getCanonicalFile().toPath();</span>
-<span class="nc" id="L46">    logger.trace(&quot;Project location: {}&quot;, projectPath);</span>
-
-<span class="nc" id="L48">    final Path projectFilePath = Paths.get(projectPath.toString(), ApmConstants.PROJECT_FILENAME);</span>
-
-<span class="nc" id="L50">    final WriteProjectFile writeProjectFile = new WriteProjectFile();</span>
-<span class="nc" id="L51">    final String projectDirectoryName = getFilename(projectPath.toFile().getCanonicalPath());</span>
-<span class="nc bnc" id="L52" title="All 4 branches missed.">    if (!options.isForce() &amp;&amp; 0 &lt; Files.list(projectPath).count()) {</span>
-<span class="nc" id="L53">      logger.trace(&quot;Force: {}&quot;, options.isForce());</span>
-<span class="nc" id="L54">      throw new DirectoryNotEmptyException(projectPath);</span>
+<span class="fc" id="L60">    final WriteProjectFile writeProjectFile = new WriteProjectFile();</span>
+<span class="fc" id="L61">    final String projectDirectoryName = getFilename(projectPathStr);</span>
+<span class="pc bpc" id="L62" title="2 of 4 branches missed.">    if (!options.isForce() &amp;&amp; 0 &lt; Files.list(projectPath).count()) {</span>
+<span class="nc" id="L63">      logger.trace(&quot;Force: {}&quot;, options.isForce());</span>
+<span class="nc" id="L64">      throw new DirectoryNotEmptyException(projectPath);</span>
     }
-<span class="nc" id="L56">    final String projectName = System.getProperty(&quot;user.name&quot;) + &quot;/&quot; + projectDirectoryName;</span>
-<span class="nc" id="L57">    logger.debug(&quot;Project name: {}&quot;, projectName);</span>
-<span class="nc" id="L58">    final ProjectFile projectFile = writeProjectFile.getProject();</span>
-<span class="nc" id="L59">    projectFile.setName(projectName);</span>
-<span class="nc" id="L60">    projectFile.setSource(&quot;src/main/lua/main.lua&quot;);</span>
-<span class="nc" id="L61">    projectFile.setTarget(&quot;app.lua&quot;);</span>
-<span class="nc" id="L62">    projectFile.setEndpoint(null);</span>
-<span class="nc" id="L63">    logger.trace(&quot;Project file: {}&quot;, projectFile);</span>
-<span class="nc" id="L64">    writeProjectFile.setArguments(singletonList(projectFilePath.toAbsolutePath().toString()));</span>
-<span class="nc" id="L65">    writeProjectFile.execute();</span>
+<span class="fc" id="L66">    final String projectName = System.getProperty(&quot;user.name&quot;) + &quot;/&quot; + projectDirectoryName;</span>
+<span class="fc" id="L67">    final ProjectFile newProjectFile = newProjectFile(projectName);</span>
+<span class="fc" id="L68">    writeProjectFile.setProject(newProjectFile);</span>
+<span class="fc" id="L69">    writeProjectFile.setArguments(singletonList(projectFilePathStr));</span>
+<span class="fc" id="L70">    writeProjectFile.execute();</span>
 
-<span class="nc" id="L67">    printer.println(&quot;Congratulation!! %s initialized.&quot;, projectPath);</span>
-<span class="nc" id="L68">    try (</span>
-<span class="nc" id="L69">        final InputStream in = Files.newInputStream(projectFilePath);</span>
-<span class="nc" id="L70">        final Reader reader = new InputStreamReader(in)) {</span>
-<span class="nc" id="L71">      printer.println(&quot;Edit &lt;green&gt;%s&lt;/green&gt; as your needs.&quot;, projectFilePath);</span>
-<span class="nc" id="L72">      printer.println(IoUtils.from(reader));</span>
+<span class="fc" id="L72">    printer.println(bind(NL_0, projectPathStr));</span>
+<span class="fc" id="L73">    try (</span>
+<span class="fc" id="L74">        final InputStream in = Files.newInputStream(projectFilePath);</span>
+<span class="fc" id="L75">        final Reader reader = new InputStreamReader(in)) {</span>
+<span class="fc" id="L76">      printer.println(bind(NL_1, projectFilePathStr));</span>
+<span class="fc" id="L77">      printer.println(IoUtils.from(reader));</span>
     }
-<span class="nc" id="L74">  }</span>
+<span class="fc" id="L79">  }</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

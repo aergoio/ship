@@ -11,7 +11,7 @@ public class LuaErrorInformation {
 <span class="nc" id="L11">  @Getter</span>
   protected final String message;
 
-<span class="nc" id="L14">  @Getter</span>
+<span class="fc" id="L14">  @Getter</span>
   protected final int lineNumber;
 
 <span class="nc" id="L17">  @Getter</span>
@@ -42,15 +42,15 @@ public class LuaErrorInformation {
    * @param lineNumber    line number
    * @param columnNumber  column number
    */
-<span class="nc" id="L45">  public LuaErrorInformation(final String message, final int lineNumber, final int columnNumber) {</span>
-<span class="nc" id="L46">    this.message = message;</span>
-<span class="nc" id="L47">    this.lineNumber = lineNumber;</span>
-<span class="nc" id="L48">    this.columnNumber = columnNumber;</span>
-<span class="nc" id="L49">  }</span>
+<span class="fc" id="L45">  public LuaErrorInformation(final String message, final int lineNumber, final int columnNumber) {</span>
+<span class="fc" id="L46">    this.message = message;</span>
+<span class="fc" id="L47">    this.lineNumber = lineNumber;</span>
+<span class="fc" id="L48">    this.columnNumber = columnNumber;</span>
+<span class="fc" id="L49">  }</span>
 
   @Override
   public String toString() {
-<span class="nc" id="L53">    return lineNumber + &quot;:&quot; + columnNumber + &quot; - Message: &quot; + message;</span>
+<span class="fc" id="L53">    return lineNumber + &quot;:&quot; + columnNumber + &quot; - Message: &quot; + message;</span>
   }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

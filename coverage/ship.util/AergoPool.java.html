@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AergoPool.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ship</a> &gt; <a href="index.source.html" class="el_package">ship.util</a> &gt; <span class="el_source">AergoPool.java</span></div><h1>AergoPool.java</h1><pre class="source lang-java linenums">package ship.util;
+
+import static hera.util.IoUtils.tryClose;
+
+import hera.api.AergoApi;
+import hera.api.model.HostnameAndPort;
+import hera.client.AergoClientBuilder;
+import hera.strategy.ConnectStrategy;
+import hera.strategy.NettyConnectStrategy;
+import io.grpc.ManagedChannel;
+import lombok.RequiredArgsConstructor;
+
+<span class="fc" id="L13">@RequiredArgsConstructor</span>
+public class AergoPool implements ResourcePool&lt;AergoApi&gt; {
+
+  protected final ConnectStrategy&lt;ManagedChannel&gt; connectStrategy;
+
+  /**
+   * Constructor with endpoint string.
+   *
+   * @param endpoint endpoint as string
+   */
+<span class="fc" id="L23">  public AergoPool(final String endpoint) {</span>
+<span class="fc" id="L24">    final HostnameAndPort hostnameAndPort = HostnameAndPort.of(endpoint);</span>
+<span class="fc" id="L25">    final NettyConnectStrategy nettyConnectStrategy = new NettyConnectStrategy(hostnameAndPort);</span>
+<span class="fc" id="L26">    this.connectStrategy = nettyConnectStrategy;</span>
+<span class="fc" id="L27">  }</span>
+
+  @Override
+  public AergoApi borrowResource() {
+<span class="fc" id="L31">    return new AergoClientBuilder()</span>
+<span class="fc" id="L32">        .addStrategy(connectStrategy)</span>
+<span class="fc" id="L33">        .build();</span>
+  }
+
+  @Override
+  public void returnResource(final AergoApi resource) {
+<span class="fc" id="L38">    tryClose(resource);</span>
+<span class="fc" id="L39">  }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

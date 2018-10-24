@@ -15,16 +15,16 @@ public class PackageResource extends BuildResource {
   protected final ResourceManager resourceManager;
 
   public PackageResource(final ResourceManager resourceManager) {
-<span class="nc" id="L18">    super(resourceManager.getProject(), resourceManager.getProject().getLocation());</span>
-<span class="nc" id="L19">    assertNotNull(this.resourceManager = resourceManager);</span>
-<span class="nc" id="L20">  }</span>
+<span class="fc" id="L18">    super(resourceManager.getProject(), resourceManager.getProject().getLocation());</span>
+<span class="fc" id="L19">    assertNotNull(this.resourceManager = resourceManager);</span>
+<span class="fc" id="L20">  }</span>
 
   @Override
   public &lt;T&gt; Optional&lt;T&gt; adapt(Class&lt;T&gt; adaptor) {
-<span class="nc bnc" id="L24" title="All 2 branches missed.">    if (adaptor.isInstance(resourceManager)) {</span>
-<span class="nc" id="L25">      return (Optional&lt;T&gt;) of(resourceManager);</span>
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">    if (adaptor.isInstance(resourceManager)) {</span>
+<span class="fc" id="L25">      return (Optional&lt;T&gt;) of(resourceManager);</span>
     }
 <span class="nc" id="L27">    return super.adapt(adaptor);</span>
   }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

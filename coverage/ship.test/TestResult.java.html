@@ -10,28 +10,28 @@ import lombok.Setter;
 import lombok.ToString;
 
 <span class="fc" id="L12">@RequiredArgsConstructor</span>
-<span class="nc" id="L13">@ToString</span>
+<span class="fc" id="L13">@ToString</span>
 public class TestResult {
 
 <span class="fc" id="L16">  @Getter</span>
 <span class="fc" id="L17">  @Setter</span>
   protected Object result;
 
-<span class="nc" id="L20">  @Getter</span>
+<span class="fc" id="L20">  @Getter</span>
 <span class="fc" id="L21">  @Setter</span>
   protected String output;
 
-<span class="nc" id="L24">  @Getter</span>
-<span class="nc" id="L25">  @Setter</span>
+<span class="fc" id="L24">  @Getter</span>
+<span class="fc" id="L25">  @Setter</span>
   protected LuaErrorInformation error;
 
-<span class="nc" id="L28">  @Getter</span>
-<span class="nc" id="L29">  @Setter</span>
+<span class="fc" id="L28">  @Getter</span>
+<span class="fc" id="L29">  @Setter</span>
   protected String codeSnippet;
 
   public boolean isSuccess() {
-<span class="nc bnc" id="L33" title="All 2 branches missed.">    return null == error;</span>
+<span class="pc bpc" id="L33" title="1 of 2 branches missed.">    return null == error;</span>
   }
 
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

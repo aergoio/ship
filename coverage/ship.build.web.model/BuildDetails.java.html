@@ -14,7 +14,7 @@ import lombok.ToString;
 import ship.test.TestReportNode;
 
 <span class="fc" id="L16">@RequiredArgsConstructor</span>
-<span class="nc" id="L17">@ToString(callSuper = true)</span>
+<span class="fc" id="L17">@ToString(callSuper = true)</span>
 public class BuildDetails extends BuildSummary {
 
 <span class="fc" id="L20">  @Getter</span>
@@ -30,7 +30,7 @@ public class BuildDetails extends BuildSummary {
   protected BuildDependency dependencies;
 
 <span class="fc" id="L32">  @Getter</span>
-<span class="nc" id="L33">  @Setter</span>
+<span class="fc" id="L33">  @Setter</span>
   protected Collection&lt;TestReportNode&gt; unitTestReport = new ArrayList&lt;&gt;();
 
   /**
@@ -55,12 +55,13 @@ public class BuildDetails extends BuildSummary {
    * @param source {@link BuildDetails} to copy from
    */
   public void copyFrom(final BuildDetails source) {
-<span class="nc" id="L58">    this.state = source.getState();</span>
-<span class="nc" id="L59">    this.elapsedTime = source.getElapsedTime();</span>
-<span class="nc" id="L60">    this.error = source.getError();</span>
-<span class="nc" id="L61">    this.result = source.getResult();</span>
-<span class="nc" id="L62">    this.dependencies = source.getDependencies();</span>
-<span class="nc" id="L63">    this.unitTestReport = source.getUnitTestReport();</span>
-<span class="nc" id="L64">  }</span>
+<span class="fc" id="L58">    this.state = source.getState();</span>
+<span class="fc" id="L59">    this.elapsedTime = source.getElapsedTime();</span>
+<span class="fc" id="L60">    this.error = source.getError();</span>
+<span class="fc" id="L61">    this.sequence = source.getSequence();</span>
+<span class="fc" id="L62">    this.result = source.getResult();</span>
+<span class="fc" id="L63">    this.dependencies = source.getDependencies();</span>
+<span class="fc" id="L64">    this.unitTestReport = source.getUnitTestReport();</span>
+<span class="fc" id="L65">  }</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

@@ -10,6 +10,7 @@ import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static org.slf4j.LoggerFactory.getLogger;
 
+import com.beust.jcommander.JCommander;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,26 +19,41 @@ import java.util.Optional;
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
-import ship.ApmConstants;
 import ship.Command;
 import ship.ProjectFile;
+import ship.ShipConstants;
 import ship.util.DummyMessagePrinter;
 import ship.util.MessagePrinter;
 
-<span class="nc" id="L27">public abstract class AbstractCommand implements Command {</span>
+<span class="fc" id="L28">public abstract class AbstractCommand implements Command {</span>
 
-<span class="nc" id="L29">  protected final transient Logger logger = getLogger(getClass());</span>
+<span class="fc" id="L30">  protected final transient Logger logger = getLogger(getClass());</span>
 
-<span class="nc" id="L31">  @Getter</span>
-<span class="nc" id="L32">  @Setter</span>
-<span class="nc" id="L33">  protected List&lt;String&gt; arguments = emptyList();</span>
+<span class="pc" id="L32">  @Getter</span>
+<span class="fc" id="L33">  @Setter</span>
+<span class="fc" id="L34">  protected List&lt;String&gt; arguments = emptyList();</span>
 
-<span class="nc" id="L35">  @Getter</span>
-<span class="nc" id="L36">  @Setter</span>
-<span class="nc" id="L37">  protected MessagePrinter printer = DummyMessagePrinter.getInstance();</span>
+<span class="fc" id="L36">  @Getter</span>
+<span class="fc" id="L37">  @Setter</span>
+<span class="fc" id="L38">  protected MessagePrinter printer = DummyMessagePrinter.getInstance();</span>
 
   public String getArgument(final int index) {
-<span class="nc" id="L40">    return arguments.get(index);</span>
+<span class="fc" id="L41">    return arguments.get(index);</span>
+  }
+
+  /**
+   * Parse and bind arguments.
+   *
+   * @param &lt;T&gt; options type
+   *
+   * @param options object to bind
+   *
+   * @return bound object
+   */
+  protected &lt;T&gt; T parse(T options) {
+<span class="fc" id="L54">    JCommander.newBuilder().addObject(options).build().parse(arguments.toArray(new String[0]));</span>
+<span class="fc" id="L55">    logger.debug(&quot;Options: {}&quot;, options);</span>
+<span class="fc" id="L56">    return options;</span>
   }
 
   /**
@@ -48,30 +64,30 @@ import ship.util.MessagePrinter;
    * @return argument if exists
    */
   public Optional&lt;String&gt; getOptionalArgument(int index) {
-<span class="nc bnc" id="L51" title="All 2 branches missed.">    if (index &lt; 0) {</span>
-<span class="nc" id="L52">      return empty();</span>
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">    if (index &lt; 0) {</span>
+<span class="nc" id="L68">      return empty();</span>
     }
-<span class="nc bnc" id="L54" title="All 2 branches missed.">    if (index &lt; arguments.size()) {</span>
-<span class="nc" id="L55">      return ofNullable(arguments.get(index));</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">    if (index &lt; arguments.size()) {</span>
+<span class="nc" id="L71">      return ofNullable(arguments.get(index));</span>
     } else {
-<span class="nc" id="L57">      return empty();</span>
+<span class="fc" id="L73">      return empty();</span>
     }
   }
 
   public Path getProjectHome() {
-<span class="nc" id="L62">    return Paths.get(&quot;.&quot;);</span>
+<span class="fc" id="L78">    return Paths.get(&quot;.&quot;);</span>
   }
 
   public Path getProjectFile() {
-<span class="nc" id="L66">    return Paths.get(getProjectHome().toString(), ApmConstants.PROJECT_FILENAME);</span>
+<span class="fc" id="L82">    return Paths.get(getProjectHome().toString(), ShipConstants.PROJECT_FILENAME);</span>
   }
 
   public String getProjectHomePath() {
-<span class="nc" id="L70">    return getCanonicalForm(getProjectHome().toFile().getAbsolutePath());</span>
+<span class="fc" id="L86">    return getCanonicalForm(getProjectHome().toFile().getAbsolutePath());</span>
   }
 
   public String getProjectFilePath() {
-<span class="nc" id="L74">    return getCanonicalForm(getProjectFile().toFile().getAbsolutePath());</span>
+<span class="fc" id="L90">    return getCanonicalForm(getProjectFile().toFile().getAbsolutePath());</span>
   }
 
   /**
@@ -82,7 +98,7 @@ import ship.util.MessagePrinter;
    * @throws IOException On failure to read project file
    */
   public ProjectFile readProject() throws IOException {
-<span class="nc" id="L85">    return ProjectFile.from(getProjectFile());</span>
+<span class="nc" id="L101">    return ProjectFile.from(getProjectFile());</span>
   }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

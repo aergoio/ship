@@ -16,24 +16,24 @@ import lombok.Getter;
 import lombok.Setter;
 import ship.ProjectFile;
 
-<span class="nc" id="L19">public class WriteProjectFile extends AbstractCommand {</span>
+<span class="fc" id="L19">public class WriteProjectFile extends AbstractCommand {</span>
 
-<span class="nc" id="L21">  @Getter</span>
+<span class="pc" id="L21">  @Getter</span>
 <span class="nc" id="L22">  @Setter</span>
   protected ProjectFile project = new ProjectFile();
 
   @Override
   public void execute() throws Exception {
-<span class="nc bnc" id="L27" title="All 2 branches missed.">    assertTrue(1 == arguments.size());</span>
-<span class="nc" id="L28">    final Path projectFilePath = Paths.get(arguments.get(0));</span>
-<span class="nc" id="L29">    final ObjectMapper mapper = new ObjectMapper();</span>
-<span class="nc bnc" id="L30" title="All 2 branches missed.">    if (Files.exists(projectFilePath)) {</span>
-<span class="nc" id="L31">      logger.warn(&quot;Project file already exists&quot;);</span>
-<span class="nc" id="L32">      return;</span>
+<span class="pc bpc" id="L27" title="1 of 2 branches missed.">    assertTrue(1 == arguments.size());</span>
+<span class="fc" id="L28">    final Path projectFilePath = Paths.get(arguments.get(0));</span>
+<span class="fc" id="L29">    final ObjectMapper mapper = new ObjectMapper();</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">    if (Files.exists(projectFilePath)) {</span>
+<span class="fc" id="L31">      logger.warn(&quot;Project file already exists&quot;);</span>
+<span class="fc" id="L32">      return;</span>
     }
-<span class="nc" id="L34">    try (final BufferedWriter writer = newBufferedWriter(projectFilePath)) {</span>
-<span class="nc" id="L35">      mapper.writerWithDefaultPrettyPrinter().writeValue(writer, project);</span>
+<span class="fc" id="L34">    try (final BufferedWriter writer = newBufferedWriter(projectFilePath)) {</span>
+<span class="fc" id="L35">      mapper.writerWithDefaultPrettyPrinter().writeValue(writer, project);</span>
     }
-<span class="nc" id="L37">  }</span>
+<span class="fc" id="L37">  }</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

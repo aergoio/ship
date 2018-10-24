@@ -8,23 +8,24 @@ import static hera.util.FilepathUtils.append;
 import static hera.util.StringUtils.nvl;
 
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import lombok.RequiredArgsConstructor;
-import ship.ApmConstants;
 import ship.ProjectFile;
+import ship.ShipConstants;
 import ship.build.res.Project;
 import ship.exception.PackageNotFoundException;
 
-<span class="fc" id="L19">@RequiredArgsConstructor</span>
+<span class="fc" id="L20">@RequiredArgsConstructor</span>
 public class PackageManager {
 
   protected final String repositoryLocation;
 
   public PackageManager() {
-<span class="fc" id="L25">    this(append(nvl(System.getProperty(&quot;user.home&quot;), System.getenv(&quot;HOME&quot;)),</span>
-        ApmConstants.MODULES_BASE));
-<span class="fc" id="L27">  }</span>
+<span class="fc" id="L26">    this(append(nvl(System.getProperty(&quot;user.home&quot;), System.getenv(&quot;HOME&quot;)),</span>
+        ShipConstants.MODULES_BASE));
+<span class="fc" id="L28">  }</span>
 
   /**
    * Find {@link ResourceManager} with package name.
@@ -34,15 +35,15 @@ public class PackageManager {
    * @return resource manager
    */
   public ResourceManager find(final String packageName) {
+<span class="fc" id="L38">    final String packageLocation = append(repositoryLocation, packageName);</span>
+<span class="fc" id="L39">    final String projectFileLocation = append(packageLocation, ShipConstants.PROJECT_FILENAME);</span>
     try {
-<span class="fc" id="L38">      final String packageLocation = append(repositoryLocation, packageName);</span>
-<span class="fc" id="L39">      final String projectFileLocation = append(packageLocation, ApmConstants.PROJECT_FILENAME);</span>
-<span class="fc" id="L40">      final Path projectFilePath = Paths.get(projectFileLocation);</span>
-<span class="fc" id="L41">      final ProjectFile projectFile = ProjectFile.from(projectFilePath);</span>
-<span class="fc" id="L42">      return new ResourceManager(new Project(packageLocation, projectFile));</span>
-<span class="nc" id="L43">    } catch (final IOException ex) {</span>
-<span class="nc" id="L44">      throw new PackageNotFoundException(ex);</span>
+<span class="fc" id="L41">      final Path projectFilePath = Paths.get(projectFileLocation);</span>
+<span class="fc" id="L42">      final ProjectFile projectFile = ProjectFile.from(projectFilePath);</span>
+<span class="fc" id="L43">      return new ResourceManager(new Project(packageLocation, projectFile));</span>
+<span class="nc" id="L44">    } catch (final IOException ex) {</span>
+<span class="nc" id="L45">      throw new PackageNotFoundException(packageName, projectFileLocation, ex);</span>
     }
   }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

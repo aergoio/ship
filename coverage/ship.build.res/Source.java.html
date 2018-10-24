@@ -6,53 +6,100 @@ package ship.build.res;
 
 import static hera.util.FilepathUtils.append;
 import static hera.util.FilepathUtils.getParentPath;
+import static java.lang.Character.isWhitespace;
 import static java.util.Collections.emptyList;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.StringJoiner;
 import org.slf4j.Logger;
 import ship.build.Resource;
 import ship.build.ResourceManager;
 
 public class Source extends File {
 
-  protected static String fromImport(final String line) {
-<span class="fc" id="L26">    final String importPrefix = &quot;import&quot;;</span>
-<span class="fc bfc" id="L27" title="All 2 branches covered.">    if (!line.startsWith(importPrefix)) {</span>
-<span class="fc" id="L28">      return null;</span>
+  protected static final String IMPORT_PREFIX = &quot;import&quot;;
+
+<span class="fc" id="L31">  protected static final String[] QUOTES = new String[] { &quot;\&quot;&quot;, &quot;'&quot; };</span>
+
+  protected static Optional&lt;String&gt; extractLiteralPart(final String line) {
+<span class="pc bpc" id="L34" title="1 of 4 branches missed.">    if (!line.startsWith(IMPORT_PREFIX) || !isWhitespace(line.charAt(IMPORT_PREFIX.length()))) {</span>
+<span class="fc" id="L35">      return empty();</span>
     }
-<span class="pc bpc" id="L30" title="1 of 2 branches missed.">    if (!Character.isWhitespace(line.charAt(importPrefix.length()))) {</span>
-<span class="nc" id="L31">      return null;</span>
-    }
-<span class="fc" id="L33">    final String literals = line.substring(importPrefix.length()).trim();</span>
-<span class="pc bpc" id="L34" title="1 of 4 branches missed.">    if (literals.startsWith(&quot;\&quot;&quot;) &amp;&amp; literals.endsWith(&quot;\&quot;&quot;)) {</span>
-<span class="fc" id="L35">      return literals.substring(1, literals.length() - 1).trim();</span>
-<span class="pc bpc" id="L36" title="1 of 4 branches missed.">    } else if (literals.startsWith(&quot;'&quot;) &amp;&amp; literals.endsWith(&quot;'&quot;)) {</span>
-<span class="fc" id="L37">      return literals.substring(1, literals.length() - 1).trim();</span>
-    }
-<span class="fc" id="L39">    return null;</span>
+<span class="fc" id="L37">    return of(line.substring(IMPORT_PREFIX.length()).trim());</span>
   }
 
-<span class="fc" id="L42">  protected final transient Logger logger = getLogger(getClass());</span>
+  protected static String fromImport(final String line) {
+<span class="fc" id="L41">    return extractLiteralPart(line).flatMap(literal -&gt; {</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">      for (final String quote : QUOTES) {</span>
+<span class="pc bpc" id="L43" title="1 of 4 branches missed.">        if (literal.startsWith(quote) &amp;&amp; literal.endsWith(quote)) {</span>
+<span class="fc" id="L44">          return of(literal.substring(quote.length(), literal.length() - quote.length()).trim());</span>
+        }
+      }
+<span class="fc" id="L47">      return empty();</span>
+<span class="fc" id="L48">    }).orElse(null);</span>
+  }
+
+<span class="fc" id="L51">  class BodyCollector {</span>
+
+<span class="fc" id="L53">    protected boolean isBodyPart = false;</span>
+
+<span class="fc" id="L55">    protected final StringJoiner joiner = new StringJoiner(&quot;\n&quot;);</span>
+
+    public void add(final String line) {
+<span class="fc bfc" id="L58" title="All 2 branches covered.">      if (isBodyPart) {</span>
+<span class="fc" id="L59">        joiner.add(line);</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">      } else if (null == fromImport(line)) {</span>
+<span class="fc" id="L61">        joiner.add(line);</span>
+<span class="fc" id="L62">        isBodyPart = true;</span>
+      }
+<span class="fc" id="L64">    }</span>
+
+    @Override
+    public String toString() {
+<span class="fc" id="L68">      return joiner.toString();</span>
+    }
+  }
+
+<span class="fc" id="L72">  protected final transient Logger logger = getLogger(getClass());</span>
 
   public Source(final Project project, final String location) {
-<span class="fc" id="L45">    super(project, location);</span>
-<span class="fc" id="L46">  }</span>
+<span class="fc" id="L75">    super(project, location);</span>
+<span class="fc" id="L76">  }</span>
 
   @Override
-  public List&lt;Resource&gt; getDependencies(ResourceManager resourceManager) throws Exception {
-<span class="fc" id="L50">    final ArrayList&lt;Resource&gt; dependencies = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L51">    dependencies.addAll(super.getDependencies(resourceManager));</span>
-<span class="fc" id="L52">    readImports().stream()</span>
-<span class="fc" id="L53">        .map(importPath -&gt; this.bind(resourceManager, importPath))</span>
-<span class="fc" id="L54">        .forEach(dependencies::add);</span>
-<span class="fc" id="L55">    return dependencies;</span>
+  public List&lt;Resource&gt; getDependencies(final ResourceManager resourceManager) throws Exception {
+<span class="fc" id="L80">    final ArrayList&lt;Resource&gt; dependencies = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L81">    dependencies.addAll(super.getDependencies(resourceManager));</span>
+<span class="fc" id="L82">    readImports().stream()</span>
+<span class="fc" id="L83">        .map(importPath -&gt; this.bind(resourceManager, importPath))</span>
+<span class="fc" id="L84">        .forEach(dependencies::add);</span>
+<span class="fc" id="L85">    return dependencies;</span>
+  }
+
+  protected List&lt;String&gt; readNextImports(final BufferedReader bufferedReader) throws IOException {
+<span class="fc" id="L89">    final String line = bufferedReader.readLine();</span>
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">    if (null == line) {</span>
+<span class="nc" id="L91">      return new ArrayList&lt;&gt;();</span>
+    }
+<span class="fc bfc" id="L93" title="All 2 branches covered.">    if (line.trim().isEmpty()) {</span>
+<span class="fc" id="L94">      return readNextImports(bufferedReader);</span>
+    }
+<span class="fc" id="L96">    final String importStr = fromImport(line.trim());</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">    if (null == importStr) {</span>
+<span class="fc" id="L98">      return new ArrayList&lt;&gt;();</span>
+    }
+<span class="fc" id="L100">    final List&lt;String&gt; results = readNextImports(bufferedReader);</span>
+<span class="fc" id="L101">    results.add(importStr);</span>
+<span class="fc" id="L102">    return results;</span>
   }
 
   /**
@@ -63,32 +110,21 @@ public class Source extends File {
    * @throws IOException Fail to read source file.
    */
   public List&lt;String&gt; readImports() throws IOException {
-<span class="fc" id="L66">    final List&lt;String&gt; imports = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L67">    try (final BufferedReader sourceIn = open()) {</span>
+<span class="fc" id="L113">    final List&lt;String&gt; imports = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L114">    try (final BufferedReader sourceIn = open()) {</span>
       // Read line by line
-<span class="fc" id="L69">      String line = null;</span>
-<span class="pc bpc" id="L70" title="1 of 2 branches missed.">      while (null != (line = sourceIn.readLine())) {</span>
-<span class="fc bfc" id="L71" title="All 2 branches covered.">        if (line.trim().isEmpty()) {</span>
-<span class="fc" id="L72">          continue;</span>
-        }
-<span class="fc" id="L74">        final String importStr = fromImport(line);</span>
-<span class="fc bfc" id="L75" title="All 2 branches covered.">        if (null == importStr) {</span>
-<span class="fc" id="L76">          return imports;</span>
-        }
-<span class="fc" id="L78">        imports.add(importStr);</span>
-<span class="fc" id="L79">      }</span>
-<span class="nc" id="L80">      return imports;</span>
-<span class="nc" id="L81">    } catch (final NoSuchFileException e) {</span>
-<span class="nc" id="L82">      logger.trace(&quot;{} not found&quot;, location);</span>
-<span class="nc" id="L83">      return emptyList();</span>
+<span class="fc" id="L116">      return readNextImports(sourceIn);</span>
+<span class="fc" id="L117">    } catch (final NoSuchFileException e) {</span>
+<span class="fc" id="L118">      logger.trace(&quot;{} not found&quot;, location);</span>
+<span class="fc" id="L119">      return emptyList();</span>
     }
   }
 
   protected Resource bind(final ResourceManager resourceManager, final String importPath) {
-<span class="fc bfc" id="L88" title="All 4 branches covered.">    if (importPath.startsWith(&quot;./&quot;) || importPath.startsWith(&quot;../&quot;)) {</span>
-<span class="fc" id="L89">      return resourceManager.getResource(append(getParentPath(getLocation()), importPath));</span>
+<span class="fc bfc" id="L124" title="All 4 branches covered.">    if (importPath.startsWith(&quot;./&quot;) || importPath.startsWith(&quot;../&quot;)) {</span>
+<span class="fc" id="L125">      return resourceManager.getResource(append(getParentPath(getLocation()), importPath));</span>
     } else {
-<span class="fc" id="L91">      return resourceManager.getPackage(importPath);</span>
+<span class="fc" id="L127">      return resourceManager.getPackage(importPath);</span>
     }
   }
 
@@ -98,28 +134,19 @@ public class Source extends File {
    * @return body text
    */
   public Text getBody() {
-<span class="fc" id="L101">    return new Text(() -&gt; {</span>
-<span class="fc" id="L102">      try (final BufferedReader sourceIn = open()) {</span>
+<span class="fc" id="L137">    return new Text(() -&gt; {</span>
+<span class="fc" id="L138">      final BodyCollector collector = new BodyCollector();</span>
+<span class="fc" id="L139">      try (final BufferedReader sourceIn = open()) {</span>
         // Read line by line
-<span class="fc" id="L104">        String line = null;</span>
-<span class="fc" id="L105">        boolean isBodyPart = false;</span>
-<span class="fc" id="L106">        final StringWriter writer = new StringWriter();</span>
-<span class="fc bfc" id="L107" title="All 2 branches covered.">        while (null != (line = sourceIn.readLine())) {</span>
-<span class="fc" id="L108">          logger.trace(&quot;Line: {}&quot;, line);</span>
-<span class="fc bfc" id="L109" title="All 2 branches covered.">          if (isBodyPart) {</span>
-<span class="fc" id="L110">            writer.write(&quot;\n&quot;);</span>
-<span class="fc" id="L111">            writer.write(line);</span>
-          } else {
-<span class="fc" id="L113">            final String importStr = fromImport(line);</span>
-<span class="fc bfc" id="L114" title="All 2 branches covered.">            if (null == importStr) {</span>
-<span class="fc" id="L115">              writer.write(line);</span>
-<span class="fc" id="L116">              isBodyPart = true;</span>
-            }
-<span class="fc" id="L118">          }</span>
+<span class="fc" id="L141">        String line = null;</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">        while (null != (line = sourceIn.readLine())) {</span>
+<span class="fc" id="L143">          logger.trace(&quot;Line: {}&quot;, line);</span>
+<span class="fc" id="L144">          collector.add(line);</span>
         }
-<span class="fc" id="L120">        return new ByteArrayInputStream(writer.toString().getBytes());</span>
+<span class="fc" id="L146">        return new ByteArrayInputStream(collector.toString().getBytes());</span>
       }
     });
   }
+
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

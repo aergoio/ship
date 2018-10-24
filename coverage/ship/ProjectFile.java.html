@@ -34,8 +34,8 @@ import lombok.Setter;
    * @throws IOException Fail to read file
    */
   public static ProjectFile from(final Path path) throws IOException {
-<span class="nc" id="L37">    try (final InputStream in = newInputStream(path)) {</span>
-<span class="nc" id="L38">      return ProjectFile.from(in);</span>
+<span class="fc" id="L37">    try (final InputStream in = newInputStream(path)) {</span>
+<span class="fc" id="L38">      return ProjectFile.from(in);</span>
     }
   }
 
@@ -49,9 +49,9 @@ import lombok.Setter;
    * @throws IOException if fail to read stream
    */
   public static ProjectFile from(final InputStream in) throws IOException {
-<span class="nc" id="L52">    final ObjectMapper mapper = new ObjectMapper();</span>
-<span class="nc" id="L53">    mapper.configure(ALLOW_COMMENTS, true);</span>
-<span class="nc" id="L54">    return mapper.readValue(in, ProjectFile.class);</span>
+<span class="fc" id="L52">    final ObjectMapper mapper = new ObjectMapper();</span>
+<span class="fc" id="L53">    mapper.configure(ALLOW_COMMENTS, true);</span>
+<span class="fc" id="L54">    return mapper.readValue(in, ProjectFile.class);</span>
   }
 
 <span class="fc" id="L57">  @Getter</span>
@@ -67,7 +67,7 @@ import lombok.Setter;
   protected String target;
 
   public String getTargetPath(final Path project) {
-<span class="nc" id="L70">    return getCanonicalForm(append(project.toFile().getAbsolutePath(), target));</span>
+<span class="fc" id="L70">    return getCanonicalForm(append(project.toFile().getAbsolutePath(), target));</span>
   }
 
 <span class="fc" id="L73">  @Getter</span>
@@ -75,7 +75,7 @@ import lombok.Setter;
   protected List&lt;String&gt; dependencies;
 
 <span class="fc" id="L77">  @Getter</span>
-<span class="nc" id="L78">  @Setter</span>
+<span class="fc" id="L78">  @Setter</span>
   protected List&lt;String&gt; tests;
 
 <span class="fc" id="L81">  @Getter</span>
@@ -83,7 +83,7 @@ import lombok.Setter;
   protected String endpoint = DEFAULT_ENDPOINT;
 
   public String toJson() throws JsonProcessingException {
-<span class="nc" id="L86">    return new ObjectMapper().writeValueAsString(this);</span>
+<span class="fc" id="L86">    return new ObjectMapper().writeValueAsString(this);</span>
   }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

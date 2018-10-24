@@ -5,12 +5,15 @@
 package ship.build.web;
 
 import static hera.util.ExceptionUtils.getStackTraceOf;
+import static hera.util.ObjectUtils.nvl;
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import java.io.IOException;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -39,37 +42,40 @@ import ship.build.web.service.LiveUpdateService;
 
 @RestController
 @ControllerAdvice
-<span class="nc" id="L42">public class Router {</span>
+<span class="fc" id="L45">public class Router {</span>
 
-<span class="nc" id="L44">  protected final transient Logger logger = getLogger(getClass());</span>
+<span class="fc" id="L47">  protected final transient Logger logger = getLogger(getClass());</span>
 
   @Inject
+<span class="fc" id="L50">  @Setter</span>
   protected BuildService buildService;
 
   @Inject
+<span class="fc" id="L54">  @Setter</span>
   protected ContractService contractService;
 
   @Inject
+<span class="fc" id="L58">  @Setter</span>
   protected LiveUpdateService liveUpdateService;
 
   @PostConstruct
   public void initialize() {
-<span class="nc" id="L57">    buildService.addListener(liveUpdateService::notifyChange);</span>
-<span class="nc" id="L58">  }</span>
+<span class="fc" id="L63">    buildService.addListener(liveUpdateService::notifyChange);</span>
+<span class="fc" id="L64">  }</span>
 
   @GetMapping(&quot;contract&quot;)
   public DeploymentResult getLatestContract() {
-<span class="nc" id="L62">    return contractService.getLatestContractInformation();</span>
+<span class="fc" id="L68">    return contractService.getLatestContractInformation();</span>
   }
 
   @GetMapping(&quot;builds&quot;)
   public List&lt;BuildSummary&gt; getLatestBuilds() {
-<span class="nc" id="L67">    return buildService.list(null, 5);</span>
+<span class="fc" id="L73">    return buildService.list(null, 5);</span>
   }
 
   @GetMapping(&quot;build/{uuid}&quot;)
   public BuildDetails getBuild(@PathVariable(&quot;uuid&quot;) final String buildUuid) {
-<span class="nc" id="L72">    return buildService.get(buildUuid).orElseThrow(ResourceNotFoundException::new);</span>
+<span class="fc" id="L78">    return buildService.get(buildUuid).orElseThrow(ResourceNotFoundException::new);</span>
   }
 
   /**
@@ -83,9 +89,9 @@ import ship.build.web.service.LiveUpdateService;
    */
   @PostMapping(&quot;build/{uuid}/deploy&quot;)
   public DeploymentResult deploy(@PathVariable(&quot;uuid&quot;) final String buildUuid) throws Exception {
-<span class="nc" id="L86">    final BuildDetails buildDetails = buildService.get(buildUuid)</span>
-<span class="nc" id="L87">        .orElseThrow(() -&gt; new ResourceNotFoundException(buildUuid + &quot; not found&quot;));</span>
-<span class="nc" id="L88">    return contractService.deploy(buildDetails);</span>
+<span class="fc" id="L92">    final BuildDetails buildDetails = buildService.get(buildUuid)</span>
+<span class="pc" id="L93">        .orElseThrow(() -&gt; new ResourceNotFoundException(buildUuid + &quot; not found&quot;));</span>
+<span class="fc" id="L94">    return contractService.deploy(buildDetails);</span>
   }
 
   @PostMapping(value = &quot;contract/{tx}/{function}&quot;)
@@ -93,8 +99,8 @@ import ship.build.web.service.LiveUpdateService;
       @PathVariable(&quot;tx&quot;) final String contractTransactionHash,
       @PathVariable(&quot;function&quot;) final String functionName,
       @RequestBody final ContractInput contractInput) throws IOException {
-<span class="nc" id="L96">    final String[] arguments = contractInput.getArguments();</span>
-<span class="nc" id="L97">    return contractService.execute(contractTransactionHash, functionName, arguments);</span>
+<span class="fc" id="L102">    final String[] arguments = contractInput.getArguments();</span>
+<span class="fc" id="L103">    return contractService.tryExecute(contractTransactionHash, functionName, arguments);</span>
   }
 
   /**
@@ -105,35 +111,31 @@ import ship.build.web.service.LiveUpdateService;
    * @param arguments               argument for function
    *
    * @return function's result
-   *
-   * @throws IOException Fail to invoke function
    */
   @GetMapping(value = &quot;contract/{tx}/{function}&quot;)
   public QueryResult query(
       @PathVariable(&quot;tx&quot;) final String contractTransactionHash,
       @PathVariable(&quot;function&quot;) final String functionName,
       @RequestParam(value = &quot;arguments&quot;, required = false) final String[] arguments
-  ) throws IOException {
-<span class="nc" id="L117">    logger.trace(&quot;Transaction Hash: {}, Function: {}, Arguments: {}&quot;,</span>
+  ) {
+<span class="fc" id="L121">    logger.trace(&quot;Transaction Hash: {}, Function: {}, Arguments: {}&quot;,</span>
         contractTransactionHash, functionName, arguments);
-<span class="nc bnc" id="L119" title="All 2 branches missed.">    if (null == arguments) {</span>
-<span class="nc" id="L120">      return contractService.query(contractTransactionHash, functionName, new String[0]);</span>
-    } else {
-<span class="nc" id="L122">      return contractService.query(contractTransactionHash, functionName, arguments);</span>
-    }
+<span class="fc" id="L123">    final String[] safeArguments = nvl(arguments, new String[0]);</span>
+<span class="fc" id="L124">    return contractService.tryQuery(contractTransactionHash, functionName, safeArguments);</span>
   }
 
   @ExceptionHandler(value = { HttpException.class })
-  protected ResponseEntity handleHttpException(HttpException ex, WebRequest request) {
-<span class="nc" id="L128">    final ServiceError serviceError = new ServiceError(ex.getMessage(), getStackTraceOf(ex));</span>
-<span class="nc" id="L129">    return ResponseEntity.status(ex.getStatusCode()).body(serviceError);</span>
+  protected ResponseEntity handleHttpException(final HttpException ex, final WebRequest request) {
+<span class="fc" id="L129">    logger.warn(&quot;Unexpected exception:&quot;, ex);</span>
+<span class="fc" id="L130">    return ResponseEntity.status(ex.getStatusCode()).body(handleThrowable(ex, request));</span>
   }
 
   @ExceptionHandler(value = { Throwable.class })
-  @ResponseStatus()
+  @ResponseStatus(INTERNAL_SERVER_ERROR)
   @ResponseBody
   protected Object handleThrowable(Throwable ex, WebRequest request) {
-<span class="nc" id="L136">    return new ServiceError(ex.getMessage(), getStackTraceOf(ex));</span>
+<span class="fc" id="L137">    logger.warn(&quot;Unexpected exception:&quot;, ex);</span>
+<span class="fc" id="L138">    return new ServiceError(ex.getMessage(), getStackTraceOf(ex));</span>
   }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

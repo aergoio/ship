@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BeforeAndAfter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ship</a> &gt; <a href="index.source.html" class="el_package">ship.util</a> &gt; <span class="el_source">BeforeAndAfter.java</span></div><h1>BeforeAndAfter.java</h1><pre class="source lang-java linenums">package ship.util;
+
+import java.util.HashSet;
+import java.util.Set;
+import lombok.RequiredArgsConstructor;
+
+<span class="fc" id="L7">@RequiredArgsConstructor</span>
+public class BeforeAndAfter&lt;T&gt; {
+
+  protected final Set&lt;T&gt; before;
+
+  protected final Set&lt;T&gt; after;
+
+  /**
+   * Get new added items in {@link #after}.
+   *
+   * @return added item set
+   */
+  public Set&lt;T&gt; getAddedItems() {
+<span class="fc" id="L20">    final HashSet&lt;T&gt; added = new HashSet&lt;&gt;(after);</span>
+<span class="fc" id="L21">    added.removeAll(before);</span>
+<span class="fc" id="L22">    return added;</span>
+  }
+
+  /**
+   * Get removed items in {@link #after}.
+   *
+   * @return removed item set
+   */
+  public Set&lt;T&gt; getRemovedItems() {
+<span class="fc" id="L31">    final HashSet&lt;T&gt; removed = new HashSet&lt;&gt;(before);</span>
+<span class="fc" id="L32">    removed.removeAll(after);</span>
+<span class="fc" id="L33">    return removed;</span>
+  }
+
+  /**
+   * Get existent items in both {@link #before} and {@link #after}.
+   *
+   * @return commonly existent item set
+   */
+  public Set&lt;T&gt; getIntersectedItems() {
+<span class="fc" id="L42">    final HashSet&lt;T&gt; intersection = new HashSet&lt;&gt;(before);</span>
+<span class="fc" id="L43">    intersection.retainAll(after);</span>
+<span class="fc" id="L44">    return intersection;</span>
+  }
+
+  /**
+   * Get items in either {@link #before} or {@link #after}.
+   *
+   * @return union set
+   */
+  public Set&lt;T&gt; getUnionedItems() {
+<span class="fc" id="L53">    final HashSet&lt;T&gt; union = new HashSet&lt;&gt;(before);</span>
+<span class="fc" id="L54">    union.addAll(after);</span>
+<span class="fc" id="L55">    return union;</span>
+  }
+
+
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

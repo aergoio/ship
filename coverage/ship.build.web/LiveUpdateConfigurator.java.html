@@ -16,17 +16,17 @@ import ship.build.web.service.LiveUpdateSessionHandler;
 
 @Configuration
 @EnableWebSocket
-<span class="nc" id="L19">public class LiveUpdateConfigurator implements WebSocketConfigurer {</span>
+<span class="fc" id="L19">public class LiveUpdateConfigurator implements WebSocketConfigurer {</span>
 
-<span class="nc" id="L21">  protected final transient Logger logger = getLogger(getClass());</span>
+<span class="fc" id="L21">  protected final transient Logger logger = getLogger(getClass());</span>
 
   @Inject
   protected LiveUpdateSessionHandler sessionHandler;
 
   @Override
   public void registerWebSocketHandlers(final WebSocketHandlerRegistry registry) {
-<span class="nc" id="L28">    registry.addHandler(sessionHandler, &quot;/event&quot;).setAllowedOrigins(&quot;*&quot;);</span>
-<span class="nc" id="L29">    logger.info(&quot;{} registered&quot;, sessionHandler);</span>
-<span class="nc" id="L30">  }</span>
+<span class="fc" id="L28">    registry.addHandler(sessionHandler, &quot;/event&quot;).setAllowedOrigins(&quot;*&quot;);</span>
+<span class="fc" id="L29">    logger.info(&quot;{} registered&quot;, sessionHandler);</span>
+<span class="fc" id="L30">  }</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

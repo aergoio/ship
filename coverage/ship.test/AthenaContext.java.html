@@ -13,69 +13,69 @@ import org.luaj.vm2.lib.OneArgFunction;
 import org.luaj.vm2.lib.TwoArgFunction;
 import org.slf4j.Logger;
 
-<span class="nc" id="L16">public class AthenaContext {</span>
+<span class="fc" id="L16">public class AthenaContext {</span>
 
-<span class="nc" id="L18">  protected static final ThreadLocal&lt;AthenaContext&gt; cabinet =</span>
-<span class="nc" id="L19">      new InheritableThreadLocal&lt;AthenaContext&gt;() {</span>
+<span class="fc" id="L18">  protected static final ThreadLocal&lt;AthenaContext&gt; cabinet =</span>
+<span class="fc" id="L19">      new InheritableThreadLocal&lt;AthenaContext&gt;() {</span>
         @Override
         protected AthenaContext initialValue() {
-<span class="nc" id="L22">          return new AthenaContext();</span>
+<span class="fc" id="L22">          return new AthenaContext();</span>
         }
       };
 
   public static AthenaContext getContext() {
-<span class="nc" id="L27">    return cabinet.get();</span>
+<span class="fc" id="L27">    return cabinet.get();</span>
   }
 
-<span class="nc" id="L30">  protected final transient Logger logger = getLogger(getClass());</span>
+<span class="fc" id="L30">  protected final transient Logger logger = getLogger(getClass());</span>
 
-<span class="nc" id="L32">  @Getter</span>
+<span class="fc" id="L32">  @Getter</span>
 <span class="nc" id="L33">  @Setter</span>
   protected TestResultCollector testReporter = new TestResultCollector();
 
-<span class="nc" id="L36">  public OneArgFunction startSuite = new OneArgFunction() {</span>
+<span class="fc" id="L36">  public OneArgFunction startSuite = new OneArgFunction() {</span>
     @Override
     public LuaValue call(final LuaValue name) {
-<span class="nc" id="L39">      testReporter.startSuite(name.tojstring());</span>
-<span class="nc" id="L40">      return null;</span>
+<span class="fc" id="L39">      testReporter.startSuite(name.tojstring());</span>
+<span class="fc" id="L40">      return null;</span>
     }
   };
 
-<span class="nc" id="L44">  public OneArgFunction endSuite = new OneArgFunction() {</span>
+<span class="fc" id="L44">  public OneArgFunction endSuite = new OneArgFunction() {</span>
     @Override
     public LuaValue call(final LuaValue name) {
-<span class="nc" id="L47">      testReporter.endSuite(name.tojstring());</span>
-<span class="nc" id="L48">      return null;</span>
+<span class="fc" id="L47">      testReporter.endSuite(name.tojstring());</span>
+<span class="fc" id="L48">      return null;</span>
     }
   };
 
-<span class="nc" id="L52">  public OneArgFunction startTest = new OneArgFunction() {</span>
+<span class="fc" id="L52">  public OneArgFunction startTest = new OneArgFunction() {</span>
     @Override
     public LuaValue call(final LuaValue name) {
-<span class="nc" id="L55">      logger.trace(&quot;Starting {}...&quot;, name);</span>
-<span class="nc" id="L56">      testReporter.startCase(name.tojstring());</span>
-<span class="nc" id="L57">      return null;</span>
+<span class="fc" id="L55">      logger.trace(&quot;Starting {}...&quot;, name);</span>
+<span class="fc" id="L56">      testReporter.startCase(name.tojstring());</span>
+<span class="fc" id="L57">      return null;</span>
     }
   };
-<span class="nc" id="L60">  public OneArgFunction endTest = new OneArgFunction() {</span>
+<span class="fc" id="L60">  public OneArgFunction endTest = new OneArgFunction() {</span>
     @Override
     public LuaValue call(final LuaValue name) {
-<span class="nc" id="L63">      logger.trace(&quot;{} end&quot;, name);</span>
-<span class="nc" id="L64">      testReporter.endCase(name.tojstring());</span>
-<span class="nc" id="L65">      return null;</span>
+<span class="fc" id="L63">      logger.trace(&quot;{} end&quot;, name);</span>
+<span class="fc" id="L64">      testReporter.endCase(name.tojstring());</span>
+<span class="fc" id="L65">      return null;</span>
     }
   };
-<span class="nc" id="L68">  public TwoArgFunction recordError = new TwoArgFunction() {</span>
+<span class="fc" id="L68">  public TwoArgFunction recordError = new TwoArgFunction() {</span>
     @Override
     public LuaValue call(LuaValue name, LuaValue error) {
-<span class="nc" id="L71">      logger.info(&quot;{} throw {}&quot;, name, error);</span>
-<span class="nc" id="L72">      testReporter.error(name.tojstring(), error.tojstring());</span>
-<span class="nc" id="L73">      return null;</span>
+<span class="fc" id="L71">      logger.info(&quot;{} throw {}&quot;, name, error);</span>
+<span class="fc" id="L72">      testReporter.error(name.tojstring(), error.tojstring());</span>
+<span class="fc" id="L73">      return null;</span>
     }
   };
 
   public static void clear() {
-<span class="nc" id="L78">    cabinet.remove();</span>
-<span class="nc" id="L79">  }</span>
+<span class="fc" id="L78">    cabinet.remove();</span>
+<span class="fc" id="L79">  }</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

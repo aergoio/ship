@@ -4,6 +4,7 @@ import static hera.util.StringUtils.removeSuffix;
 import static hera.util.ValidationUtils.assertEquals;
 import static hera.util.ValidationUtils.assertNotNull;
 import static hera.util.ValidationUtils.assertTrue;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -13,7 +14,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.slf4j.Logger;
 
 public class AnsiMessagePrinter implements MessagePrinter {
 
@@ -28,14 +31,14 @@ public class AnsiMessagePrinter implements MessagePrinter {
   public static final String COLOR_CYAN    = &quot;\u001B[36m&quot;;
   public static final String COLOR_WHITE   = &quot;\u001B[37m&quot;;
 
-<span class="fc" id="L31">  public static final String COLOR_BRIGHT_BLACK    = removeSuffix(COLOR_BLACK, &quot;m&quot;) + &quot;;1m&quot;;</span>
-<span class="fc" id="L32">  public static final String COLOR_BRIGHT_RED      = removeSuffix(COLOR_RED, &quot;m&quot;) + &quot;;1m&quot;;</span>
-<span class="fc" id="L33">  public static final String COLOR_BRIGHT_GREEN    = removeSuffix(COLOR_GREEN, &quot;m&quot;) + &quot;;1m&quot;;</span>
-<span class="fc" id="L34">  public static final String COLOR_BRIGHT_YELLOW   = removeSuffix(COLOR_YELLOW, &quot;m&quot;) + &quot;;1m&quot;;</span>
-<span class="fc" id="L35">  public static final String COLOR_BRIGHT_BLUE     = removeSuffix(COLOR_BLUE, &quot;m&quot;) + &quot;;1m&quot;;</span>
-<span class="fc" id="L36">  public static final String COLOR_BRIGHT_MAGENTA  = removeSuffix(COLOR_MAGENTA, &quot;m&quot;) + &quot;;1m&quot;;</span>
-<span class="fc" id="L37">  public static final String COLOR_BRIGHT_CYAN     = removeSuffix(COLOR_CYAN, &quot;m&quot;) + &quot;;1m&quot;;</span>
-<span class="fc" id="L38">  public static final String COLOR_BRIGHT_WHITE    = removeSuffix(COLOR_WHITE, &quot;m&quot;) + &quot;;1m&quot;;</span>
+<span class="fc" id="L34">  public static final String COLOR_BRIGHT_BLACK    = removeSuffix(COLOR_BLACK, &quot;m&quot;) + &quot;;1m&quot;;</span>
+<span class="fc" id="L35">  public static final String COLOR_BRIGHT_RED      = removeSuffix(COLOR_RED, &quot;m&quot;) + &quot;;1m&quot;;</span>
+<span class="fc" id="L36">  public static final String COLOR_BRIGHT_GREEN    = removeSuffix(COLOR_GREEN, &quot;m&quot;) + &quot;;1m&quot;;</span>
+<span class="fc" id="L37">  public static final String COLOR_BRIGHT_YELLOW   = removeSuffix(COLOR_YELLOW, &quot;m&quot;) + &quot;;1m&quot;;</span>
+<span class="fc" id="L38">  public static final String COLOR_BRIGHT_BLUE     = removeSuffix(COLOR_BLUE, &quot;m&quot;) + &quot;;1m&quot;;</span>
+<span class="fc" id="L39">  public static final String COLOR_BRIGHT_MAGENTA  = removeSuffix(COLOR_MAGENTA, &quot;m&quot;) + &quot;;1m&quot;;</span>
+<span class="fc" id="L40">  public static final String COLOR_BRIGHT_CYAN     = removeSuffix(COLOR_CYAN, &quot;m&quot;) + &quot;;1m&quot;;</span>
+<span class="fc" id="L41">  public static final String COLOR_BRIGHT_WHITE    = removeSuffix(COLOR_WHITE, &quot;m&quot;) + &quot;;1m&quot;;</span>
 
   public static final String BG_BLACK = &quot;\u001B[40m&quot;;
   public static final String BG_RED = &quot;\u001B[41m&quot;;
@@ -46,21 +49,23 @@ public class AnsiMessagePrinter implements MessagePrinter {
   public static final String BG_CYAN = &quot;\u001B[46m&quot;;
   public static final String BG_WHITE = &quot;\u001B[47m&quot;;
 
-<span class="fc" id="L49">  public static final String BG_BRIGHT_BLACK = removeSuffix(BG_BLACK, &quot;m&quot;) + &quot;;1m&quot;;</span>
-<span class="fc" id="L50">  public static final String BG_BRIGHT_RED = removeSuffix(BG_RED, &quot;m&quot;) + &quot;;1m&quot;;</span>
-<span class="fc" id="L51">  public static final String BG_BRIGHT_GREEN = removeSuffix(BG_GREEN, &quot;m&quot;) + &quot;;1m&quot;;</span>
-<span class="fc" id="L52">  public static final String BG_BRIGHT_YELLOW = removeSuffix(BG_YELLOW, &quot;m&quot;) + &quot;;1m&quot;;</span>
-<span class="fc" id="L53">  public static final String BG_BRIGHT_BLUE = removeSuffix(BG_BLUE, &quot;m&quot;) + &quot;;1m&quot;;</span>
-<span class="fc" id="L54">  public static final String BG_BRIGHT_MAGENTA = removeSuffix(BG_MAGENTA, &quot;m&quot;) + &quot;;1m&quot;;</span>
-<span class="fc" id="L55">  public static final String BG_BRIGHT_CYAN = removeSuffix(BG_CYAN, &quot;m&quot;) + &quot;;1m&quot;;</span>
-<span class="fc" id="L56">  public static final String BG_BRIGHT_WHITE = removeSuffix(BG_WHITE, &quot;m&quot;) + &quot;;1m&quot;;</span>
+<span class="fc" id="L52">  public static final String BG_BRIGHT_BLACK = removeSuffix(BG_BLACK, &quot;m&quot;) + &quot;;1m&quot;;</span>
+<span class="fc" id="L53">  public static final String BG_BRIGHT_RED = removeSuffix(BG_RED, &quot;m&quot;) + &quot;;1m&quot;;</span>
+<span class="fc" id="L54">  public static final String BG_BRIGHT_GREEN = removeSuffix(BG_GREEN, &quot;m&quot;) + &quot;;1m&quot;;</span>
+<span class="fc" id="L55">  public static final String BG_BRIGHT_YELLOW = removeSuffix(BG_YELLOW, &quot;m&quot;) + &quot;;1m&quot;;</span>
+<span class="fc" id="L56">  public static final String BG_BRIGHT_BLUE = removeSuffix(BG_BLUE, &quot;m&quot;) + &quot;;1m&quot;;</span>
+<span class="fc" id="L57">  public static final String BG_BRIGHT_MAGENTA = removeSuffix(BG_MAGENTA, &quot;m&quot;) + &quot;;1m&quot;;</span>
+<span class="fc" id="L58">  public static final String BG_BRIGHT_CYAN = removeSuffix(BG_CYAN, &quot;m&quot;) + &quot;;1m&quot;;</span>
+<span class="fc" id="L59">  public static final String BG_BRIGHT_WHITE = removeSuffix(BG_WHITE, &quot;m&quot;) + &quot;;1m&quot;;</span>
 
-<span class="pc" id="L58">  @Getter</span>
-<span class="fc" id="L59">  @Setter</span>
+<span class="fc" id="L61">  protected final transient Logger logger = getLogger(getClass());</span>
+
+<span class="pc" id="L63">  @Getter</span>
+<span class="fc" id="L64">  @Setter</span>
   protected String resetCode = COLOR_RESET;
 
-<span class="pc" id="L62">  @Getter</span>
-<span class="fc" id="L63">  @Setter</span>
+<span class="pc" id="L67">  @Getter</span>
+<span class="fc" id="L68">  @Setter</span>
   protected Map&lt;String, String&gt; colors = new HashMap&lt;&gt;();
 
   protected final PrintStream out;
@@ -70,44 +75,168 @@ public class AnsiMessagePrinter implements MessagePrinter {
    *
    * @param out stream to print out
    */
-<span class="fc" id="L73">  public AnsiMessagePrinter(final PrintStream out) {</span>
-<span class="fc" id="L74">    this.out = out;</span>
-<span class="fc" id="L75">    colors.put(&quot;black&quot;, COLOR_BLACK);</span>
-<span class="fc" id="L76">    colors.put(&quot;red&quot;, COLOR_RED);</span>
-<span class="fc" id="L77">    colors.put(&quot;green&quot;, COLOR_GREEN);</span>
-<span class="fc" id="L78">    colors.put(&quot;yellow&quot;, COLOR_YELLOW);</span>
-<span class="fc" id="L79">    colors.put(&quot;blue&quot;, COLOR_BLUE);</span>
-<span class="fc" id="L80">    colors.put(&quot;magenta&quot;, COLOR_MAGENTA);</span>
-<span class="fc" id="L81">    colors.put(&quot;cyan&quot;, COLOR_CYAN);</span>
-<span class="fc" id="L82">    colors.put(&quot;white&quot;, COLOR_WHITE);</span>
+<span class="fc" id="L78">  public AnsiMessagePrinter(final PrintStream out) {</span>
+<span class="fc" id="L79">    this.out = out;</span>
+<span class="fc" id="L80">    colors.put(&quot;black&quot;, COLOR_BLACK);</span>
+<span class="fc" id="L81">    colors.put(&quot;red&quot;, COLOR_RED);</span>
+<span class="fc" id="L82">    colors.put(&quot;green&quot;, COLOR_GREEN);</span>
+<span class="fc" id="L83">    colors.put(&quot;yellow&quot;, COLOR_YELLOW);</span>
+<span class="fc" id="L84">    colors.put(&quot;blue&quot;, COLOR_BLUE);</span>
+<span class="fc" id="L85">    colors.put(&quot;magenta&quot;, COLOR_MAGENTA);</span>
+<span class="fc" id="L86">    colors.put(&quot;cyan&quot;, COLOR_CYAN);</span>
+<span class="fc" id="L87">    colors.put(&quot;white&quot;, COLOR_WHITE);</span>
 
-<span class="fc" id="L84">    colors.put(&quot;bright_black&quot;, COLOR_BRIGHT_BLACK);</span>
-<span class="fc" id="L85">    colors.put(&quot;bright_red&quot;, COLOR_BRIGHT_RED);</span>
-<span class="fc" id="L86">    colors.put(&quot;bright_green&quot;, COLOR_BRIGHT_GREEN);</span>
-<span class="fc" id="L87">    colors.put(&quot;bright_yellow&quot;, COLOR_BRIGHT_YELLOW);</span>
-<span class="fc" id="L88">    colors.put(&quot;bright_blue&quot;, COLOR_BRIGHT_BLUE);</span>
-<span class="fc" id="L89">    colors.put(&quot;bright_magenta&quot;, COLOR_BRIGHT_MAGENTA);</span>
-<span class="fc" id="L90">    colors.put(&quot;bright_cyan&quot;, COLOR_BRIGHT_CYAN);</span>
-<span class="fc" id="L91">    colors.put(&quot;bright_white&quot;, COLOR_BRIGHT_WHITE);</span>
+<span class="fc" id="L89">    colors.put(&quot;bright_black&quot;, COLOR_BRIGHT_BLACK);</span>
+<span class="fc" id="L90">    colors.put(&quot;bright_red&quot;, COLOR_BRIGHT_RED);</span>
+<span class="fc" id="L91">    colors.put(&quot;bright_green&quot;, COLOR_BRIGHT_GREEN);</span>
+<span class="fc" id="L92">    colors.put(&quot;bright_yellow&quot;, COLOR_BRIGHT_YELLOW);</span>
+<span class="fc" id="L93">    colors.put(&quot;bright_blue&quot;, COLOR_BRIGHT_BLUE);</span>
+<span class="fc" id="L94">    colors.put(&quot;bright_magenta&quot;, COLOR_BRIGHT_MAGENTA);</span>
+<span class="fc" id="L95">    colors.put(&quot;bright_cyan&quot;, COLOR_BRIGHT_CYAN);</span>
+<span class="fc" id="L96">    colors.put(&quot;bright_white&quot;, COLOR_BRIGHT_WHITE);</span>
 
-<span class="fc" id="L93">    colors.put(&quot;bg_black&quot;, BG_BLACK);</span>
-<span class="fc" id="L94">    colors.put(&quot;bg_red&quot;, BG_RED);</span>
-<span class="fc" id="L95">    colors.put(&quot;bg_green&quot;, BG_GREEN);</span>
-<span class="fc" id="L96">    colors.put(&quot;bg_yellow&quot;, BG_YELLOW);</span>
-<span class="fc" id="L97">    colors.put(&quot;bg_blue&quot;, BG_BLUE);</span>
-<span class="fc" id="L98">    colors.put(&quot;bg_magenta&quot;, BG_MAGENTA);</span>
-<span class="fc" id="L99">    colors.put(&quot;bg_cyan&quot;, BG_CYAN);</span>
-<span class="fc" id="L100">    colors.put(&quot;bg_white&quot;, BG_WHITE);</span>
+<span class="fc" id="L98">    colors.put(&quot;bg_black&quot;, BG_BLACK);</span>
+<span class="fc" id="L99">    colors.put(&quot;bg_red&quot;, BG_RED);</span>
+<span class="fc" id="L100">    colors.put(&quot;bg_green&quot;, BG_GREEN);</span>
+<span class="fc" id="L101">    colors.put(&quot;bg_yellow&quot;, BG_YELLOW);</span>
+<span class="fc" id="L102">    colors.put(&quot;bg_blue&quot;, BG_BLUE);</span>
+<span class="fc" id="L103">    colors.put(&quot;bg_magenta&quot;, BG_MAGENTA);</span>
+<span class="fc" id="L104">    colors.put(&quot;bg_cyan&quot;, BG_CYAN);</span>
+<span class="fc" id="L105">    colors.put(&quot;bg_white&quot;, BG_WHITE);</span>
 
-<span class="fc" id="L102">    colors.put(&quot;bg_bright_black&quot;, BG_BRIGHT_BLACK);</span>
-<span class="fc" id="L103">    colors.put(&quot;bg_bright_red&quot;, BG_BRIGHT_RED);</span>
-<span class="fc" id="L104">    colors.put(&quot;bg_bright_green&quot;, BG_BRIGHT_GREEN);</span>
-<span class="fc" id="L105">    colors.put(&quot;bg_bright_yellow&quot;, BG_BRIGHT_YELLOW);</span>
-<span class="fc" id="L106">    colors.put(&quot;bg_bright_blue&quot;, BG_BRIGHT_BLUE);</span>
-<span class="fc" id="L107">    colors.put(&quot;bg_bright_magenta&quot;, BG_BRIGHT_MAGENTA);</span>
-<span class="fc" id="L108">    colors.put(&quot;bg_bright_cyan&quot;, BG_BRIGHT_CYAN);</span>
-<span class="fc" id="L109">    colors.put(&quot;bg_bright_white&quot;, BG_BRIGHT_WHITE);</span>
-<span class="fc" id="L110">  }</span>
+<span class="fc" id="L107">    colors.put(&quot;bg_bright_black&quot;, BG_BRIGHT_BLACK);</span>
+<span class="fc" id="L108">    colors.put(&quot;bg_bright_red&quot;, BG_BRIGHT_RED);</span>
+<span class="fc" id="L109">    colors.put(&quot;bg_bright_green&quot;, BG_BRIGHT_GREEN);</span>
+<span class="fc" id="L110">    colors.put(&quot;bg_bright_yellow&quot;, BG_BRIGHT_YELLOW);</span>
+<span class="fc" id="L111">    colors.put(&quot;bg_bright_blue&quot;, BG_BRIGHT_BLUE);</span>
+<span class="fc" id="L112">    colors.put(&quot;bg_bright_magenta&quot;, BG_BRIGHT_MAGENTA);</span>
+<span class="fc" id="L113">    colors.put(&quot;bg_bright_cyan&quot;, BG_BRIGHT_CYAN);</span>
+<span class="fc" id="L114">    colors.put(&quot;bg_bright_white&quot;, BG_BRIGHT_WHITE);</span>
+<span class="fc" id="L115">  }</span>
+
+<span class="fc" id="L117">  @RequiredArgsConstructor</span>
+  abstract class State {
+<span class="fc" id="L119">    @Getter</span>
+    protected final Stack&lt;String&gt; tags;
+
+<span class="fc" id="L122">    @Getter</span>
+    protected final StringWriter writer;
+
+    abstract State next(int ch);
+  }
+
+  class Normal extends State {
+
+    protected static final int CH_TAG_START = '&lt;';
+    protected static final int CH_ESCAPE = '!';
+
+<span class="fc" id="L133">    public Normal(final Stack&lt;String&gt; tags, final StringWriter writer) {</span>
+<span class="fc" id="L134">      super(tags, writer);</span>
+<span class="fc" id="L135">    }</span>
+
+    @Override
+    public State next(int ch) {
+<span class="fc bfc" id="L139" title="All 2 branches covered.">      if (CH_ESCAPE == ch) {</span>
+<span class="fc" id="L140">        return new Escape(tags, writer);</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">      } else if (CH_TAG_START == ch) {</span>
+<span class="fc" id="L142">        return new TagOpen(tags, writer);</span>
+      } else {
+<span class="fc" id="L144">        writer.write((char) ch);</span>
+<span class="fc" id="L145">        return this;</span>
+      }
+    }
+  }
+
+  class Escape extends State {
+
+<span class="fc" id="L152">    public Escape(final Stack&lt;String&gt; tags, final StringWriter writer) {</span>
+<span class="fc" id="L153">      super(tags, writer);</span>
+<span class="fc" id="L154">    }</span>
+
+    @Override
+    public State next(int ch) {
+<span class="fc" id="L158">      writer.write((char) ch);</span>
+<span class="fc" id="L159">      return new Normal(tags, writer);</span>
+    }
+  }
+
+  class TagOpen extends State {
+    protected static final int CH_TAG_CLOSE = '/';
+
+<span class="fc" id="L166">    public TagOpen(final Stack&lt;String&gt; tags, final StringWriter writer) {</span>
+<span class="fc" id="L167">      super(tags, writer);</span>
+<span class="fc" id="L168">    }</span>
+
+    @Override
+    public State next(int ch) {
+<span class="fc bfc" id="L172" title="All 2 branches covered.">      if (ch == CH_TAG_CLOSE) {</span>
+<span class="fc" id="L173">        return new CloseColor(tags, writer);</span>
+      } else {
+<span class="fc" id="L175">        return new OpenColor(tags, writer).next(ch);</span>
+      }
+    }
+  }
+
+  class OpenColor extends State {
+    protected static final int CH_TAG_END = '&gt;';
+
+<span class="fc" id="L183">    protected final StringBuilder color = new StringBuilder();</span>
+
+<span class="fc" id="L185">    public OpenColor(final Stack&lt;String&gt; tags, final StringWriter writer) {</span>
+<span class="fc" id="L186">      super(tags, writer);</span>
+<span class="fc" id="L187">    }</span>
+
+    @Override
+    public State next(int ch) {
+<span class="fc bfc" id="L191" title="All 2 branches covered.">      if (ch == CH_TAG_END) {</span>
+<span class="fc" id="L192">        final String colorName = color.toString();</span>
+        // check valid
+<span class="fc" id="L194">        tags.push(colorName);</span>
+<span class="fc" id="L195">        logger.debug(&quot;Tags: {}&quot;, tags);</span>
+<span class="fc" id="L196">        final String colorCode = colors.get(colorName);</span>
+<span class="fc" id="L197">        assertNotNull(colorCode, &quot;Unknown color: &quot; + colorName);</span>
+<span class="fc" id="L198">        writer.write(colorCode);</span>
+<span class="fc" id="L199">        return new Normal(tags, writer);</span>
+      } else {
+<span class="fc" id="L201">        color.append((char) ch);</span>
+<span class="fc" id="L202">        return this;</span>
+      }
+
+    }
+  }
+
+  class CloseColor extends State {
+
+    protected static final int CH_TAG_END = '&gt;';
+
+<span class="fc" id="L212">    protected final StringBuilder color = new StringBuilder();</span>
+
+<span class="fc" id="L214">    public CloseColor(final Stack&lt;String&gt; tags, final StringWriter writer) {</span>
+<span class="fc" id="L215">      super(tags, writer);</span>
+<span class="fc" id="L216">    }</span>
+
+    @Override
+    public State next(int ch) {
+<span class="fc bfc" id="L220" title="All 2 branches covered.">      if (ch == CH_TAG_END) {</span>
+<span class="fc" id="L221">        final String colorName = color.toString();</span>
+        // check valid
+<span class="fc" id="L223">        final String openColorName = tags.pop();</span>
+<span class="fc" id="L224">        logger.debug(&quot;Tags: {}&quot;, tags);</span>
+<span class="fc" id="L225">        assertEquals(openColorName, colorName,</span>
+            &quot;The closing tag not matched: &quot; + openColorName + &quot;, &quot; + colorName);
+<span class="fc" id="L227">        color.delete(0, color.length());</span>
+<span class="pc bpc" id="L228" title="1 of 2 branches missed.">        if (tags.isEmpty()) {</span>
+<span class="fc" id="L229">          writer.write(resetCode);</span>
+        } else {
+<span class="nc" id="L231">          writer.write(colors.get(tags.peek()));</span>
+        }
+<span class="fc" id="L233">        return new Normal(tags, writer);</span>
+      } else {
+<span class="fc" id="L235">        color.append((char) ch);</span>
+<span class="fc" id="L236">        return this;</span>
+      }
+    }
+  }
 
   /**
    * Format tagged message with ansi color.
@@ -117,109 +246,47 @@ public class AnsiMessagePrinter implements MessagePrinter {
    * @return text with ansi code
    */
   public String format(final String message) {
-<span class="pc bpc" id="L120" title="1 of 2 branches missed.">    if (null == message) {</span>
-<span class="nc" id="L121">      return null;</span>
+<span class="pc bpc" id="L249" title="1 of 2 branches missed.">    if (null == message) {</span>
+<span class="nc" id="L250">      return null;</span>
     }
-<span class="fc" id="L123">    final StringReader reader = new StringReader(message);</span>
-<span class="fc" id="L124">    final StringWriter writer = new StringWriter();</span>
-<span class="fc" id="L125">    final StringBuilder color = new StringBuilder();</span>
+<span class="fc" id="L252">    final StringReader reader = new StringReader(message);</span>
 
-<span class="fc" id="L127">    final Stack&lt;String&gt; tags = new Stack&lt;&gt;();</span>
-<span class="fc" id="L128">    int ch = 0;</span>
-<span class="fc" id="L129">    final int ST_NORMAL = 0;</span>
-<span class="fc" id="L130">    final int ST_ESCAPE = 1;</span>
-<span class="fc" id="L131">    final int ST_TAG_OPEN = 2;</span>
-<span class="fc" id="L132">    final int ST_OPEN_COLOR = 3;</span>
-<span class="fc" id="L133">    final int ST_CLOSE_COLOR = 4;</span>
-<span class="fc" id="L134">    final int CH_ESCAPE = '!';</span>
-<span class="fc" id="L135">    final int CH_TAG_START = '&lt;';</span>
-<span class="fc" id="L136">    final int CH_TAG_CLOSE = '/';</span>
-<span class="fc" id="L137">    final int CH_TAG_END = '&gt;';</span>
-<span class="fc" id="L138">    int state = ST_NORMAL;</span>
+<span class="fc" id="L254">    int ch = 0;</span>
+<span class="fc" id="L255">    State state = new Normal(new Stack&lt;&gt;(), new StringWriter());</span>
     try {
-<span class="fc bfc" id="L140" title="All 2 branches covered.">      while (0 &lt;= (ch = reader.read())) {</span>
-<span class="pc bpc" id="L141" title="2 of 6 branches missed.">        switch (state) {</span>
-          case ST_NORMAL:
-<span class="pc bpc" id="L143" title="1 of 2 branches missed.">            if (CH_ESCAPE == ch) {</span>
-<span class="nc" id="L144">              state = ST_ESCAPE;</span>
-<span class="fc bfc" id="L145" title="All 2 branches covered.">            } else if (CH_TAG_START == ch) {</span>
-<span class="fc" id="L146">              state = ST_TAG_OPEN;</span>
-            } else {
-<span class="fc" id="L148">              writer.write((char) ch);</span>
-            }
-<span class="fc" id="L150">            break;</span>
-          case ST_ESCAPE:
-<span class="nc" id="L152">            writer.write((char) ch);</span>
-<span class="nc" id="L153">            state = ST_NORMAL;</span>
-<span class="nc" id="L154">            break;</span>
-          case ST_TAG_OPEN:
-<span class="fc bfc" id="L156" title="All 2 branches covered.">            if (ch == CH_TAG_CLOSE) {</span>
-<span class="fc" id="L157">              state = ST_CLOSE_COLOR;</span>
-            } else {
-<span class="fc" id="L159">              state = ST_OPEN_COLOR;</span>
-<span class="fc" id="L160">              color.append((char) ch);</span>
-            }
-<span class="fc" id="L162">            break;</span>
-          case ST_OPEN_COLOR:
-<span class="fc bfc" id="L164" title="All 2 branches covered.">            if (ch == CH_TAG_END) {</span>
-<span class="fc" id="L165">              final String colorName = color.toString();</span>
-              // check valid
-<span class="fc" id="L167">              tags.push(colorName);</span>
-<span class="fc" id="L168">              color.delete(0, color.length());</span>
-<span class="fc" id="L169">              final String colorCode = colors.get(colorName);</span>
-<span class="fc" id="L170">              assertNotNull(colorCode, &quot;Unknown color: &quot; + colorName);</span>
-<span class="fc" id="L171">              writer.write(colorCode);</span>
-<span class="fc" id="L172">              state = ST_NORMAL;</span>
-<span class="fc" id="L173">            } else {</span>
-<span class="fc" id="L174">              color.append((char) ch);</span>
-            }
-<span class="fc" id="L176">            break;</span>
-          case ST_CLOSE_COLOR:
-<span class="fc bfc" id="L178" title="All 2 branches covered.">            if (ch == CH_TAG_END) {</span>
-<span class="fc" id="L179">              final String colorName = color.toString();</span>
-              // check valid
-<span class="fc" id="L181">              final String openColorName = tags.pop();</span>
-<span class="fc" id="L182">              assertEquals(openColorName, colorName,</span>
-                  &quot;The closing tag not matched: &quot; + openColorName + &quot;, &quot; + colorName);
-<span class="fc" id="L184">              color.delete(0, color.length());</span>
-<span class="pc bpc" id="L185" title="1 of 2 branches missed.">              if (tags.isEmpty()) {</span>
-<span class="fc" id="L186">                writer.write(resetCode);</span>
-              } else {
-<span class="nc" id="L188">                writer.write(colors.get(tags.peek()));</span>
-              }
-<span class="fc" id="L190">              state = ST_NORMAL;</span>
-<span class="fc" id="L191">            } else {</span>
-<span class="fc" id="L192">              color.append((char) ch);</span>
-            }
-<span class="fc" id="L194">            break;</span>
-
-          default:
-<span class="nc" id="L197">            throw new IllegalStateException();</span>
+<span class="fc bfc" id="L257" title="All 2 branches covered.">      while (0 &lt;= (ch = reader.read())) {</span>
+<span class="fc" id="L258">        logger.trace(&quot;Char: {}&quot;, (char) ch);</span>
+<span class="fc" id="L259">        final State old = state;</span>
+<span class="fc" id="L260">        state = state.next(ch);</span>
+<span class="fc bfc" id="L261" title="All 2 branches covered.">        if (old != state) {</span>
+<span class="fc" id="L262">          logger.debug(&quot;{} -&gt; {}&quot;, old, state);</span>
         }
-      }
-<span class="nc" id="L200">    } catch (IOException ex) {</span>
-<span class="nc" id="L201">      throw new IllegalStateException();</span>
-<span class="fc" id="L202">    }</span>
-<span class="fc" id="L203">    assertEquals(ST_NORMAL, state, &quot;Expression is invalid: &quot; + state);</span>
-<span class="fc" id="L204">    assertTrue(tags.isEmpty(), &quot;The closing tag missed: &quot; + tags);</span>
-<span class="fc" id="L205">    return writer.toString();</span>
+<span class="fc" id="L264">      }</span>
+<span class="nc" id="L265">    } catch (final IOException ex) {</span>
+<span class="nc" id="L266">      throw new IllegalStateException();</span>
+<span class="fc" id="L267">    }</span>
+<span class="fc" id="L268">    logger.debug(&quot;State: {}&quot;, state);</span>
+<span class="fc" id="L269">    logger.debug(&quot;Tags: {}&quot;, state.getTags());</span>
+<span class="fc" id="L270">    assertTrue(state instanceof Normal, &quot;Expression is invalid: &quot; + state);</span>
+<span class="fc" id="L271">    assertTrue(state.getTags().isEmpty(), &quot;The closing tag missed: &quot; + state.getTags());</span>
+<span class="fc" id="L272">    return state.getWriter().toString();</span>
   }
 
   public void print(final String format, Object...args) {
-<span class="nc" id="L209">    out.print(this.format(String.format(format, args)));</span>
-<span class="nc" id="L210">  }</span>
+<span class="nc" id="L276">    out.print(this.format(String.format(format, args)));</span>
+<span class="nc" id="L277">  }</span>
 
   public void println() {
-<span class="nc" id="L213">    out.println();</span>
-<span class="nc" id="L214">  }</span>
+<span class="nc" id="L280">    out.println();</span>
+<span class="nc" id="L281">  }</span>
 
   public void println(final String format, Object... args) {
-<span class="nc" id="L217">    out.println(this.format(String.format(format, args)));</span>
-<span class="nc" id="L218">  }</span>
+<span class="nc" id="L284">    out.println(this.format(String.format(format, args)));</span>
+<span class="nc" id="L285">  }</span>
 
   @Override
   public void flush() {
-<span class="nc" id="L222">    out.flush();</span>
-<span class="nc" id="L223">  }</span>
+<span class="nc" id="L289">    out.flush();</span>
+<span class="nc" id="L290">  }</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

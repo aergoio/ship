@@ -8,6 +8,7 @@ import static hera.util.FilepathUtils.getCanonicalForm;
 import static hera.util.ObjectUtils.equal;
 import static hera.util.ObjectUtils.nvl;
 import static java.util.Arrays.asList;
+import static java.util.Collections.EMPTY_LIST;
 import static java.util.Collections.unmodifiableSet;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -37,112 +38,117 @@ import ship.build.res.Source;
 import ship.build.res.TestResource;
 import ship.util.FileWatcher;
 
-<span class="fc" id="L40">@RequiredArgsConstructor</span>
+<span class="fc" id="L41">@RequiredArgsConstructor</span>
 public class ResourceManager implements ServerListener {
-<span class="fc" id="L42">  protected static final Set&lt;Integer&gt; eventFilter =</span>
-<span class="fc" id="L43">      unmodifiableSet(new HashSet(asList(FileWatcher.ANY_CHANGED)));</span>
+<span class="fc" id="L43">  protected static final Set&lt;Integer&gt; eventFilter =</span>
+<span class="fc" id="L44">      unmodifiableSet(new HashSet(asList(FileWatcher.ANY_CHANGED)));</span>
 
-<span class="fc" id="L45">  protected final transient Logger logger = getLogger(getClass());</span>
+<span class="fc" id="L46">  protected final transient Logger logger = getLogger(getClass());</span>
 
-<span class="fc" id="L47">  protected final Map&lt;String, Resource&gt; cache = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L48">  protected final Map&lt;String, Resource&gt; cache = new HashMap&lt;&gt;();</span>
 
-<span class="nc" id="L49">  @Getter</span>
+<span class="fc" id="L50">  @Getter</span>
   protected final Project project;
 
-<span class="pc" id="L52">  @Getter</span>
-<span class="nc" id="L53">  @Setter</span>
+<span class="pc" id="L53">  @Getter</span>
+<span class="nc" id="L54">  @Setter</span>
   protected PackageManager packageManager = new PackageManager();
 
-<span class="fc" id="L56">  protected final Set&lt;ResourceChangeListener&gt; resourceChangeListeners = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L57">  protected final Set&lt;ResourceChangeListener&gt; resourceChangeListeners = new HashSet&lt;&gt;();</span>
 
   public void addResourceChangeListener(final ResourceChangeListener listener) {
-<span class="nc" id="L59">    resourceChangeListeners.add(listener);</span>
-<span class="nc" id="L60">  }</span>
+<span class="fc" id="L60">    resourceChangeListeners.add(listener);</span>
+<span class="fc" id="L61">  }</span>
 
   public void removeResourceChangeListener(final ResourceChangeListener listener) {
-<span class="nc" id="L63">    resourceChangeListeners.remove(listener);</span>
-<span class="nc" id="L64">  }</span>
+<span class="fc" id="L64">    resourceChangeListeners.remove(listener);</span>
+<span class="fc" id="L65">  }</span>
 
   protected void fireEvent(final ResourceChangeEvent event) {
-<span class="nc bnc" id="L67" title="All 2 branches missed.">    for (final ResourceChangeListener listener : resourceChangeListeners) {</span>
-<span class="nc" id="L68">      listener.handle(event);</span>
-<span class="nc" id="L69">    }</span>
-<span class="nc" id="L70">  }</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">    for (final ResourceChangeListener listener : resourceChangeListeners) {</span>
+<span class="fc" id="L69">      listener.handle(event);</span>
+<span class="fc" id="L70">    }</span>
+<span class="fc" id="L71">  }</span>
 
   /**
-   * Return resouce for {@code base}.
+   * Return resource for {@code base}.
    *
-   * @param path resoruce base
+   * @param path resource base
    *
-   * @return resoruce for base
+   * @return resource for base
    */
   public synchronized Resource getResource(final String path) {
-<span class="nc" id="L80">    logger.trace(&quot;Path: {}&quot;, path);</span>
-<span class="nc" id="L81">    final ProjectFile projectFile = project.getProjectFile();</span>
-<span class="nc" id="L82">    final String canonicalPath = getCanonicalForm(path);</span>
-<span class="nc" id="L83">    logger.trace(&quot;Canonical base: {}&quot;, canonicalPath);</span>
-<span class="nc" id="L84">    final Resource cached = cache.get(canonicalPath);</span>
-<span class="nc bnc" id="L85" title="All 2 branches missed.">    if (null != cached) {</span>
-<span class="nc" id="L86">      return cached;</span>
+<span class="fc" id="L81">    logger.trace(&quot;Path: {}&quot;, path);</span>
+<span class="fc" id="L82">    final ProjectFile projectFile = project.getProjectFile();</span>
+<span class="fc" id="L83">    final String canonicalPath = getCanonicalForm(path);</span>
+<span class="fc" id="L84">    logger.trace(&quot;Canonical base: {}&quot;, canonicalPath);</span>
+<span class="fc" id="L85">    final Resource cached = cache.get(canonicalPath);</span>
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">    if (null != cached) {</span>
+<span class="nc" id="L87">      return cached;</span>
     }
-<span class="nc" id="L88">    Resource created = null;</span>
-<span class="nc bnc" id="L89" title="All 2 branches missed.">    if (equal(canonicalPath, getCanonicalForm(projectFile.getTarget()))) {</span>
-<span class="nc" id="L90">      created = new BuildResource(project, canonicalPath);</span>
+<span class="fc" id="L89">    final Resource created = create(canonicalPath);</span>
+<span class="fc" id="L90">    cache.put(canonicalPath, created);</span>
+<span class="fc" id="L91">    logger.debug(&quot;{} added&quot;, canonicalPath);</span>
+<span class="fc" id="L92">    return created;</span>
+  }
+
+  protected boolean isTarget(final String canonicalPath) {
+<span class="fc" id="L96">    final ProjectFile projectFile = project.getProjectFile();</span>
+<span class="fc" id="L97">    return equal(canonicalPath, getCanonicalForm(projectFile.getTarget()));</span>
+  }
+
+  protected boolean isTest(final String canonicalPath) {
+<span class="fc" id="L101">    final ProjectFile projectFile = project.getProjectFile();</span>
+<span class="fc" id="L102">    return nvl(projectFile.getTests(), Collections.&lt;String&gt;emptyList())</span>
+<span class="fc" id="L103">        .stream().map(FilepathUtils::getCanonicalForm).anyMatch(canonicalPath::equals);</span>
+  }
+
+  protected Resource create(final String canonicalPath) {
+<span class="pc bpc" id="L107" title="1 of 2 branches missed.">    if (isTarget(canonicalPath)) {</span>
+<span class="nc" id="L108">      return new BuildResource(project, canonicalPath);</span>
+<span class="pc bpc" id="L109" title="1 of 2 branches missed.">    } else if (isTest(canonicalPath)) {</span>
+<span class="nc" id="L110">      return new TestResource(project, canonicalPath);</span>
+<span class="pc bpc" id="L111" title="1 of 2 branches missed.">    } else if (canonicalPath.endsWith(&quot;.lua&quot;)) {</span>
+<span class="nc" id="L112">      return new Source(project, canonicalPath);</span>
     } else {
-<span class="nc" id="L92">      if (nvl(projectFile.getTests(), Collections.&lt;String&gt;emptyList())</span>
-<span class="nc bnc" id="L93" title="All 2 branches missed.">          .stream().map(FilepathUtils::getCanonicalForm).anyMatch(canonicalPath::equals)) {</span>
-<span class="nc" id="L94">        created = new TestResource(project, canonicalPath);</span>
-      } else {
-<span class="nc bnc" id="L96" title="All 2 branches missed.">        if (canonicalPath.endsWith(&quot;.lua&quot;)) {</span>
-<span class="nc" id="L97">          created = new Source(project, canonicalPath);</span>
-        } else {
-<span class="nc" id="L99">          created = new Resource(project, canonicalPath);</span>
-        }
-      }
+<span class="fc" id="L114">      return new Resource(project, canonicalPath);</span>
     }
-<span class="nc" id="L103">    cache.put(canonicalPath, created);</span>
-<span class="nc" id="L104">    logger.debug(&quot;{} added&quot;, canonicalPath);</span>
-<span class="nc" id="L105">    return created;</span>
+
   }
 
   public Resource getPackage(final String packageName) {
-<span class="nc" id="L109">    final ResourceManager newResourceManager = packageManager.find(packageName);</span>
-<span class="nc" id="L110">    return new PackageResource(newResourceManager);</span>
+<span class="nc" id="L120">    final ResourceManager newResourceManager = packageManager.find(packageName);</span>
+<span class="nc" id="L121">    return new PackageResource(newResourceManager);</span>
   }
 
   @Override
   public void handle(final ServerEvent event) {
-<span class="nc bnc" id="L115" title="All 2 branches missed.">    if (!eventFilter.contains(event.getType())) {</span>
-<span class="nc" id="L116">      logger.trace(&quot;Unhandled event: {}&quot;, event);</span>
-<span class="nc" id="L117">      return;</span>
+<span class="pc bpc" id="L126" title="1 of 2 branches missed.">    if (!eventFilter.contains(event.getType())) {</span>
+<span class="nc" id="L127">      logger.trace(&quot;Unhandled event: {}&quot;, event);</span>
+<span class="nc" id="L128">      return;</span>
     }
 
-<span class="nc" id="L120">    final int eventType = event.getType();</span>
-<span class="nc" id="L121">    logger.trace(&quot;Event type: {}&quot;, eventType);</span>
-<span class="nc bnc" id="L122" title="All 2 branches missed.">    switch (eventType) {</span>
-      case FileWatcher.ANY_CHANGED:
-<span class="nc" id="L124">        final Collection&lt;File&gt; files = (Collection&lt;File&gt;) event.getNewData();</span>
-<span class="nc" id="L125">        final Optional&lt;Resource&gt; cachedResourceOpt = files.stream().map(file -&gt; {</span>
-<span class="nc" id="L126">          final String path = getCanonicalForm(file.getAbsolutePath());</span>
-<span class="nc" id="L127">          final String projectPath =</span>
-<span class="nc" id="L128">              getCanonicalForm(project.getPath().toAbsolutePath().toString());</span>
-<span class="nc" id="L129">          final Path relativePath =</span>
-<span class="nc" id="L130">              Paths.get(projectPath).relativize(Paths.get(path));</span>
-<span class="nc" id="L131">          logger.trace(&quot;Project path: {}, Path: {}, Relative path: {}&quot;,</span>
-              projectPath, path, relativePath);
-<span class="nc" id="L133">          final String canonicalPath = getCanonicalForm(relativePath.toString());</span>
-<span class="nc" id="L134">          logger.trace(&quot;Project relative path: {}&quot;, canonicalPath);</span>
-<span class="nc" id="L135">          return cache.get(canonicalPath);</span>
-<span class="nc" id="L136">        }).filter(Objects::nonNull).findFirst();</span>
-<span class="nc bnc" id="L137" title="All 2 branches missed.">        if (cachedResourceOpt.isPresent()) {</span>
-<span class="nc" id="L138">          final Resource cached = cachedResourceOpt.get();</span>
-<span class="nc" id="L139">          logger.info(&quot;{} changed: {}&quot;, cached, event.getType());</span>
-<span class="nc" id="L140">          fireEvent(new ResourceChangeEvent(cached));</span>
-<span class="nc" id="L141">        }</span>
-        break;
-      default:
-        break;
+<span class="fc" id="L131">    final Collection&lt;File&gt; files = nvl((Collection&lt;File&gt;) event.getNewData(), EMPTY_LIST);</span>
+<span class="fc" id="L132">    final Optional&lt;Resource&gt; cachedResourceOpt = files.stream().map(file -&gt; {</span>
+<span class="fc" id="L133">      final String path = getCanonicalForm(file.getAbsolutePath());</span>
+<span class="fc" id="L134">      final String projectPath =</span>
+<span class="fc" id="L135">          getCanonicalForm(project.getPath().toAbsolutePath().toString());</span>
+<span class="fc" id="L136">      final Path relativePath =</span>
+<span class="fc" id="L137">          Paths.get(projectPath).relativize(Paths.get(path));</span>
+<span class="fc" id="L138">      logger.trace(&quot;Project path: {}, Path: {}, Relative path: {}&quot;,</span>
+          projectPath, path, relativePath);
+<span class="fc" id="L140">      final String relativePathStr = relativePath.toString();</span>
+<span class="fc" id="L141">      logger.debug(&quot;Relative path: {}&quot;, relativePath);</span>
+
+<span class="fc" id="L143">      final String canonicalPath = getCanonicalForm(relativePathStr);</span>
+<span class="fc" id="L144">      logger.trace(&quot;Project relative path: {}&quot;, canonicalPath);</span>
+<span class="fc" id="L145">      return cache.get(canonicalPath);</span>
+<span class="fc" id="L146">    }).filter(Objects::nonNull).findFirst();</span>
+<span class="pc bpc" id="L147" title="1 of 2 branches missed.">    if (cachedResourceOpt.isPresent()) {</span>
+<span class="nc" id="L148">      final Resource cached = cachedResourceOpt.get();</span>
+<span class="nc" id="L149">      logger.info(&quot;{} changed: {}&quot;, cached, event.getType());</span>
+<span class="nc" id="L150">      fireEvent(new ResourceChangeEvent(cached));</span>
     }
-<span class="nc" id="L146">  }</span>
+<span class="fc" id="L152">  }</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

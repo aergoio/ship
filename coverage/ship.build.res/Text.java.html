@@ -26,10 +26,10 @@ public class Text {
    * @throws Exception Fail to read or write
    */
   public void read(final DangerousSupplier&lt;OutputStream&gt; supplier) throws Exception {
-<span class="nc" id="L29">    try (final InputStream in = textSupplier.get()) {</span>
-<span class="nc" id="L30">      IoUtils.redirect(in, supplier.get());</span>
+<span class="fc" id="L29">    try (final InputStream in = textSupplier.get()) {</span>
+<span class="fc" id="L30">      IoUtils.redirect(in, supplier.get());</span>
     }
-<span class="nc" id="L32">  }</span>
+<span class="fc" id="L32">  }</span>
 
   /**
    * Read using {@link DangerousConsumer}.
@@ -39,10 +39,10 @@ public class Text {
    * @throws Exception Fail to read
    */
   public void read(final DangerousConsumer&lt;InputStream&gt; consumer) throws Exception {
-<span class="nc" id="L42">    try (final InputStream in = textSupplier.get()) {</span>
-<span class="nc" id="L43">      consumer.accept(in);</span>
+<span class="fc" id="L42">    try (final InputStream in = textSupplier.get()) {</span>
+<span class="fc" id="L43">      consumer.accept(in);</span>
     }
-<span class="nc" id="L45">  }</span>
+<span class="fc" id="L45">  }</span>
 
   /**
    * Get content text as String.
@@ -58,4 +58,4 @@ public class Text {
     }
   }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

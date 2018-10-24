@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BuildProjectConsoleMode.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ship</a> &gt; <a href="index.source.html" class="el_package">ship.command</a> &gt; <span class="el_source">BuildProjectConsoleMode.java</span></div><h1>BuildProjectConsoleMode.java</h1><pre class="source lang-java linenums">package ship.command;
+
+import static hera.util.ExceptionUtils.buildExceptionMessage;
+import static ship.build.web.model.BuildSummary.SUCCESS;
+import static ship.build.web.model.BuildSummary.TEST_FAIL;
+
+import hera.util.DangerousConsumer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import ship.build.ConsoleServer;
+import ship.build.Resource;
+import ship.build.ResourceChangeEvent;
+import ship.build.res.BuildResource;
+import ship.build.res.PackageResource;
+import ship.build.res.Project;
+import ship.build.web.model.BuildDetails;
+import ship.test.TestReportNode;
+import ship.util.FileWatcher;
+
+<span class="fc" id="L21">public class BuildProjectConsoleMode extends BuildProjectCommandMode {</span>
+
+<span class="fc" id="L23">  protected final List&lt;DangerousConsumer&lt;BuildDetails&gt;&gt; buildListeners = new ArrayList&lt;&gt;();</span>
+
+  public void addListener(final DangerousConsumer&lt;BuildDetails&gt; listener) {
+<span class="fc" id="L26">    this.buildListeners.add(listener);</span>
+<span class="fc" id="L27">  }</span>
+
+  @Override
+  protected BuildDetails build(final Project project) {
+<span class="fc" id="L31">    final BuildDetails buildDetails = super.build(project);</span>
+<span class="fc" id="L32">    test(buildDetails);</span>
+<span class="fc" id="L33">    fireEvent(buildDetails);</span>
+<span class="fc" id="L34">    return buildDetails;</span>
+  }
+
+  protected void startConsoleServer() {
+<span class="fc" id="L38">    final ConsoleServer consoleServer = new ConsoleServer();</span>
+<span class="fc" id="L39">    consoleServer.setPrinter(getPrinter());</span>
+<span class="fc" id="L40">    addListener(consoleServer::process);</span>
+<span class="fc" id="L41">    consoleServer.boot();</span>
+<span class="fc" id="L42">  }</span>
+
+  protected FileWatcher createFileWatcher() {
+<span class="fc" id="L45">    final FileWatcher fileWatcher = new FileWatcher(project.getPath().toFile());</span>
+<span class="fc" id="L46">    fileWatcher.addIgnore(&quot;.git&quot;);</span>
+<span class="fc" id="L47">    fileWatcher.addServerListener(builder.getResourceManager());</span>
+<span class="fc" id="L48">    fileWatcher.run();</span>
+<span class="fc" id="L49">    return fileWatcher;</span>
+  }
+
+  @Override
+  public void execute() throws Exception {
+<span class="fc" id="L54">    initialize();</span>
+<span class="fc" id="L55">    startConsoleServer();</span>
+<span class="fc" id="L56">    this.build(project);</span>
+<span class="fc" id="L57">    builder.getResourceManager().addResourceChangeListener(this::resourceChanged);</span>
+<span class="fc" id="L58">    createFileWatcher();</span>
+<span class="fc" id="L59">  }</span>
+
+  protected void resourceChanged(final ResourceChangeEvent event) {
+<span class="fc" id="L62">    logger.info(&quot;Resource changed: {}&quot;, event);</span>
+<span class="fc" id="L63">    final Resource changedResource = event.getResource();</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">    if (changedResource instanceof PackageResource) {</span>
+<span class="nc" id="L65">      logger.trace(&quot;Skip package resource: {}&quot;, changedResource.getLocation());</span>
+<span class="nc" id="L66">      return;</span>
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">    } else if (changedResource instanceof BuildResource) {</span>
+<span class="nc" id="L68">      logger.trace(&quot;Skip build resource: {}&quot;, changedResource.getLocation());</span>
+<span class="nc" id="L69">      return;</span>
+    }
+<span class="fc" id="L71">    this.build(project);</span>
+<span class="fc" id="L72">  }</span>
+
+
+  protected void test(final BuildDetails buildDetails) {
+    try {
+<span class="fc" id="L77">      final TestProject testProject = new TestProject();</span>
+<span class="pc" id="L78">      testProject.setBuilderFactory(p -&gt; builder);</span>
+<span class="fc" id="L79">      testProject.setReporter(testResultCollector -&gt; {</span>
+<span class="nc" id="L80">        final Collection&lt;TestReportNode&gt; testResults = testResultCollector.getResults();</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        if (buildDetails.getState() == SUCCESS</span>
+<span class="nc bnc" id="L82" title="All 4 branches missed.">            &amp;&amp; testResults.stream().anyMatch(testFile -&gt; !testFile.isSuccess())) {</span>
+<span class="nc" id="L83">          buildDetails.setState(TEST_FAIL);</span>
+        }
+<span class="nc" id="L85">        buildDetails.setUnitTestReport(testResults);</span>
+<span class="nc" id="L86">      });</span>
+<span class="nc" id="L87">      testProject.execute();</span>
+<span class="fc" id="L88">    } catch (final Throwable ex) {</span>
+<span class="fc" id="L89">      buildDetails.setError(buildExceptionMessage(&quot;Error in unit test&quot;, ex));</span>
+<span class="nc" id="L90">    }</span>
+<span class="fc" id="L91">  }</span>
+
+  protected void fireEvent(final BuildDetails buildDetails) {
+<span class="fc" id="L94">    this.buildListeners.forEach(listener -&gt; {</span>
+      try {
+<span class="fc" id="L96">        listener.accept(buildDetails);</span>
+<span class="nc" id="L97">      } catch (final Throwable ex) {</span>
+<span class="nc" id="L98">        logger.trace(&quot;Listener {} throws exception&quot;, listener, ex);</span>
+<span class="fc" id="L99">      }</span>
+<span class="fc" id="L100">    });</span>
+<span class="fc" id="L101">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

@@ -40,26 +40,26 @@ import org.slf4j.Logger;
 <span class="fc" id="L40">      logger.debug(&quot;Result: {}&quot;, result);</span>
 <span class="fc" id="L41">      testResult.setResult(result);</span>
 <span class="fc" id="L42">      return testResult;</span>
-<span class="nc" id="L43">    } catch (final ScriptException e) {</span>
-<span class="nc" id="L44">      logger.trace(&quot;=== ScriptException ===&quot;, e);</span>
-<span class="nc" id="L45">      final String rawMessage = e.getMessage();</span>
-<span class="nc" id="L46">      final String pattern =</span>
+<span class="fc" id="L43">    } catch (final ScriptException e) {</span>
+<span class="fc" id="L44">      logger.trace(&quot;=== ScriptException ===&quot;, e);</span>
+<span class="fc" id="L45">      final String rawMessage = e.getMessage();</span>
+<span class="fc" id="L46">      final String pattern =</span>
           &quot;eval threw javax.script.ScriptException: [string \&quot;script\&quot;]:{0}: {1}&quot;;
-<span class="nc" id="L48">      final MessageFormat messageFormat = new MessageFormat(pattern);</span>
-<span class="nc" id="L49">      LuaErrorInformation errorInformation = null;</span>
+<span class="fc" id="L48">      final MessageFormat messageFormat = new MessageFormat(pattern);</span>
+<span class="fc" id="L49">      LuaErrorInformation errorInformation = null;</span>
       try {
-<span class="nc" id="L51">        final Object[] args = messageFormat.parse(rawMessage);</span>
-<span class="nc" id="L52">        final String rowStr = (String) args[0];</span>
-<span class="nc" id="L53">        final String message = (String) args[1];</span>
-<span class="nc" id="L54">        final int lineNumber = Integer.parseInt(rowStr);</span>
-<span class="nc" id="L55">        errorInformation = new LuaErrorInformation(message, lineNumber, -1);</span>
+<span class="fc" id="L51">        final Object[] args = messageFormat.parse(rawMessage);</span>
+<span class="fc" id="L52">        final String rowStr = (String) args[0];</span>
+<span class="fc" id="L53">        final String message = (String) args[1];</span>
+<span class="fc" id="L54">        final int lineNumber = Integer.parseInt(rowStr);</span>
+<span class="fc" id="L55">        errorInformation = new LuaErrorInformation(message, lineNumber, -1);</span>
 <span class="nc" id="L56">      } catch (final ParseException e1) {</span>
 <span class="nc" id="L57">        final String message = e.getMessage();</span>
 <span class="nc" id="L58">        final int lineNumber = e.getLineNumber();</span>
 <span class="nc" id="L59">        final int columnNumber = e.getColumnNumber();</span>
 <span class="nc" id="L60">        errorInformation = new LuaErrorInformation(message, lineNumber, columnNumber);</span>
-<span class="nc" id="L61">      }</span>
-<span class="nc" id="L62">      return apply(testResult, source, errorInformation);</span>
+<span class="fc" id="L61">      }</span>
+<span class="fc" id="L62">      return apply(testResult, source, errorInformation);</span>
 <span class="nc" id="L63">    } catch (final LuaError e) {</span>
 <span class="nc" id="L64">      logger.trace(&quot;=== LuaError ===&quot;, e);</span>
 <span class="nc" id="L65">      final LuaErrorInformation errorInformation = new LuaErrorInformation(e.getMessage());</span>
@@ -75,16 +75,16 @@ import org.slf4j.Logger;
       final TestResult testResult,
       final LuaSource source,
       final LuaErrorInformation errorInformation) {
-<span class="nc" id="L78">    logger.debug(&quot;Error: {}&quot;, errorInformation);</span>
-<span class="nc" id="L79">    final int lineNumber = errorInformation.getLineNumber();</span>
-<span class="nc" id="L80">    testResult.setError(errorInformation);</span>
-<span class="nc bnc" id="L81" title="All 2 branches missed.">    if (0 &lt; lineNumber) {</span>
-<span class="nc" id="L82">      final String codeSnippet =</span>
-<span class="nc" id="L83">          source.toString(lineNumber - 10, lineNumber + 10, Arrays.asList(lineNumber));</span>
-<span class="nc" id="L84">      testResult.setCodeSnippet(codeSnippet);</span>
+<span class="fc" id="L78">    logger.debug(&quot;Error: {}&quot;, errorInformation);</span>
+<span class="fc" id="L79">    final int lineNumber = errorInformation.getLineNumber();</span>
+<span class="fc" id="L80">    testResult.setError(errorInformation);</span>
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">    if (0 &lt; lineNumber) {</span>
+<span class="fc" id="L82">      final String codeSnippet =</span>
+<span class="fc" id="L83">          source.toString(lineNumber - 10, lineNumber + 10, Arrays.asList(lineNumber));</span>
+<span class="fc" id="L84">      testResult.setCodeSnippet(codeSnippet);</span>
     }
 
-<span class="nc" id="L87">    return testResult;</span>
+<span class="fc" id="L87">    return testResult;</span>
   }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

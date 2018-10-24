@@ -12,9 +12,9 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-<span class="nc bnc" id="L15" title="All 2 branches missed.">@RequiredArgsConstructor</span>
+<span class="pc bpc" id="L15" title="1 of 2 branches missed.">@RequiredArgsConstructor</span>
 public class FileContent implements Comparable&lt;FileContent&gt; {
-<span class="nc" id="L17">  @Getter</span>
+<span class="fc" id="L17">  @Getter</span>
   @NonNull
   protected final String path;
 
@@ -29,26 +29,26 @@ public class FileContent implements Comparable&lt;FileContent&gt; {
    */
   public InputStream open() throws IOException {
     try {
-<span class="nc" id="L32">      return conentSupplier.get();</span>
-<span class="nc" id="L33">    } catch (final IOException ex) {</span>
-<span class="nc" id="L34">      throw ex;</span>
-<span class="nc" id="L35">    } catch (final Throwable ex) {</span>
-<span class="nc" id="L36">      throw new IOException(ex);</span>
+<span class="fc" id="L32">      return conentSupplier.get();</span>
+<span class="fc" id="L33">    } catch (final IOException ex) {</span>
+<span class="fc" id="L34">      throw ex;</span>
+<span class="fc" id="L35">    } catch (final Throwable ex) {</span>
+<span class="fc" id="L36">      throw new IOException(ex);</span>
     }
   }
 
   @Override
   public String toString() {
-<span class="nc" id="L42">    return getClass().getSimpleName() + &quot;[&quot; + path + &quot;]&quot;;</span>
+<span class="fc" id="L42">    return getClass().getSimpleName() + &quot;[&quot; + path + &quot;]&quot;;</span>
   }
 
   @Override
   public int compareTo(final FileContent o) {
-<span class="nc" id="L47">    return this.path.compareTo(o.path);</span>
+<span class="fc" id="L47">    return this.path.compareTo(o.path);</span>
   }
 
   public File getFileFrom(File base) {
 <span class="nc" id="L51">    return new File(base, path);</span>
   }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

@@ -10,23 +10,23 @@ import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.TwoArgFunction;
 import org.slf4j.Logger;
 
-<span class="nc" id="L13">public class Athena extends TwoArgFunction {</span>
+<span class="fc" id="L13">public class Athena extends TwoArgFunction {</span>
 
-<span class="nc" id="L15">  protected final transient Logger logger = getLogger(getClass());</span>
+<span class="fc" id="L15">  protected final transient Logger logger = getLogger(getClass());</span>
 
   @Override
   public LuaValue call(final LuaValue modname, final LuaValue env) {
-<span class="nc" id="L19">    logger.debug(&quot;Loading {}...&quot;, modname);</span>
-<span class="nc" id="L20">    LuaValue library = tableOf();</span>
-<span class="nc" id="L21">    final AthenaContext context = AthenaContext.getContext();</span>
+<span class="fc" id="L19">    logger.debug(&quot;Loading {}...&quot;, modname);</span>
+<span class="fc" id="L20">    LuaValue library = tableOf();</span>
+<span class="fc" id="L21">    final AthenaContext context = AthenaContext.getContext();</span>
 
-<span class="nc" id="L23">    library.set(&quot;startSuite&quot;, context.startSuite);</span>
-<span class="nc" id="L24">    library.set(&quot;endSuite&quot;, context.endSuite);</span>
-<span class="nc" id="L25">    library.set(&quot;startTest&quot;, context.startTest);</span>
-<span class="nc" id="L26">    library.set(&quot;endTest&quot;, context.endTest);</span>
-<span class="nc" id="L27">    library.set(&quot;recordError&quot;, context.recordError);</span>
-<span class="nc" id="L28">    env.set(&quot;TestReporter&quot;, library);</span>
-<span class="nc" id="L29">    return library;</span>
+<span class="fc" id="L23">    library.set(&quot;startSuite&quot;, context.startSuite);</span>
+<span class="fc" id="L24">    library.set(&quot;endSuite&quot;, context.endSuite);</span>
+<span class="fc" id="L25">    library.set(&quot;startTest&quot;, context.startTest);</span>
+<span class="fc" id="L26">    library.set(&quot;endTest&quot;, context.endTest);</span>
+<span class="fc" id="L27">    library.set(&quot;recordError&quot;, context.recordError);</span>
+<span class="fc" id="L28">    env.set(&quot;TestReporter&quot;, library);</span>
+<span class="fc" id="L29">    return library;</span>
   }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.1.201803210924</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>
