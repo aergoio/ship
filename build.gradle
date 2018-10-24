@@ -20,7 +20,7 @@ group 'io.aergo'
 
 allprojects {
   group 'io.aergo'
-  version '0.1-SNAPSHOT'
+  version '0.8'
 }
 def javaProjects = [
   project('core'),
@@ -126,8 +126,18 @@ configure(javaProjects) {
     if(JavaVersion.current().isJava9Compatible()) {
       jvmArgs('--add-opens', 'java.base/java.lang=ALL-UNNAMED')
       jvmArgs('--add-opens', 'java.base/java.lang.invoke=ALL-UNNAMED')
+      jvmArgs('--add-opens', 'java.base/java.io=ALL-UNNAMED')
+      jvmArgs('--add-opens', 'java.base/java.lang.reflect=ALL-UNNAMED')
+      jvmArgs('--add-opens', 'java.base/java.nio=ALL-UNNAMED')
+      jvmArgs('--add-opens', 'java.base/java.nio.file=ALL-UNNAMED')
+      jvmArgs('--add-opens', 'java.base/java.text=ALL-UNNAMED')
+      jvmArgs('--add-opens', 'java.base/java.util=ALL-UNNAMED')
+      jvmArgs('--add-opens', 'java.base/java.util.stream=ALL-UNNAMED')
+      jvmArgs('--add-opens', 'java.base/sun.nio.fs=ALL-UNNAMED')
+      jvmArgs('--add-opens', 'java.rmi/sun.rmi.transport=ALL-UNNAMED')
       jvmArgs('--add-opens', 'java.xml/jdk.xml.internal=ALL-UNNAMED')
     }
+      
     maxParallelForks = Math.max(1, Runtime.runtime.availableProcessors())
     exclude '**/*Tests.class'
     exclude '**/*IT.class'

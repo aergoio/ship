@@ -8,13 +8,13 @@ jar {
 
 ext {
   springBootVersion = '2.1.0.M2'
-  heraVersion = '0.1-SNAPSHOT'
+  heraVersion = '0.8'
 }
 
 dependencies {
-  implementation "io.aergo:hera-util:${heraVersion}"
-  implementation "io.aergo:hera-common:${heraVersion}"
-  implementation "io.aergo:hera-transport:${heraVersion}"
+  implementation "io.aergo:heraj-util:${heraVersion}"
+  implementation "io.aergo:heraj-common:${heraVersion}"
+  implementation "io.aergo:heraj-transport:${heraVersion}"
 
   implementation 'com.google.guava:guava:22.0'
   implementation "com.fasterxml.jackson.core:jackson-databind:2.9.3"
