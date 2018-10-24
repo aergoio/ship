@@ -70,12 +70,12 @@ public class ContractService extends AbstractService {
 
   @Getter
   @Setter
-  @Value("${project.privatekey}")
+  @Value("${project.privatekey:}")
   protected String encodedEncryptedPrivateKey;
 
   @Getter
   @Setter
-  @Value("${project.password}")
+  @Value("${project.password:}")
   protected String password;
 
   protected Account account;
@@ -116,7 +116,7 @@ public class ContractService extends AbstractService {
     try {
       final AccountOperation accountOperation = aergoApi.getAccountOperation();
       logger.trace("Password: {}", password);
-      if (null == encodedEncryptedPrivateKey) {
+      if (null == encodedEncryptedPrivateKey || encodedEncryptedPrivateKey.isEmpty()) {
         password = randomUUID().toString();
         account = accountOperation.create(password);
       } else {

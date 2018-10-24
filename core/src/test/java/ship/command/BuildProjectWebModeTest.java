@@ -3,7 +3,6 @@ package ship.command;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 
-import java.io.IOException;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import ship.AbstractTestCase;
@@ -19,7 +18,7 @@ public class BuildProjectWebModeTest extends AbstractTestCase {
 
     final BuildProjectWebMode buildProject = new BuildProjectWebMode(0) {
       @Override
-      public ProjectFile readProject() throws IOException {
+      public ProjectFile readProject() {
         return projectFile;
       }
     };
