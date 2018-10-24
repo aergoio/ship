@@ -2,7 +2,7 @@ title: ship
 logo: /assets/img/logo.png
 description: Package Manager for Aergo
 baseurl: "/ship"
-url: "https://aergo.github.io"
+url: "https://aergoio.github.io"
 show_downloads: false
 google_analytics:
 github:

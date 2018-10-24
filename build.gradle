@@ -18,6 +18,15 @@ buildscript {
 }
 group 'io.aergo'
 
+repositories {
+  mavenLocal()
+  maven {
+    url "http://dist.wso2.org/maven2"
+  }
+  mavenCentral()
+  jcenter()
+}
+
 allprojects {
   group 'io.aergo'
   version '0.8'
@@ -62,12 +71,6 @@ configure(javaProjects) {
 
   repositories {
     mavenLocal()
-    maven {
-      url "http://repo.spring.io/milestone"
-    }
-    maven {
-      url "http://repo.spring.io/libs-milestone"
-    }
     maven {
       url "http://dist.wso2.org/maven2"
     }
