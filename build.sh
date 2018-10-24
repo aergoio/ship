@@ -46,7 +46,7 @@ function install-deps() {
   WORKSPACE="$BUILD_WORKSPACE/deps"
   rm -rf $WORKSPACE
   mkdir -p $WORKSPACE
-  (cd $WORKSPACE && git clone -b develop/v1.0-SNAPSHOT --recurse-submodule https://github.com/aergoio/heraj.git)
+  (cd $WORKSPACE && git clone --recurse-submodule https://github.com/aergoio/heraj.git)
   (cd $WORKSPACE/heraj && ./gradlew install)
 }
 
