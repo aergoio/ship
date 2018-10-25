@@ -50,6 +50,8 @@ $PROJECT_HOME/
 * dependencies: package dependencies
 * tests: test cases to run
 * endpoint: endpoint to deploy or run (Default value is "localhost:7845")
+* privatekey: private key to deploy or execute contracts
+* password: password to decrypt private key 
 
 ## Examples
 ```json

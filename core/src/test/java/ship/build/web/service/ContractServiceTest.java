@@ -105,7 +105,7 @@ public class ContractServiceTest extends AbstractTestCase {
   }
 
   @Test
-  public void testDeployAndGetLatestContractInformation() throws Exception {
+  public void testDeployAndGetLatestContractInformation() {
     // Given
     when(contractOperation.deploy(any(Account.class), any(), any())).thenReturn(contractTxHash);
 
@@ -126,7 +126,7 @@ public class ContractServiceTest extends AbstractTestCase {
   }
 
   @Test
-  public void testTryExecute() throws Exception {
+  public void testTryExecute() {
     when(contractOperation.deploy(any(Account.class), any(), any()))
         .thenReturn(contractTxHash);
     final ContractTxHash executedContractTxHash =
@@ -152,7 +152,7 @@ public class ContractServiceTest extends AbstractTestCase {
   }
 
   @Test
-  public void testTryQuery() throws Exception {
+  public void testTryQuery() {
     when(contractOperation.deploy(any(Account.class), any(), any())).thenReturn(contractTxHash);
     final ContractResult contractResult = mock(ContractResult.class);
     when(contractResult.getResultInRawBytes())
