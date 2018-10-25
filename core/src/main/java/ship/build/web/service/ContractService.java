@@ -4,7 +4,6 @@
 
 package ship.build.web.service;
 
-import static java.util.Arrays.stream;
 import static java.util.UUID.randomUUID;
 import static ship.util.Messages.bind;
 
@@ -12,17 +11,13 @@ import hera.api.AccountOperation;
 import hera.api.AergoApi;
 import hera.api.ContractOperation;
 import hera.api.encode.Base58;
-import hera.api.encode.Base58WithCheckSum;
 import hera.api.model.Account;
 import hera.api.model.AccountAddress;
-import hera.api.model.AccountState;
 import hera.api.model.Authentication;
 import hera.api.model.ClientManagedAccount;
 import hera.api.model.ContractAddress;
-import hera.api.model.ContractDefinition;
 import hera.api.model.ContractFunction;
 import hera.api.model.ContractInterface;
-import hera.api.model.ContractInvocation;
 import hera.api.model.ContractResult;
 import hera.api.model.ContractTxHash;
 import hera.api.model.ContractTxReceipt;
@@ -42,6 +37,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import ship.build.web.exception.AergoNodeException;
 import ship.build.web.exception.ResourceNotFoundException;
@@ -49,14 +45,17 @@ import ship.build.web.model.BuildDetails;
 import ship.build.web.model.DeploymentResult;
 import ship.build.web.model.ExecutionResult;
 import ship.build.web.model.QueryResult;
+import ship.build.web.service.component.DeployComponent;
+import ship.build.web.service.component.ExecuteComponent;
+import ship.build.web.service.component.QueryComponent;
 import ship.test.LuaBinary;
 import ship.test.LuaCompiler;
 import ship.util.AergoPool;
-import ship.util.ResourcePool;
 
 @NoArgsConstructor
 @Named
-public class ContractService extends AbstractService {
+public class ContractService extends AbstractService
+    implements DeployComponent, ExecuteComponent, QueryComponent {
 
   protected static final String NL_0 = ContractService.class.getName() + ".0";
 
@@ -77,6 +76,7 @@ public class ContractService extends AbstractService {
 
   protected Account account;
 
+  @Getter
   protected Fee fee = new Fee(0, 0);
 
   protected final LuaCompiler luaCompiler = new LuaCompiler();
@@ -87,7 +87,13 @@ public class ContractService extends AbstractService {
       new HashMap<>();
 
   @Setter
-  protected ResourcePool<AergoApi> aergoPool;
+  @Getter
+  protected AergoPool aergoPool;
+
+  @Override
+  public Logger logger() {
+    return logger;
+  }
 
   @RequiredArgsConstructor
   class SimpleBase58 implements Base58 {
@@ -148,25 +154,17 @@ public class ContractService extends AbstractService {
    *
    * @throws Exception Fail to deploy
    */
-  public DeploymentResult deploy(final BuildDetails buildDetails) throws Exception {
+  public DeploymentResult deploy(final BuildDetails buildDetails) {
     ensureAccount();
 
-    final AergoApi aergoApi = aergoPool.borrowResource();
     try {
       final byte[] buildResult = buildDetails.getResult().getBytes();
       final LuaBinary luaBinary = luaCompiler.compile(() -> new ByteArrayInputStream(buildResult));
       logger.trace("Successful to compile:\n{}", luaBinary.getPayload());
-      final AccountOperation accountOperation = aergoApi.getAccountOperation();
-      final AccountState syncedAccount = accountOperation.getState(account);
-      final ContractOperation contractOperation = aergoApi.getContractOperation();
-      final Base58WithCheckSum encodedPayload = () -> luaBinary.getPayload().getEncodedValue();
 
-      account.setNonce(syncedAccount.getNonce());
-      final ContractDefinition contractDefinition = ContractDefinition.of(encodedPayload);
-      final ContractTxHash contractTransactionHash =
-          contractOperation.deploy(account, contractDefinition, fee);
-      logger.debug("Contract transaction hash: {}", contractTransactionHash);
-      final String encodedContractTxHash = contractTransactionHash.toString();
+      final ContractTxHash contractTxHash =  deploy(account, luaBinary);
+      logger.debug("Contract transaction hash: {}", contractTxHash);
+      final String encodedContractTxHash = contractTxHash.toString();
       final DeploymentResult deploymentResult = new DeploymentResult();
       deploymentResult.setBuildUuid(buildDetails.getUuid());
       deploymentResult.setEncodedContractTransactionHash(encodedContractTxHash);
@@ -178,8 +176,6 @@ public class ContractService extends AbstractService {
           "Fail to connect aergo[" + endpoint + "]. Check your aergo node.", ex);
     } catch (final RpcException ex) {
       throw new AergoNodeException("Fail to deploy contract", ex);
-    } finally {
-      aergoPool.returnResource(aergoApi);
     }
   }
 
@@ -218,32 +214,11 @@ public class ContractService extends AbstractService {
       final ContractFunction contractFunction,
       final String... args) {
     ensureAccount();
-    final AergoApi aergoApi = aergoPool.borrowResource();
-    try {
-      final AccountOperation accountOperation = aergoApi.getAccountOperation();
-      final ContractOperation contractOperation = aergoApi.getContractOperation();
-      final ContractTxReceipt contractTxReceipt =
-          contractOperation.getReceipt(contractTxHash);
-      logger.debug("Receipt: {}", contractTxReceipt);
-      final AccountState syncedAccount = accountOperation.getState(account);
-      final ContractAddress contractAddress = contractTxReceipt.getContractAddress();
-
-      logger.trace("Executing...");
-      final ContractInvocation contractCall =
-          new ContractInvocation(contractAddress, contractFunction, stream(args).toArray());
-      account.setNonce(syncedAccount.getNonce());
-      final ContractTxHash executionContractHash = contractOperation.execute(
-          account,
-          contractCall,
-          fee
-      );
-
-      final ExecutionResult executionResult = new ExecutionResult();
-      executionResult.setContractTransactionHash(executionContractHash.toString());
-      return executionResult;
-    } finally {
-      aergoPool.returnResource(aergoApi);
-    }
+    final ContractTxHash executionContractHash =
+        execute(account, contractFunction, contractTxHash, args);
+    final ExecutionResult executionResult = new ExecutionResult();
+    executionResult.setContractTransactionHash(executionContractHash.toString());
+    return executionResult;
   }
 
   /**
@@ -267,23 +242,9 @@ public class ContractService extends AbstractService {
       final ContractFunction contractFunction,
       final String... args) {
     ensureAccount();
-    final AergoApi aergoApi = aergoPool.borrowResource();
-    try {
-      final ContractOperation contractOperation = aergoApi.getContractOperation();
-      final ContractTxReceipt contractTxReceipt =
-          contractOperation.getReceipt(contractTxHash);
-      logger.debug("Receipt: {}", contractTxReceipt);
-      final ContractAddress contractAddress = contractTxReceipt.getContractAddress();
-
-      final ContractInvocation contractCall =
-          new ContractInvocation(contractAddress, contractFunction, stream(args).toArray());
-      logger.trace("Querying...");
-      final ContractResult contractResult = contractOperation.query(contractCall);
-      final String resultString = new String(contractResult.getResultInRawBytes().getValue());
-      return new QueryResult(resultString);
-    } finally {
-      aergoPool.returnResource(aergoApi);
-    }
+    final ContractResult contractResult = query(contractFunction, contractTxHash, args);
+    final String resultString = new String(contractResult.getResultInRawBytes().getValue());
+    return new QueryResult(resultString);
   }
 
   /**

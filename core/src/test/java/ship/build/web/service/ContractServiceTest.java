@@ -39,7 +39,7 @@ import ship.build.web.model.DeploymentResult;
 import ship.build.web.model.ExecutionResult;
 import ship.build.web.model.QueryResult;
 import ship.test.LuaCompiler;
-import ship.util.ResourcePool;
+import ship.util.AergoPool;
 
 @PrepareForTest(LuaCompiler.class)
 public class ContractServiceTest extends AbstractTestCase {
@@ -47,16 +47,8 @@ public class ContractServiceTest extends AbstractTestCase {
   protected final ContractTxHash contractTxHash =
       ContractTxHash.of(BytesValue.of(randomUUID().toString().getBytes()));
 
-  protected ResourcePool<AergoApi> resourcePool = new ResourcePool<AergoApi>() {
-    @Override
-    public AergoApi borrowResource() {
-      return aergoApi;
-    }
-
-    @Override
-    public void returnResource(final AergoApi resource) {
-    }
-  };
+  @Mock
+  protected AergoPool resourcePool;
 
   protected ContractService contractService;
 
@@ -82,6 +74,7 @@ public class ContractServiceTest extends AbstractTestCase {
     final Runtime runtime = mock(Runtime.class);
     final Process p = mock(Process.class);
     mockStatic(Runtime.class);
+    when(resourcePool.borrowResource()).thenReturn(aergoApi);
     when(Runtime.getRuntime()).thenReturn(runtime);
     when(runtime.exec(anyString(), any(String[].class))).thenReturn(p);
     when(p.getInputStream()).thenReturn(new ByteArrayInputStream(
