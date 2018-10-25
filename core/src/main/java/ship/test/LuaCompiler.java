@@ -4,16 +4,12 @@
 
 package ship.test;
 
-import static hera.util.Base58Utils.decodeWithCheck;
 import static hera.util.IoUtils.from;
 import static hera.util.IoUtils.redirect;
-import static java.lang.System.arraycopy;
 import static org.slf4j.LoggerFactory.getLogger;
 
-import hera.api.encode.Base58WithCheckSum;
 import hera.util.DangerousSupplier;
 import hera.util.IoUtils;
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -45,7 +41,9 @@ public class LuaCompiler {
       final String[] envParameters = System.getenv().entrySet().stream()
           .map(e -> e.getKey() + "=" + e.getValue())
           .toArray(String[]::new);
-      final Process process = Runtime.getRuntime().exec(buildCommand(), envParameters);
+      final String command = buildCommand();
+      logger.debug("Compile command: {}", command);
+      final Process process = Runtime.getRuntime().exec(command, envParameters);
       try (
           final Reader compilerStdErr = new InputStreamReader(process.getErrorStream());
           final Reader compilerStdOut = new InputStreamReader(process.getInputStream())

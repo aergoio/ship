@@ -5,7 +5,6 @@
 package ship.build.web.service;
 
 import static java.util.Arrays.stream;
-import static java.util.Optional.ofNullable;
 import static java.util.UUID.randomUUID;
 import static ship.util.Messages.bind;
 
@@ -14,7 +13,6 @@ import hera.api.AergoApi;
 import hera.api.ContractOperation;
 import hera.api.encode.Base58;
 import hera.api.encode.Base58WithCheckSum;
-import hera.api.encode.EncodedString;
 import hera.api.model.Account;
 import hera.api.model.AccountAddress;
 import hera.api.model.AccountState;
@@ -28,7 +26,6 @@ import hera.api.model.ContractInvocation;
 import hera.api.model.ContractResult;
 import hera.api.model.ContractTxHash;
 import hera.api.model.ContractTxReceipt;
-import hera.api.model.EncryptedPrivateKey;
 import hera.api.model.Fee;
 import hera.exception.RpcConnectionException;
 import hera.exception.RpcException;
@@ -80,7 +77,7 @@ public class ContractService extends AbstractService {
 
   protected Account account;
 
-  protected Fee fee = new Fee(1000, 1000);
+  protected Fee fee = new Fee(0, 0);
 
   protected final LuaCompiler luaCompiler = new LuaCompiler();
 
@@ -164,7 +161,7 @@ public class ContractService extends AbstractService {
       final ContractOperation contractOperation = aergoApi.getContractOperation();
       final Base58WithCheckSum encodedPayload = () -> luaBinary.getPayload().getEncodedValue();
 
-      account.setNonce(syncedAccount.getNonce() + 1);
+      account.setNonce(syncedAccount.getNonce());
       final ContractDefinition contractDefinition = ContractDefinition.of(encodedPayload);
       final ContractTxHash contractTransactionHash =
           contractOperation.deploy(account, contractDefinition, fee);
@@ -234,7 +231,7 @@ public class ContractService extends AbstractService {
       logger.trace("Executing...");
       final ContractInvocation contractCall =
           new ContractInvocation(contractAddress, contractFunction, stream(args).toArray());
-      account.setNonce(syncedAccount.getNonce() + 1);
+      account.setNonce(syncedAccount.getNonce());
       final ContractTxHash executionContractHash = contractOperation.execute(
           account,
           contractCall,
