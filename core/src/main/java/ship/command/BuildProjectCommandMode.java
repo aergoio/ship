@@ -55,7 +55,8 @@ public class BuildProjectCommandMode extends AbstractCommand {
         final BuildDetails builderResult = builder.build(buildTarget);
         logger.debug("Builder result: {}", builderResult);
         buildDetails.copyFrom(builderResult);
-        final byte[] bytes = buildDetails.getResult().getBytes();
+        final String buildResult = buildDetails.getResult();
+        final byte[] bytes = buildResult.getBytes();
         targetWriter.setContents(() -> new ByteArrayInputStream(bytes));
         targetWriter.execute();
       } catch (final Throwable buildException) {

@@ -46,8 +46,10 @@ public class Builder {
     final Optional<BuildResource> buildResourceOpt = resource.adapt(BuildResource.class);
     final Optional<TestResource> testResourceOpt = resource.adapt(TestResource.class);
     if (buildResourceOpt.isPresent()) {
+      logger.trace("Build to target");
       return concatenator.visit(buildResourceOpt.get());
     } else if (testResourceOpt.isPresent()) {
+      logger.trace("Build to test");
       return concatenator.visit(testResourceOpt.get());
     }
 

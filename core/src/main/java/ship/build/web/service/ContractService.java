@@ -151,8 +151,6 @@ public class ContractService extends AbstractService
    * @param buildDetails build result
    *
    * @return deployment result
-   *
-   * @throws Exception Fail to deploy
    */
   public DeploymentResult deploy(final BuildDetails buildDetails) {
     ensureAccount();

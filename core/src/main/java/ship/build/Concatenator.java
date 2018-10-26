@@ -91,7 +91,7 @@ public class Concatenator {
   public String visit(final Resource resource, final BuildDependency resourceDependency) {
     logger.trace("Resource: {}", resource);
     if (visitedResources.contains(resource)) {
-      return null;
+      return "";
     }
 
     final StringJoiner contentWriter = new StringJoiner("\n");
@@ -110,7 +110,7 @@ public class Concatenator {
       resource.adapt(Source.class).map(next::visit).ifPresent(contentWriter::add);
       callStack.exit(resource);
       visitedResources.add(resource);
-      return (0 < contentWriter.length()) ? contentWriter.toString() : null;
+      return contentWriter.toString();
     } catch (final BuildException e) {
       throw e;
     } catch (final Throwable ex) {

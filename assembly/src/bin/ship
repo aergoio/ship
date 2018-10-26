@@ -26,8 +26,8 @@ export SHIP_LIB=${SHIP_LIB:-$SHIP_HOME/lib}
 
 JARS=$(find "$SHIP_LIB" -name '*.jar' | tr '\n' ':')
 
-#--add-exports java.base/java.lang=ALL-UNNAMED \
-#--add-exports java.base/jdk.internal.misc=ALL-UNNAMED \
+#--add-exports java.base/java.lang=ALL-UNNAMED
+#--add-exports java.base/jdk.internal.misc=ALL-UNNAMED
 COMMAND="java -cp $SHIP_CONF:$JARS \
 	-Dio.netty.tryReflectionSetAccessible=true \
 	-Dlogback.verbose=true \

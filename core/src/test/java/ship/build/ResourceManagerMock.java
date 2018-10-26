@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 
 import hera.util.FilepathUtils;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -17,7 +16,7 @@ import ship.build.res.Source;
 
 public class ResourceManagerMock extends ResourceManager {
 
-  static interface ResourceDef {
+  interface ResourceDef {
     String getName();
 
     ResourceDef get(String name);
@@ -89,8 +88,10 @@ public class ResourceManagerMock extends ResourceManager {
       final File file = (File) iter;
       final Source source = new Source(project, null) {
         @Override
-        public BufferedReader open() throws IOException {
-          return new BufferedReader(new InputStreamReader(file.getContent().get()));
+        public BufferedReader open() {
+          final InputStream in = file.getContent().get();
+          assertNotNull(file.getName() + " not found", in);
+          return new BufferedReader(new InputStreamReader(in));
         }
       };
       return source;
