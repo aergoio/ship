@@ -1,5 +1,6 @@
 package ship.build;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static ship.build.ResourceManagerMock.dir;
@@ -29,7 +30,8 @@ public class ConcatenatorTest extends AbstractTestCase {
             file("aergo.json", () -> open(base + "aergo.json")),
             file("source.lua", () -> open(base + "source.lua")),
             dir("subdir",
-                file("ref1.lua", () -> open(base + "subdir/ref1.lua"))
+                file("ref1.lua", () -> open(base + "subdir/ref1.lua")),
+                file("ref2.lua", () -> open(base + "subdir/ref2.lua"))
             )
         )
     );
@@ -37,8 +39,12 @@ public class ConcatenatorTest extends AbstractTestCase {
     final BuildDetails buildDetails =
         concatenator.visit(new BuildResource(project, "target.lua"));
     logger.debug("Build result: {}", buildDetails.getResult());
-    assertTrue(buildDetails.getResult().contains("hello"));
-    assertTrue(buildDetails.getResult().contains("world"));
+    final String result = buildDetails.getResult();
+    final String fingerprint1 = "ref1fingerprint";
+    final String fingerprint2 = "ref2fingerprint";
+    assertEquals(1, (result.length() - result.replace(fingerprint1, "").length()) / fingerprint1.length());
+    assertEquals(1, (result.length() - result.replace(fingerprint2, "").length()) / fingerprint2.length());
+    assertTrue(result.contains("world"));
   }
 
   @Test

@@ -6,6 +6,7 @@ package ship.build.res;
 
 import static hera.util.FilepathUtils.append;
 import static hera.util.FilepathUtils.getParentPath;
+import static hera.util.ObjectUtils.equal;
 import static java.lang.Character.isWhitespace;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
@@ -122,7 +123,11 @@ public class Source extends File {
 
   protected Resource bind(final ResourceManager resourceManager, final String importPath) {
     if (importPath.startsWith("./") || importPath.startsWith("../")) {
-      return resourceManager.getResource(append(getParentPath(getLocation()), importPath));
+      final String location = getLocation();
+      logger.trace("Location: {}", location);
+      final String parent = getParentPath(getLocation());
+      logger.trace("Parent: {}", parent);
+      return resourceManager.getResource(append(parent, importPath));
     } else {
       return resourceManager.getPackage(importPath);
     }
@@ -148,4 +153,17 @@ public class Source extends File {
     });
   }
 
+  @Override
+  public int hashCode() {
+    return project.hashCode() + location.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof Source) {
+      final Source other = (Source) obj;
+      return equal(project, other.project) && equal(location, other.location);
+    }
+    return false;
+  }
 }

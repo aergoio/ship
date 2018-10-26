@@ -37,7 +37,7 @@ public class ResourceManagerMock extends ResourceManager {
     public ResourceDef get(final String name) {
       final ResourceDef child = children.get(name);
       if (null == child) {
-        throw new IllegalArgumentException();
+        throw new IllegalArgumentException("No resource: " + name);
       }
       return child;
     }
@@ -86,7 +86,8 @@ public class ResourceManagerMock extends ResourceManager {
     if (iter instanceof Directory) {
     } else if (iter instanceof File) {
       final File file = (File) iter;
-      final Source source = new Source(project, null) {
+      final String canonicalPath = FilepathUtils.getCanonicalForm(path);
+      final Source source = new Source(project, canonicalPath) {
         @Override
         public BufferedReader open() {
           final InputStream in = file.getContent().get();
