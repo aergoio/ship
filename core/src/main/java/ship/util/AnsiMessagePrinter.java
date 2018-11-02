@@ -298,6 +298,12 @@ public class AnsiMessagePrinter implements MessagePrinter {
     return writer.toString();
   }
 
+  protected String bind(final String messageId, Object... args) {
+    return Messages.bind(
+        messageId,
+        Arrays.stream(args).map(arg -> escape((null == arg) ? null : arg.toString())).toArray());
+  }
+
   /**
    * Print message with {@code messageId} and {@code args}.
    *
@@ -305,10 +311,7 @@ public class AnsiMessagePrinter implements MessagePrinter {
    * @param args argument
    */
   public void print(final String messageId, Object...args) {
-    final String msg = Messages.bind(
-        messageId,
-        Arrays.stream(args).map(arg -> escape((null == arg) ? null : arg.toString())).toArray());
-    out.print(this.format(msg));
+    out.print(this.format(bind(messageId, args)));
   }
 
   /**
@@ -325,10 +328,7 @@ public class AnsiMessagePrinter implements MessagePrinter {
    * @param args argument
    */
   public void println(final String messageId, Object... args) {
-    final String msg = Messages.bind(
-        messageId,
-        Arrays.stream(args).map(arg -> escape((null == arg) ? null : arg.toString())).toArray());
-    out.println(this.format(msg));
+    out.println(this.format(bind(messageId, args)));
   }
 
   @Override
