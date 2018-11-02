@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.io.PrintStream;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import org.junit.Test;
 import ship.AbstractTestCase;
