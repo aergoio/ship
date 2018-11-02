@@ -41,7 +41,19 @@ public class AnsiMessagePrinterTest extends AbstractTestCase {
     printer.setColors(colors);
 
     printer.format("<red>No command!!</red>");
-    printer.println(" <red>x</red> {0} - <red>{1}</red>", "src/test/lua/test-asset.lua", "assertion failed!");
+  }
+
+  @Test
+  public void testPrint() {
+    final String resetCode = randomUUID().toString();
+    final String blue = randomUUID().toString();
+    final HashMap<String, String> colors = new HashMap<>();
+    colors.put("blue", blue);
+    colors.put("red", blue);
+    final AnsiMessagePrinter printer = new AnsiMessagePrinter(mock(PrintStream.class));
+    printer.setResetCode(resetCode);
+    printer.setColors(colors);
+    printer.print(" <red>x</red> {0} - <red>{1}</red>", "src/test/lua/test-asset.lua", "assertion failed!");
   }
 
 }

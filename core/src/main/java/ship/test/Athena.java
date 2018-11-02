@@ -26,6 +26,13 @@ public class Athena extends TwoArgFunction {
     library.set("endTest", context.endTest);
     library.set("recordError", context.recordError);
     env.set("TestReporter", library);
+
+    final AergoMock aergoMock = new AergoMock();
+    final LuaValue system = tableOf();
+    system.set("getItem", aergoMock.getItem);
+    system.set("setItem", aergoMock.setItem);
+
+    env.set("system", system);
     return library;
   }
 }

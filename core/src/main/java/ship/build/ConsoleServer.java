@@ -1,5 +1,6 @@
 package ship.build;
 
+import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 
 import hera.server.AbstractServer;
@@ -79,13 +80,13 @@ public class ConsoleServer extends AbstractServer {
     final String now = new Date().toString();
     switch (summary.getState()) {
       case BuildSummary.SUCCESS:
-        printer.println(NL_1, String.format("%-30s", summary.getElapsedTime() + " ms elapsed"), now);
+        printer.println(NL_1, format("%-30s", summary.getElapsedTime() + " ms elapsed"), now);
         break;
       case BuildSummary.BUILD_FAIL:
-        printer.println(NL_2, String.format("%30s", " "), now);
+        printer.println(NL_2, format("%30s", " "), now);
         break;
       case BuildSummary.TEST_FAIL:
-        printer.println(NL_3, String.format("%30s", " "), now);
+        printer.println(NL_3, format("%30s", " "), now);
         break;
       default:
         throw new IllegalArgumentException("Unknown state: " + summary.getState());
@@ -93,9 +94,8 @@ public class ConsoleServer extends AbstractServer {
   }
 
   protected void printTest(final BuildDetails buildDetails) {
-    ofNullable(buildDetails).map(BuildDetails::getUnitTestReport).ifPresent(testReport -> {
-      testReport.forEach(this::print);
-    });
+    ofNullable(buildDetails).map(BuildDetails::getUnitTestReport)
+        .ifPresent(testReport -> testReport.forEach(this::print));
   }
 
   protected void print(final TestReportNode node) {

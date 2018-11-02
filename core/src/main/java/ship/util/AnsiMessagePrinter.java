@@ -269,10 +269,18 @@ public class AnsiMessagePrinter implements MessagePrinter {
     logger.debug("State: {}", state);
     logger.debug("Tags: {}", state.getTags());
     assertTrue(state instanceof Normal, "Expression is invalid[" + state + ": " + message);
-    assertTrue(state.getTags().isEmpty(), "The closing tag[" + state.getTags() + "] missed: " + message);
+    assertTrue(state.getTags().isEmpty(),
+        "The closing tag[" + state.getTags() + "] missed: " + message);
     return state.getWriter().toString();
   }
 
+  /**
+   * Escape all special char in {@code str}.
+   *
+   * @param str string to escape
+   *
+   * @return escaped string
+   */
   public String escape(final String str) {
     final StringBuilder writer = new StringBuilder();
     final StringReader reader = new StringReader(str);
@@ -290,20 +298,35 @@ public class AnsiMessagePrinter implements MessagePrinter {
     return writer.toString();
   }
 
-  public void print(final String format, Object...args) {
+  /**
+   * Print message with {@code messageId} and {@code args}.
+   *
+   * @param messageId message id
+   * @param args argument
+   */
+  public void print(final String messageId, Object...args) {
     final String msg = Messages.bind(
-        format,
+        messageId,
         Arrays.stream(args).map(arg -> escape((null == arg) ? null : arg.toString())).toArray());
     out.print(this.format(msg));
   }
 
+  /**
+   * Insert empty line.
+   */
   public void println() {
     out.println();
   }
 
-  public void println(final String format, Object... args) {
+  /**
+   * Print message with {@code messageId} and {@code args} and append line ending.
+   *
+   * @param messageId message id
+   * @param args argument
+   */
+  public void println(final String messageId, Object... args) {
     final String msg = Messages.bind(
-        format,
+        messageId,
         Arrays.stream(args).map(arg -> escape((null == arg) ? null : arg.toString())).toArray());
     out.println(this.format(msg));
   }
