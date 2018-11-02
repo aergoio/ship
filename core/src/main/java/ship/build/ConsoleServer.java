@@ -1,7 +1,6 @@
 package ship.build;
 
 import static java.util.Optional.ofNullable;
-import static ship.util.Messages.bind;
 
 import hera.server.AbstractServer;
 import hera.server.ServerStatus;
@@ -61,7 +60,7 @@ public class ConsoleServer extends AbstractServer {
     if (BuildSummary.SUCCESS == details.getState() || null == details.getError()) {
       printTest(details);
     } else {
-      printer.println(bind(NL_0, details.getError()));
+      printer.println(NL_0, details.getError());
     }
 
     try {
@@ -80,14 +79,13 @@ public class ConsoleServer extends AbstractServer {
     final String now = new Date().toString();
     switch (summary.getState()) {
       case BuildSummary.SUCCESS:
-        printer.println(
-            bind(NL_1, String.format("%-30s", summary.getElapsedTime() + " ms elapsed"), now));
+        printer.println(NL_1, String.format("%-30s", summary.getElapsedTime() + " ms elapsed"), now);
         break;
       case BuildSummary.BUILD_FAIL:
-        printer.println(bind(NL_2, String.format("%30s", " "), now));
+        printer.println(NL_2, String.format("%30s", " "), now);
         break;
       case BuildSummary.TEST_FAIL:
-        printer.println(bind(NL_3, String.format("%30s", " "), now));
+        printer.println(NL_3, String.format("%30s", " "), now);
         break;
       default:
         throw new IllegalArgumentException("Unknown state: " + summary.getState());
@@ -102,9 +100,9 @@ public class ConsoleServer extends AbstractServer {
 
   protected void print(final TestReportNode node) {
     if (node.isSuccess()) {
-      printer.println(bind(NL_4, node.getName()));
+      printer.println(NL_4, node.getName());
     } else {
-      printer.println(bind(NL_5, node.getName()));
+      printer.println(NL_5, node.getName());
     }
     node.getChildren().forEach(child -> this.printSuite((TestReportNode) child));
   }
@@ -115,18 +113,18 @@ public class ConsoleServer extends AbstractServer {
     final int successes = node.getTheNumberOfSuccesses();
     final int runs = node.getTheNumberOfTests();
     if (0 < nFailures) {
-      printer.print(bind(NL_6, name, successes, runs));
+      printer.print(NL_6, name, successes, runs);
     } else {
-      printer.print(bind(NL_7, name, successes, runs));
+      printer.print(NL_7, name, successes, runs);
     }
     node.getChildren().forEach(child -> this.printCase((TestReportNode) child));
   }
 
   protected void printCase(final TestReportNode node) {
     if (node.isSuccess()) {
-      printer.println(bind(NL_8, node.getName(), (node.getEndTime() - node.getStartTime())));
+      printer.println(NL_8, node.getName(), (node.getEndTime() - node.getStartTime()));
     } else {
-      printer.println(bind(NL_9, node.getName(), node.getResultDetail()));
+      printer.println(NL_9, node.getName(), node.getResultDetail());
     }
   }
 }

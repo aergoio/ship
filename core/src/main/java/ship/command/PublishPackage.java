@@ -42,7 +42,7 @@ public class PublishPackage extends AbstractCommand {
     }
     createDirectories(publishPath);
     FileSet.from(Paths.get(".")).copyTo(publishPath);
-    printer.println(bind(NL_1, rootProject.getName()));
-    printer.println(bind(NL_2, publishPath));
+    printer.println(NL_1, rootProject.getName());
+    printer.println(NL_2, publishPath);
   }
 }

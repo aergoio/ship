@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.io.PrintStream;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import org.junit.Test;
 import ship.AbstractTestCase;
@@ -41,6 +42,7 @@ public class AnsiMessagePrinterTest extends AbstractTestCase {
     printer.setColors(colors);
 
     printer.format("<red>No command!!</red>");
+    printer.println(" <red>x</red> {0} - <red>{1}</red>", "src/test/lua/test-asset.lua", "assertion failed!");
   }
 
 }

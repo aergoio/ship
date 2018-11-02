@@ -8,7 +8,6 @@ import static hera.util.ObjectUtils.nvl;
 import static java.util.Collections.EMPTY_LIST;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
-import static ship.util.Messages.bind;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,16 +47,16 @@ public class TestProject extends AbstractCommand {
   protected Consumer<TestResultCollector> reporter = (testReporter) -> {
     testReporter.getResults().forEach(testFile -> {
       if (testFile.isSuccess()) {
-        getPrinter().println(bind(NL_0, testFile.getName()));
+        getPrinter().println(NL_0, testFile.getName());
       } else {
         final Optional<String> errorMessage =
             ofNullable(testFile.getResultDetail())
                 .map(obj -> (LuaErrorInformation) obj)
                 .map(LuaErrorInformation::getMessage);
         if (errorMessage.isPresent()) {
-          getPrinter().println(bind(NL_1, testFile.getName(), errorMessage.get()));
+          getPrinter().println(NL_1, testFile.getName(), errorMessage.get());
         } else {
-          getPrinter().println(bind(NL_2, testFile.getName()));
+          getPrinter().println(NL_2, testFile.getName());
         }
       }
       testFile.getChildren().forEach(child -> {
@@ -66,15 +65,15 @@ public class TestProject extends AbstractCommand {
         final int successes = testSuite.getTheNumberOfSuccesses();
         final int runs = testSuite.getTheNumberOfTests();
         if (testSuite.isSuccess()) {
-          getPrinter().println(bind(NL_3, name, successes, runs));
+          getPrinter().println(NL_3, name, successes, runs);
         } else {
-          getPrinter().println(bind(NL_4, name, successes, runs));
+          getPrinter().println(NL_4, name, successes, runs);
         }
         testSuite.getChildren().forEach(testCase -> {
           if (testCase.isSuccess()) {
-            getPrinter().println(bind(NL_5, testCase.getName()));
+            getPrinter().println(NL_5, testCase.getName());
           } else {
-            getPrinter().println(bind(NL_6, testCase.getName(), testCase.getResultDetail()));
+            getPrinter().println(NL_6, testCase.getName(), testCase.getResultDetail());
           }
         });
       });
