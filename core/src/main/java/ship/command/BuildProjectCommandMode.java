@@ -4,7 +4,6 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static ship.build.web.model.BuildSummary.BUILD_FAIL;
 import static ship.build.web.model.BuildSummary.SUCCESS;
 import static ship.build.web.model.BuildSummary.TEST_FAIL;
-import static ship.util.Messages.bind;
 
 import com.google.common.base.Stopwatch;
 import java.io.ByteArrayInputStream;
@@ -49,7 +48,7 @@ public class BuildProjectCommandMode extends AbstractCommand {
     final BuildDetails buildDetails = new BuildDetails();
     if (null == buildTarget) {
       buildDetails.setState(BUILD_FAIL);
-      buildDetails.setError(bind(NL_4));
+      buildDetails.setError(NL_4);
     } else {
       try {
         final BuildDetails builderResult = builder.build(buildTarget);
@@ -89,13 +88,13 @@ public class BuildProjectCommandMode extends AbstractCommand {
     logger.debug("Build result: {}", result);
     switch (result.getState()) {
       case SUCCESS:
-        getPrinter().println(bind(NL_0));
-        getPrinter().println(bind(NL_1, project.getProjectFile().getTargetPath(getProjectHome())));
+        getPrinter().println(NL_0);
+        getPrinter().println(NL_1, project.getProjectFile().getTargetPath(getProjectHome()));
         break;
       case BUILD_FAIL:
-        getPrinter().println(bind(NL_2));
+        getPrinter().println(NL_2);
         final String errorMessage = result.getError();
-        getPrinter().println(bind(NL_3, errorMessage));
+        getPrinter().println(NL_3, errorMessage);
         break;
       case TEST_FAIL:
         throw new IllegalStateException();

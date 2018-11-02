@@ -41,6 +41,7 @@ public class AnsiMessagePrinterTest extends AbstractTestCase {
     printer.setColors(colors);
 
     printer.format("<red>No command!!</red>");
+    printer.println(" <red>x</red> {0} - <red>{1}</red>", "src/test/lua/test-asset.lua", "assertion failed!");
   }
 
 }

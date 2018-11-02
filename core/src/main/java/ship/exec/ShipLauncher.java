@@ -5,7 +5,6 @@
 package ship.exec;
 
 import static org.slf4j.LoggerFactory.getLogger;
-import static ship.util.Messages.bind;
 
 import hera.util.ExceptionUtils;
 import java.util.Optional;
@@ -39,7 +38,7 @@ public class ShipLauncher {
   protected final MessagePrinter messagePrinter;
 
   protected void printHelp() {
-    messagePrinter.println(bind(NL_0));
+    messagePrinter.println(NL_0);
   }
 
   public void exit(int returnCode) {
@@ -92,7 +91,7 @@ public class ShipLauncher {
       final CommandException commandException) {
     final String message = commandException.getMessage();
     if (null != message) {
-      messagePrinter.println(bind(NL_1, message));
+      messagePrinter.println(NL_1, message);
       logger.error("Fail to execute {}", command, commandException);
     } else {
       logger.error("{}", commandException.getMessage(), commandException);
@@ -103,7 +102,7 @@ public class ShipLauncher {
   protected void handleThrowable(final Command command, final Throwable throwable) {
     final String mainMessage = ExceptionUtils.buildExceptionMessage(null, throwable);
     System.err.println(mainMessage);
-    System.err.println(bind(NL_2));
+    System.err.println(NL_2);
     logger.debug("Unexpected exception: {}", throwable.getClass(), throwable);
     exit(-1);
   }

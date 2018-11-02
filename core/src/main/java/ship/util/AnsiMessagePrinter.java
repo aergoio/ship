@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
@@ -267,13 +268,33 @@ public class AnsiMessagePrinter implements MessagePrinter {
     }
     logger.debug("State: {}", state);
     logger.debug("Tags: {}", state.getTags());
-    assertTrue(state instanceof Normal, "Expression is invalid: " + state);
-    assertTrue(state.getTags().isEmpty(), "The closing tag missed: " + state.getTags());
+    assertTrue(state instanceof Normal, "Expression is invalid[" + state + ": " + message);
+    assertTrue(state.getTags().isEmpty(), "The closing tag[" + state.getTags() + "] missed: " + message);
     return state.getWriter().toString();
   }
 
+  public String escape(final String str) {
+    final StringBuilder writer = new StringBuilder();
+    final StringReader reader = new StringReader(str);
+    int ch = 0;
+    try {
+      while (0 < (ch = reader.read())) {
+        if (ch == '<' | ch == '!') {
+          writer.append('!');
+        }
+        writer.append((char) ch);
+      }
+    } catch (final IOException e) {
+      throw new IllegalStateException(e);
+    }
+    return writer.toString();
+  }
+
   public void print(final String format, Object...args) {
-    out.print(this.format(String.format(format, args)));
+    final String msg = Messages.bind(
+        format,
+        Arrays.stream(args).map(arg -> escape((null == arg) ? null : arg.toString())).toArray());
+    out.print(this.format(msg));
   }
 
   public void println() {
@@ -281,7 +302,10 @@ public class AnsiMessagePrinter implements MessagePrinter {
   }
 
   public void println(final String format, Object... args) {
-    out.println(this.format(String.format(format, args)));
+    final String msg = Messages.bind(
+        format,
+        Arrays.stream(args).map(arg -> escape((null == arg) ? null : arg.toString())).toArray());
+    out.println(this.format(msg));
   }
 
   @Override
