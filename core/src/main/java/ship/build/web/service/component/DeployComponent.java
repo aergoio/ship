@@ -46,7 +46,7 @@ public interface DeployComponent extends Aergo, LoggerComponent {
     } catch (final RpcConnectionException ex) {
       throw new AergoNodeException(Messages.bind(NL_0, aergoPool.getHostnameAndPort()), ex);
     } catch (final RpcException ex) {
-      throw new AergoNodeException(NL_1, ex);
+      throw new AergoNodeException(Messages.bind(NL_1), ex);
     } finally {
       aergoPool.returnResource(aergoApi);
     }
