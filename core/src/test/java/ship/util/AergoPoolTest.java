@@ -13,6 +13,7 @@ import hera.client.AergoClientBuilder;
 import hera.strategy.ConnectStrategy;
 import hera.strategy.NettyConnectStrategy;
 import io.grpc.ManagedChannel;
+import io.grpc.netty.NettyChannelBuilder;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import ship.AbstractTestCase;
@@ -21,10 +22,11 @@ public class AergoPoolTest extends AbstractTestCase {
 
   @Test
   @SuppressWarnings("unchecked")
+  @PrepareForTest(NettyChannelBuilder.class)
   public void testBorrowResource() throws Exception {
     // Given
     final NettyConnectStrategy connectStrategy = mock(NettyConnectStrategy.class);
-    final ManagedChannel managedChannel = mock(ManagedChannel.class);
+    final NettyChannelBuilder managedChannel = mock(NettyChannelBuilder.class);
     whenNew(NettyConnectStrategy.class).withAnyArguments().thenReturn(connectStrategy);
     when(connectStrategy.connect()).thenReturn(managedChannel);
 
@@ -44,7 +46,7 @@ public class AergoPoolTest extends AbstractTestCase {
     whenNew(AergoClient.class).withAnyArguments().thenReturn(client);
 
     // When
-    final AergoPool pool = new AergoPool(connectStrategy);
+    final AergoPool pool = new AergoPool(randomUUID().toString());
     final AergoApi api = pool.borrowResource();
     pool.returnResource(api);
 
