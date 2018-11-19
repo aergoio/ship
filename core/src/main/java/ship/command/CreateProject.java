@@ -5,16 +5,22 @@
 package ship.command;
 
 import static hera.util.FilepathUtils.getFilename;
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.Optional.ofNullable;
 import static ship.util.Messages.bind;
 
 import com.beust.jcommander.Parameter;
 import hera.util.IoUtils;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -47,6 +53,24 @@ public class CreateProject extends AbstractCommand implements Command {
     return projectFile;
   }
 
+  protected void prepare(final ProjectFile projectFile) {
+    final List<Supplier<String>> fileSupplier = asList(
+        projectFile::getSource,
+        projectFile::getTarget);
+
+    fileSupplier.stream()
+        .map(f -> f.get())
+        .forEach(path ->
+            ofNullable(path)
+                .map(File::new)
+                .map(File::getParentFile)
+                .filter(f -> !f.exists())
+                .ifPresent(File::mkdirs)
+        );
+
+    final String sourcePath = projectFile.getSource();
+  }
+
   @Override
   public void execute() throws Exception {
     logger.debug("Starting {} with {}...", this, arguments);
@@ -65,6 +89,7 @@ public class CreateProject extends AbstractCommand implements Command {
     }
     final String projectName = System.getProperty("user.name") + "/" + projectDirectoryName;
     final ProjectFile newProjectFile = newProjectFile(projectName);
+    prepare(newProjectFile);
     writeProjectFile.setProject(newProjectFile);
     writeProjectFile.setArguments(singletonList(projectFilePathStr));
     writeProjectFile.execute();
