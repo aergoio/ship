@@ -306,8 +306,12 @@ public class AnsiMessagePrinter implements MessagePrinter {
           messageId,
           Arrays.stream(args).map(arg -> escape((null == arg) ? null : arg.toString())).toArray());
     } else {
-      return MessageFormat.format(messageId,
-          Arrays.stream(args).map(arg -> escape((null == arg) ? null : arg.toString())).toArray());
+      if (0 < args.length) {
+        return MessageFormat.format(messageId,
+            Arrays.stream(args).map(arg -> escape((null == arg) ? null : arg.toString())).toArray());
+      } else {
+        return messageId;
+      }
     }
   }
 
