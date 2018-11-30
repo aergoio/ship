@@ -64,17 +64,18 @@ public class CreateProject extends AbstractCommand implements Command {
    * @param projectFile project configuration contents
    */
   protected void prepare(final ProjectFile projectFile) {
-    final List<Supplier<String>> fileSupplier = asList(
+    final List<Supplier<String>> fileSuppliers = asList(
         projectFile::getSource,
         projectFile::getTarget);
 
-    fileSupplier.stream()
+    fileSuppliers.forEach(fileSupplier -> logger.debug("File: {}", fileSupplier.get()));
+
+    fileSuppliers.stream()
         .map(Supplier::get)
-        .allMatch(path -> (null == path) ? true : of(path)
+        .allMatch(path -> (null == path) ? false : of(path)
             .map(Paths::get)
             .map(Path::toAbsolutePath)
             .map(Path::getParent)
-            .filter(p -> !Files.exists(p))
             .map(Path::toFile)
             .map(File::mkdirs)
             .orElseThrow(() -> new CommandException(Messages.bind(NL_2, path))));
