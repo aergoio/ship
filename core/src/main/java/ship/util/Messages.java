@@ -24,6 +24,14 @@ public class Messages {
     }
   }
 
+  public static boolean exists(final String msgId) {
+    return null != getMessage(msgId);
+  }
+
+  public static String getMessage(final String msgId) {
+    return messages.getProperty(msgId);
+  }
+
   /**
    * Bind message with message id and arguments.
    *
@@ -33,7 +41,7 @@ public class Messages {
    * @return bound message
    */
   public static String bind(final String msgId, final Object... args) {
-    final String pattern = messages.getProperty(msgId);
+    final String pattern = getMessage(msgId);
     if (null == pattern) {
       final StringJoiner joiner = new StringJoiner(",");
       stream(args).map(Object::toString).forEach(joiner::add);

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -299,9 +300,14 @@ public class AnsiMessagePrinter implements MessagePrinter {
   }
 
   protected String bind(final String messageId, Object... args) {
-    return Messages.bind(
-        messageId,
-        Arrays.stream(args).map(arg -> escape((null == arg) ? null : arg.toString())).toArray());
+    if (Messages.exists(messageId)) {
+      return Messages.bind(
+          messageId,
+          Arrays.stream(args).map(arg -> escape((null == arg) ? null : arg.toString())).toArray());
+    } else {
+      return MessageFormat.format(messageId,
+          Arrays.stream(args).map(arg -> escape((null == arg) ? null : arg.toString())).toArray());
+    }
   }
 
   /**

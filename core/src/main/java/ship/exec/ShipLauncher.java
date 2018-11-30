@@ -15,6 +15,7 @@ import ship.CommandFactory;
 import ship.exception.CommandException;
 import ship.util.AnsiMessagePrinter;
 import ship.util.MessagePrinter;
+import ship.util.Messages;
 
 @RequiredArgsConstructor
 public class ShipLauncher {
@@ -90,11 +91,11 @@ public class ShipLauncher {
       final Command command,
       final CommandException commandException) {
     final String message = commandException.getMessage();
-    if (null != message) {
-      messagePrinter.println(NL_1, message);
+    if (null == message) {
       logger.error("Fail to execute {}", command, commandException);
     } else {
-      logger.error("{}", commandException.getMessage(), commandException);
+      messagePrinter.println(Messages.bind(NL_1, message));
+      logger.error("{}", message, commandException);
     }
     exit(-1);
   }
