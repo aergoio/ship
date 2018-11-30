@@ -129,9 +129,4 @@ We provides next in https://aergoio.github.io/ship
 * JavaDoc
 * Test Coverage
 
-## How to build documents
-```console
-$ ./build.sh docs
-```
-
 # Contribution
