@@ -248,6 +248,7 @@ public class AnsiMessagePrinter implements MessagePrinter {
    * @return text with ansi code
    */
   public String format(final String message) {
+    logger.debug("Message: {}", message);
     if (null == message) {
       return null;
     }
@@ -257,7 +258,7 @@ public class AnsiMessagePrinter implements MessagePrinter {
     State state = new Normal(new Stack<>(), new StringWriter());
     try {
       while (0 <= (ch = reader.read())) {
-        logger.trace("Char: {}", (char) ch);
+        logger.trace("Char: {} - {}", ch < 32 ? ' ' : (char) ch, ch);
         final State old = state;
         state = state.next(ch);
         if (old != state) {

@@ -24,6 +24,7 @@ public class ShipLauncher {
   protected static final String NL_0 = ShipLauncher.class.getName() + ".0";
   protected static final String NL_1 = ShipLauncher.class.getName() + ".1";
   protected static final String NL_2 = ShipLauncher.class.getName() + ".2";
+  protected static final String NL_3 = ShipLauncher.class.getName() + ".3";
 
   /**
    * ship's entry point.
@@ -38,10 +39,6 @@ public class ShipLauncher {
 
   protected final MessagePrinter messagePrinter;
 
-  protected void printHelp() {
-    messagePrinter.println(NL_0);
-  }
-
   public void exit(int returnCode) {
     System.exit(returnCode);
   }
@@ -53,13 +50,13 @@ public class ShipLauncher {
    */
   public void run(final String[] args) {
     if (args.length < 1) {
-      printHelp();
+      messagePrinter.println(NL_0);
       exit(-1);
     } else {
       final CommandFactory commandFactory = new CommandFactory(messagePrinter);
       final Optional<Command> commandOpt = commandFactory.create(args);
       if (!commandOpt.isPresent()) {
-        printHelp();
+        messagePrinter.println(NL_1, args[0]);
         exit(-1);
       }
 
@@ -94,7 +91,7 @@ public class ShipLauncher {
     if (null == message) {
       logger.error("Fail to execute {}", command, commandException);
     } else {
-      messagePrinter.println(Messages.bind(NL_1, message));
+      messagePrinter.println(Messages.bind(NL_2, message));
       logger.error("{}", message, commandException);
     }
     exit(-1);
@@ -103,7 +100,7 @@ public class ShipLauncher {
   protected void handleThrowable(final Command command, final Throwable throwable) {
     final String mainMessage = ExceptionUtils.buildExceptionMessage(null, throwable);
     System.err.println(mainMessage);
-    System.err.println(NL_2);
+    System.err.println(NL_3);
     logger.debug("Unexpected exception: {}", throwable.getClass(), throwable);
     exit(-1);
   }
