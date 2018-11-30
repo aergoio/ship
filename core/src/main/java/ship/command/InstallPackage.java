@@ -34,6 +34,7 @@ public class InstallPackage extends AbstractCommand {
     final Optional<String> checkout = getOptionalArgument(1);
 
     final CloneGit cloneGit = new CloneGit();
+    logger.trace("CloneGit: {}", cloneGit);
     cloneGit.setArguments(asList(packageName, checkout.orElse("master")));
     cloneGit.execute();
     final FileSet fileSet = cloneGit.getFileSet();

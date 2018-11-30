@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.stream.Stream;
 import lombok.Getter;
+import lombok.Setter;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.internal.storage.dfs.DfsRepositoryDescription;
 import org.eclipse.jgit.internal.storage.dfs.InMemoryRepository;
@@ -33,6 +34,7 @@ public class CloneGit extends AbstractCommand {
   protected static final String URI_PATTERN = "https://github.com/{0}.git";
 
   @Getter
+  @Setter
   protected FileSet fileSet = new FileSet();
 
   @Override
