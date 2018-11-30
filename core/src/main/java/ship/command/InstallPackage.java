@@ -11,6 +11,7 @@ import static hera.util.ValidationUtils.assertTrue;
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.exists;
 import static java.util.Arrays.asList;
+import static ship.ShipConstants.MODULES_BASE;
 import static ship.util.Messages.bind;
 
 import java.nio.file.Path;
@@ -38,7 +39,7 @@ public class InstallPackage extends AbstractCommand {
     final FileSet fileSet = cloneGit.getFileSet();
     logger.debug("FileSet: {}", fileSet.getFiles());
 
-    final String publishRepository = append(System.getProperty("user.home"), ".aergo_modules");
+    final String publishRepository = append(System.getProperty("user.home"), MODULES_BASE);
     final Path publishPath = Paths.get(append(publishRepository, packageName));
     if (exists(publishPath)) {
       deleteRecursively(publishPath, ALLOW_INSECURE);

@@ -10,6 +10,7 @@ import static hera.util.FilepathUtils.append;
 import static hera.util.ValidationUtils.assertNotNull;
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.exists;
+import static ship.ShipConstants.MODULES_BASE;
 import static ship.util.Messages.bind;
 
 import java.nio.file.Path;
@@ -35,7 +36,7 @@ public class PublishPackage extends AbstractCommand {
       new BuildProject().execute();
     }
 
-    final String publishRepository = append(System.getProperty("user.home"), ".aergo_modules");
+    final String publishRepository = append(System.getProperty("user.home"), MODULES_BASE);
     final Path publishPath = Paths.get(append(publishRepository, rootProject.getName()));
     if (exists(publishPath)) {
       deleteRecursively(publishPath, ALLOW_INSECURE);

@@ -61,7 +61,7 @@ $PROJECT_HOME/
   "target": "app.lua",
   "dependencies": ["aergoio/athena-343"],
   "test": ["src/test/lua/test-main.lua"],
-  "endpoint": "remotehost:3030"
+  "endpoint": "remotehost:7845"
 }
 ```
 

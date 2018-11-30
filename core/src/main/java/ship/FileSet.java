@@ -5,6 +5,7 @@
 package ship;
 
 import static com.google.common.io.MoreFiles.createParentDirectories;
+import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.newInputStream;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
@@ -100,7 +101,7 @@ public class FileSet {
    */
   public void copyTo(final Path base) throws IOException {
     logger.trace("Copying to {}...", base);
-    Files.createDirectories(base);
+    createDirectories(base);
 
     logger.debug("Files: {}", files);
     for (final FileContent fileContent: files) {
