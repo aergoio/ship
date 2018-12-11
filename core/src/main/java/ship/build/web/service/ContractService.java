@@ -4,12 +4,15 @@
 
 package ship.build.web.service;
 
+import static hera.util.ValidationUtils.assertNotNull;
+import static java.math.BigInteger.ZERO;
 import static java.util.UUID.randomUUID;
 import static ship.util.Messages.bind;
 
 import hera.api.AccountOperation;
 import hera.api.AergoApi;
 import hera.api.ContractOperation;
+import hera.api.KeyStoreOperation;
 import hera.api.encode.Base58;
 import hera.api.model.Account;
 import hera.api.model.AccountAddress;
@@ -77,7 +80,7 @@ public class ContractService extends AbstractService
   protected Account account;
 
   @Getter
-  protected Fee fee = new Fee(0, 0);
+  protected Fee fee = new Fee(ZERO, 0);
 
   protected final LuaCompiler luaCompiler = new LuaCompiler();
 
@@ -117,11 +120,11 @@ public class ContractService extends AbstractService
     }
     final AergoApi aergoApi = aergoPool.borrowResource();
     try {
-      final AccountOperation accountOperation = aergoApi.getAccountOperation();
+      final KeyStoreOperation keyStoreOp = aergoApi.getKeyStoreOperation();
       logger.trace("Password: {}", password);
       if (null == encodedEncryptedPrivateKey || encodedEncryptedPrivateKey.isEmpty()) {
         password = randomUUID().toString();
-        account = accountOperation.create(password);
+        account = keyStoreOp.create(password);
       } else {
         try {
           final AergoKey pk = AergoKey.of(encodedEncryptedPrivateKey, password);
@@ -132,7 +135,7 @@ public class ContractService extends AbstractService
       }
       final AccountAddress accountAddress = account.getAddress();
       final Authentication authentication = new Authentication(accountAddress, password);
-      accountOperation.unlock(authentication);
+      keyStoreOp.unlock(authentication);
       logger.debug("{} unlocked", authentication);
     } catch (final RpcConnectionException ex) {
       throw new AergoNodeException(
@@ -186,8 +189,9 @@ public class ContractService extends AbstractService
     final DeploymentResult deploymentResult =
         encodedContractTxHash2contractAddresses.get(encodedContractTxHash);
     final ContractInterface contractInterface = deploymentResult.getContractInterface();
-    final ContractFunction contractFunction = contractInterface.findFunction(functionName)
-        .orElseThrow(() -> new ResourceNotFoundException("No " + functionName + " function."));
+    final ContractFunction contractFunction = contractInterface.findFunction(functionName);
+    assertNotNull(contractFunction,
+        () -> new ResourceNotFoundException("No " + functionName + " function."));
     return new Pair<>(contractTxHash, contractFunction);
   }
 

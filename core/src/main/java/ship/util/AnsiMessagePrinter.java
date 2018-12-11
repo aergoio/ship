@@ -4,6 +4,7 @@ import static hera.util.StringUtils.removeSuffix;
 import static hera.util.ValidationUtils.assertEquals;
 import static hera.util.ValidationUtils.assertNotNull;
 import static hera.util.ValidationUtils.assertTrue;
+import static java.util.Arrays.stream;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
@@ -11,7 +12,6 @@ import java.io.PrintStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
@@ -304,11 +304,11 @@ public class AnsiMessagePrinter implements MessagePrinter {
     if (Messages.exists(messageId)) {
       return Messages.bind(
           messageId,
-          Arrays.stream(args).map(arg -> escape((null == arg) ? null : arg.toString())).toArray());
+          stream(args).map(arg -> escape((null == arg) ? null : arg.toString())).toArray());
     } else {
       if (0 < args.length) {
         return MessageFormat.format(messageId,
-            Arrays.stream(args).map(arg -> escape((null == arg) ? null : arg.toString())).toArray());
+            stream(args).map(arg -> escape((null == arg) ? null : arg.toString())).toArray());
       } else {
         return messageId;
       }

@@ -47,6 +47,7 @@ public interface ExecuteComponent extends Aergo, LoggerComponent {
       return contractOperation.execute(
           account,
           contractCall,
+          syncedAccount.getNonce() + 1,
           getFee()
       );
     } finally {

@@ -1,10 +1,12 @@
 package ship.build.web.service;
 
 import static hera.util.Base58Utils.encodeWithCheck;
+import static java.math.BigInteger.ZERO;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -15,9 +17,12 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import hera.api.AccountOperation;
 import hera.api.AergoApi;
 import hera.api.ContractOperation;
+import hera.api.KeyStoreOperation;
 import hera.api.model.Account;
+import hera.api.model.AccountAddress;
 import hera.api.model.AccountState;
 import hera.api.model.BytesValue;
+import hera.api.model.ContractAddress;
 import hera.api.model.ContractFunction;
 import hera.api.model.ContractInterface;
 import hera.api.model.ContractResult;
@@ -28,6 +33,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -52,7 +58,8 @@ public class ContractServiceTest extends AbstractTestCase {
 
   protected ContractService contractService;
 
-  protected ServerManagedAccount account = mock(ServerManagedAccount.class);
+  protected ServerManagedAccount account = new ServerManagedAccount(new AccountAddress(
+      new BytesValue(('B' + randomUUID().toString()).getBytes())));
 
   protected ContractTxReceipt contractTxReceipt;
 
@@ -62,6 +69,9 @@ public class ContractServiceTest extends AbstractTestCase {
 
   @Mock
   protected AergoApi aergoApi;
+
+  @Mock
+  protected KeyStoreOperation keyStoreOperation;
 
   @Mock
   protected AccountOperation accountOperation;
@@ -83,31 +93,41 @@ public class ContractServiceTest extends AbstractTestCase {
     when(p.getOutputStream()).thenReturn(new ByteArrayOutputStream());
     when(p.waitFor()).thenReturn(0);
 
-    final AccountState accountState = new AccountState();
+    final BytesValue accountAddressValue =
+        new BytesValue(('B' + randomUUID().toString()).getBytes());
+    final BytesValue contractAddressValue =
+        new BytesValue(('B' + randomUUID().toString()).getBytes());
+
+    final AccountState accountState =
+        new AccountState(new AccountAddress(accountAddressValue), 10, ZERO);
 
     contractTxReceipt = new ContractTxReceipt();
-    contractInterface = new ContractInterface();
-    contractFunction = new ContractFunction();
-    contractFunction.setName(randomUUID().toString());
-    contractFunction.setArgumentNames(new ArrayList<>());
-    contractInterface.setFunctions(asList(contractFunction));
+    contractFunction = new ContractFunction(('B' + randomUUID().toString()), new ArrayList<>());
+    contractInterface = new ContractInterface(
+        new ContractAddress(contractAddressValue),
+        "",
+        "",
+        asList(contractFunction));
 
     contractService = new ContractService();
     contractService.setAergoPool(resourcePool);
     reset(aergoApi, contractOperation);
     when(aergoApi.getAccountOperation()).thenReturn(accountOperation);
+    when(aergoApi.getKeyStoreOperation()).thenReturn(keyStoreOperation);
     when(aergoApi.getContractOperation()).thenReturn(contractOperation);
 
-    when(accountOperation.create(anyString())).thenReturn(account);
+    when(keyStoreOperation.create(anyString())).thenReturn(account);
     when(accountOperation.getState(account)).thenReturn(accountState);
     when(contractOperation.getReceipt(contractTxHash)).thenReturn(contractTxReceipt);
-    when(contractOperation.getContractInterface(contractTxReceipt.getContractAddress())).thenReturn(contractInterface);
+    when(contractOperation.getContractInterface(contractTxReceipt.getContractAddress()))
+        .thenReturn(contractInterface);
   }
 
   @Test
   public void testDeployAndGetLatestContractInformation() {
     // Given
-    when(contractOperation.deploy(any(Account.class), any(), any())).thenReturn(contractTxHash);
+    when(contractOperation.deploy(any(Account.class), any(), anyLong(), any()))
+        .thenReturn(contractTxHash);
 
     // When
     final BuildDetails buildDetails = new BuildDetails();
@@ -127,15 +147,15 @@ public class ContractServiceTest extends AbstractTestCase {
 
   @Test
   public void testTryExecute() {
-    when(contractOperation.deploy(any(Account.class), any(), any()))
+    when(contractOperation.deploy(any(Account.class), any(), anyLong(), any()))
         .thenReturn(contractTxHash);
     final ContractTxHash executedContractTxHash =
         ContractTxHash.of(BytesValue.of(randomUUID().toString().getBytes()));
-    when(contractOperation.execute(any(Account.class), any(), any()))
+    when(contractOperation.execute(any(Account.class), any(), anyLong(), any()))
         .thenReturn(executedContractTxHash);
     long nonce = new Random().nextLong();
-    final AccountState accountState = new AccountState();
-    accountState.setNonce(nonce);
+    final AccountState accountState = new AccountState(new AccountAddress(new BytesValue(
+        ('B' + randomUUID().toString()).getBytes())), nonce, ZERO);
     when(accountOperation.getState(account)).thenReturn(accountState);
 
     // When
@@ -148,12 +168,13 @@ public class ContractServiceTest extends AbstractTestCase {
 
     // Then
     assertNotNull(executionResult.getContractTransactionHash());
-    verify(contractOperation).execute(any(Account.class), any(), any());
+    verify(contractOperation).execute(any(Account.class), any(), anyLong(), any());
   }
 
   @Test
   public void testTryQuery() {
-    when(contractOperation.deploy(any(Account.class), any(), any())).thenReturn(contractTxHash);
+    when(contractOperation.deploy(any(Account.class), any(), anyLong(), any()))
+        .thenReturn(contractTxHash);
     final ContractResult contractResult = mock(ContractResult.class);
     when(contractResult.getResultInRawBytes())
         .thenReturn(BytesValue.of(randomUUID().toString().getBytes()));

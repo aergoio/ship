@@ -39,10 +39,10 @@ public interface DeployComponent extends Aergo, LoggerComponent {
       final ContractOperation contractOperation = aergoApi.getContractOperation();
       final Base58WithCheckSum encodedPayload = () -> luaBinary.getPayload().getEncodedValue();
 
-      account.setNonce(syncedAccount.getNonce());
-      final ContractDefinition contractDefinition = ContractDefinition.of(encodedPayload);
+      final ContractDefinition contractDef =
+          ContractDefinition.of(encodedPayload.getEncodedValue());
 
-      return contractOperation.deploy(account, contractDefinition, fee);
+      return contractOperation.deploy(account, contractDef, syncedAccount.getNonce() + 1, fee);
     } catch (final RpcConnectionException ex) {
       throw new AergoNodeException(Messages.bind(NL_0, aergoPool.getHostnameAndPort()), ex);
     } catch (final RpcException ex) {
