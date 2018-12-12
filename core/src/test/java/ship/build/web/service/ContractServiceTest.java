@@ -153,7 +153,7 @@ public class ContractServiceTest extends AbstractTestCase {
         ContractTxHash.of(BytesValue.of(randomUUID().toString().getBytes()));
     when(contractOperation.execute(any(Account.class), any(), anyLong(), any()))
         .thenReturn(executedContractTxHash);
-    long nonce = new Random().nextLong();
+    final long nonce = new Random().nextLong() + 1;
     final AccountState accountState = new AccountState(new AccountAddress(new BytesValue(
         ('B' + randomUUID().toString()).getBytes())), nonce, ZERO);
     when(accountOperation.getState(account)).thenReturn(accountState);
