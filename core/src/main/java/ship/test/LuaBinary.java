@@ -4,7 +4,6 @@
 
 package ship.test;
 
-import hera.api.encode.Base58WithCheckSum;
 import java.util.function.Supplier;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -12,9 +11,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class LuaBinary {
   @Getter
-  protected final Supplier<Base58WithCheckSum> inputSupplier;
+  protected final Supplier<String> inputSupplier;
 
-  public Base58WithCheckSum getPayload() {
+  public String getPayload() {
     return inputSupplier.get();
   }
 

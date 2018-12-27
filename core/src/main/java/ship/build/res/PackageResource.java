@@ -5,9 +5,7 @@
 package ship.build.res;
 
 import static hera.util.ValidationUtils.assertNotNull;
-import static java.util.Optional.of;
 
-import java.util.Optional;
 import ship.build.ResourceManager;
 
 public class PackageResource extends BuildResource {
@@ -20,9 +18,9 @@ public class PackageResource extends BuildResource {
   }
 
   @Override
-  public <T> Optional<T> adapt(Class<T> adaptor) {
+  public <T> T adapt(Class<T> adaptor) {
     if (adaptor.isInstance(resourceManager)) {
-      return (Optional<T>) of(resourceManager);
+      return (T) resourceManager;
     }
     return super.adapt(adaptor);
   }

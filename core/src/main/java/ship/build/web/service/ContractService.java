@@ -4,20 +4,19 @@
 
 package ship.build.web.service;
 
+import static hera.util.ValidationUtils.assertEquals;
 import static hera.util.ValidationUtils.assertNotNull;
-import static java.math.BigInteger.ZERO;
 import static java.util.UUID.randomUUID;
 import static ship.util.Messages.bind;
 
-import hera.api.AccountOperation;
 import hera.api.AergoApi;
 import hera.api.ContractOperation;
 import hera.api.KeyStoreOperation;
-import hera.api.encode.Base58;
 import hera.api.model.Account;
 import hera.api.model.AccountAddress;
+import hera.api.model.AccountFactory;
+import hera.api.model.Aer;
 import hera.api.model.Authentication;
-import hera.api.model.ClientManagedAccount;
 import hera.api.model.ContractAddress;
 import hera.api.model.ContractFunction;
 import hera.api.model.ContractInterface;
@@ -37,8 +36,6 @@ import java.util.Map;
 import javax.inject.Named;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -80,7 +77,7 @@ public class ContractService extends AbstractService
   protected Account account;
 
   @Getter
-  protected Fee fee = new Fee(ZERO, 0);
+  protected Fee fee = new Fee(Aer.GIGA_ONE, -1);
 
   protected final LuaCompiler luaCompiler = new LuaCompiler();
 
@@ -96,18 +93,6 @@ public class ContractService extends AbstractService
   @Override
   public Logger logger() {
     return logger;
-  }
-
-  @RequiredArgsConstructor
-  class SimpleBase58 implements Base58 {
-
-    @NonNull
-    protected final String encoded;
-
-    @Override
-    public String getEncodedValue() {
-      return encoded;
-    }
   }
 
   protected synchronized void ensureAccount() {
@@ -128,7 +113,7 @@ public class ContractService extends AbstractService
       } else {
         try {
           final AergoKey pk = AergoKey.of(encodedEncryptedPrivateKey, password);
-          account = new ClientManagedAccount(pk);
+          account = new AccountFactory().create(pk);
         } catch (final Exception e) {
           throw new IllegalArgumentException(e);
         }
@@ -183,8 +168,7 @@ public class ContractService extends AbstractService
   protected Pair<ContractTxHash, ContractFunction> find(
       final String encodedContractTxHash, final String functionName) {
     logger.trace("Encoded tx hash: {}", encodedContractTxHash);
-    final Base58 encoded = new SimpleBase58(encodedContractTxHash);
-    final ContractTxHash contractTxHash = new ContractTxHash(encoded);
+    final ContractTxHash contractTxHash = new ContractTxHash(encodedContractTxHash);
 
     final DeploymentResult deploymentResult =
         encodedContractTxHash2contractAddresses.get(encodedContractTxHash);
@@ -263,8 +247,7 @@ public class ContractService extends AbstractService
     if (null == latest.getContractInterface()) {
       final String encodedContractTxHash = latest.getEncodedContractTransactionHash();
       logger.trace("Encoded tx hash: {}", encodedContractTxHash);
-      final Base58 base58 = new SimpleBase58(encodedContractTxHash);
-      final ContractTxHash contractTxHash = new ContractTxHash(base58);
+      final ContractTxHash contractTxHash = new ContractTxHash(encodedContractTxHash);
       final ContractInterface contractInterface = getInterface(contractTxHash);
       latest.setContractInterface(contractInterface);
     }
@@ -283,7 +266,9 @@ public class ContractService extends AbstractService
     final AergoApi aergoApi = aergoPool.borrowResource();
     try {
       final ContractOperation contractOperation = aergoApi.getContractOperation();
-      ContractTxReceipt receipt = contractOperation.getReceipt(contractTxHash);
+      final ContractTxReceipt receipt = contractOperation.getReceipt(contractTxHash);
+      assertEquals("CREATED", receipt.getStatus());
+
       final ContractAddress address = receipt.getContractAddress();
       final ContractInterface contractInterface = contractOperation.getContractInterface(address);
       if (null == contractInterface) {

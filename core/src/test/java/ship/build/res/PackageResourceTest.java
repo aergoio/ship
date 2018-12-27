@@ -1,7 +1,7 @@
 package ship.build.res;
 
 import static java.util.UUID.randomUUID;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 import ship.AbstractTestCase;
@@ -15,7 +15,6 @@ public class PackageResourceTest extends AbstractTestCase {
     final Project project = new Project(randomUUID().toString(), new ProjectFile());
     final ResourceManager resourceManager = new ResourceManager(project);
     final PackageResource packageResource = new PackageResource(resourceManager);
-    assertTrue(packageResource.adapt(ResourceManager.class).isPresent());
+    assertNotNull(packageResource.adapt(ResourceManager.class));
   }
-
 }

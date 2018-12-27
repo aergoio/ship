@@ -1,8 +1,6 @@
 package ship.build.web.service.component;
 
-import static hera.api.model.AccountAddress.VERSION;
 import static hera.util.Base58Utils.encodeWithCheck;
-import static java.math.BigInteger.ZERO;
 import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -15,10 +13,11 @@ import hera.api.ContractOperation;
 import hera.api.model.Account;
 import hera.api.model.AccountAddress;
 import hera.api.model.AccountState;
+import hera.api.model.Aer;
 import hera.api.model.BytesValue;
 import hera.api.model.ContractTxHash;
 import hera.api.model.Fee;
-import hera.api.model.ServerManagedAccount;
+import hera.api.model.internal.AccountWithAddress;
 import java.util.UUID;
 import lombok.Getter;
 import org.junit.Test;
@@ -37,7 +36,7 @@ public class DeployComponentTest extends AbstractTestCase implements DeployCompo
   protected AergoApi aergoApi;
 
   @Getter
-  protected Fee fee = new Fee(ZERO, 0);
+  protected Fee fee = new Fee(Aer.ZERO, 0);
 
   @Override
   public Logger logger() {
@@ -51,7 +50,7 @@ public class DeployComponentTest extends AbstractTestCase implements DeployCompo
   protected ContractOperation contractOperation;
 
   @Mock
-  protected ServerManagedAccount account;
+  protected AccountWithAddress account;
 
   @Test
   public void testDeploy() {
@@ -59,7 +58,7 @@ public class DeployComponentTest extends AbstractTestCase implements DeployCompo
         ContractTxHash.of(BytesValue.of(randomUUID().toString().getBytes()));
 
     final AccountState accountState = new AccountState(new AccountAddress(new BytesValue(
-        ('B' + UUID.randomUUID().toString()).getBytes())), 10, ZERO);
+        ('B' + UUID.randomUUID().toString()).getBytes())), 10, Aer.ZERO);
 
     when(aergoPool.borrowResource()).thenReturn(aergoApi);
     when(aergoApi.getAccountOperation()).thenReturn(accountOperation);
@@ -71,7 +70,7 @@ public class DeployComponentTest extends AbstractTestCase implements DeployCompo
 
     // When
     final LuaBinary luaBinary =
-        new LuaBinary(() -> () -> encodeWithCheck(randomUUID().toString().getBytes()));
+        new LuaBinary(() -> encodeWithCheck(randomUUID().toString().getBytes()));
     final ContractTxHash txHash = deploy(account, luaBinary);
 
     // Then

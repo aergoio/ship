@@ -1,7 +1,6 @@
 package ship.build.web.service;
 
 import static hera.util.Base58Utils.encodeWithCheck;
-import static java.math.BigInteger.ZERO;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertNotNull;
@@ -21,6 +20,7 @@ import hera.api.KeyStoreOperation;
 import hera.api.model.Account;
 import hera.api.model.AccountAddress;
 import hera.api.model.AccountState;
+import hera.api.model.Aer;
 import hera.api.model.BytesValue;
 import hera.api.model.ContractAddress;
 import hera.api.model.ContractFunction;
@@ -28,12 +28,11 @@ import hera.api.model.ContractInterface;
 import hera.api.model.ContractResult;
 import hera.api.model.ContractTxHash;
 import hera.api.model.ContractTxReceipt;
-import hera.api.model.ServerManagedAccount;
+import hera.api.model.internal.AccountWithAddress;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -58,7 +57,7 @@ public class ContractServiceTest extends AbstractTestCase {
 
   protected ContractService contractService;
 
-  protected ServerManagedAccount account = new ServerManagedAccount(new AccountAddress(
+  protected AccountWithAddress account = new AccountWithAddress(new AccountAddress(
       new BytesValue(('B' + randomUUID().toString()).getBytes())));
 
   protected ContractTxReceipt contractTxReceipt;
@@ -99,9 +98,9 @@ public class ContractServiceTest extends AbstractTestCase {
         new BytesValue(('B' + randomUUID().toString()).getBytes());
 
     final AccountState accountState =
-        new AccountState(new AccountAddress(accountAddressValue), 10, ZERO);
+        new AccountState(new AccountAddress(accountAddressValue), 10, Aer.ZERO);
 
-    contractTxReceipt = new ContractTxReceipt();
+    contractTxReceipt = new ContractTxReceipt(new ContractAddress(contractAddressValue), "CREATED", "");
     contractFunction = new ContractFunction(('B' + randomUUID().toString()), new ArrayList<>());
     contractInterface = new ContractInterface(
         new ContractAddress(contractAddressValue),
@@ -153,9 +152,9 @@ public class ContractServiceTest extends AbstractTestCase {
         ContractTxHash.of(BytesValue.of(randomUUID().toString().getBytes()));
     when(contractOperation.execute(any(Account.class), any(), anyLong(), any()))
         .thenReturn(executedContractTxHash);
-    final long nonce = new Random().nextLong() + 1;
+    final long nonce = Math.abs(new Random().nextLong()) + 1;
     final AccountState accountState = new AccountState(new AccountAddress(new BytesValue(
-        ('B' + randomUUID().toString()).getBytes())), nonce, ZERO);
+        ('B' + randomUUID().toString()).getBytes())), nonce, Aer.ZERO);
     when(accountOperation.getState(account)).thenReturn(accountState);
 
     // When

@@ -97,7 +97,7 @@ public class Concatenator {
     final StringJoiner contentWriter = new StringJoiner("\n");
     try {
       callStack.enter(resource);
-      final Concatenator next = resource.adapt(ResourceManager.class)
+      final Concatenator next = ofNullable(resource.adapt(ResourceManager.class))
           .map(newResourceManager -> new Concatenator(newResourceManager, visitedResources))
           .orElse(this);
       logger.debug("Resource manager changed: {} -> {}", this, next);
@@ -107,7 +107,7 @@ public class Concatenator {
         resourceDependency.add(childDependency);
       });
 
-      resource.adapt(Source.class).map(next::visit).ifPresent(contentWriter::add);
+      ofNullable(resource.adapt(Source.class)).map(next::visit).ifPresent(contentWriter::add);
       callStack.exit(resource);
       visitedResources.add(resource);
       return contentWriter.toString();

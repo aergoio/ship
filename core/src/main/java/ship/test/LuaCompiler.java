@@ -6,14 +6,17 @@ package ship.test;
 
 import static hera.util.IoUtils.from;
 import static hera.util.IoUtils.redirect;
+import static hera.util.ValidationUtils.assertNotNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import hera.util.DangerousSupplier;
 import hera.util.IoUtils;
+import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.io.StringReader;
 import org.slf4j.Logger;
 import ship.exception.BuildException;
 
@@ -59,9 +62,11 @@ public class LuaCompiler {
           logger.warn("Compiler Error: {}", errorOut);
           throw new BuildException("Fail to aergoluac");
         }
-        final String base58Encoded = IoUtils.from(compilerStdOut);
+        final String line = new BufferedReader(compilerStdOut).readLine();
+        assertNotNull(line, () -> new BuildException("No result from aergoluac"));
+        final String base58Encoded = line;
         logger.info("Encoded: {}", base58Encoded);
-        return new LuaBinary(() -> (() -> base58Encoded));
+        return new LuaBinary(() -> base58Encoded);
       }
     } catch (final BuildException ex) {
       throw ex;

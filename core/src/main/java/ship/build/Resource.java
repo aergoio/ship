@@ -40,11 +40,11 @@ public class Resource implements Adaptor {
   }
 
   @Override
-  public <T> Optional<T> adapt(final Class<T> adaptor) {
+  public <T> T adapt(final Class<T> adaptor) {
     if (adaptor.isInstance(this)) {
-      return (Optional<T>) of(this);
+      return (T) this;
     }
-    return Optional.empty();
+    return null;
   }
 
   @Override

@@ -4,6 +4,7 @@
 
 package ship;
 
+import static java.util.Optional.ofNullable;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.Optional;
@@ -43,14 +44,14 @@ public class Builder {
     final Resource resource = resourceManager.getResource(resourcePath);
     logger.trace("{}: {}", resourcePath, resource);
     final Concatenator concatenator = new Concatenator(resourceManager);
-    final Optional<BuildResource> buildResourceOpt = resource.adapt(BuildResource.class);
-    final Optional<TestResource> testResourceOpt = resource.adapt(TestResource.class);
-    if (buildResourceOpt.isPresent()) {
+    final Optional<BuildResource> buildResource = ofNullable(resource.adapt(BuildResource.class));
+    final Optional<TestResource> testResource = ofNullable(resource.adapt(TestResource.class));
+    if (buildResource.isPresent()) {
       logger.trace("Build to target");
-      return concatenator.visit(buildResourceOpt.get());
-    } else if (testResourceOpt.isPresent()) {
+      return concatenator.visit(buildResource.get());
+    } else if (testResource.isPresent()) {
       logger.trace("Build to test");
-      return concatenator.visit(testResourceOpt.get());
+      return concatenator.visit(testResource.get());
     }
 
     return new BuildDetails();

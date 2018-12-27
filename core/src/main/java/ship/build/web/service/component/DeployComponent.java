@@ -3,7 +3,6 @@ package ship.build.web.service.component;
 import hera.api.AccountOperation;
 import hera.api.AergoApi;
 import hera.api.ContractOperation;
-import hera.api.encode.Base58WithCheckSum;
 import hera.api.model.Account;
 import hera.api.model.AccountState;
 import hera.api.model.ContractDefinition;
@@ -37,10 +36,9 @@ public interface DeployComponent extends Aergo, LoggerComponent {
       final AccountOperation accountOperation = aergoApi.getAccountOperation();
       final AccountState syncedAccount = accountOperation.getState(account);
       final ContractOperation contractOperation = aergoApi.getContractOperation();
-      final Base58WithCheckSum encodedPayload = () -> luaBinary.getPayload().getEncodedValue();
+      final String encodedPayload = luaBinary.getPayload();
 
-      final ContractDefinition contractDef =
-          ContractDefinition.of(encodedPayload.getEncodedValue());
+      final ContractDefinition contractDef = ContractDefinition.of(encodedPayload);
 
       return contractOperation.deploy(account, contractDef, syncedAccount.getNonce() + 1, fee);
     } catch (final RpcConnectionException ex) {
