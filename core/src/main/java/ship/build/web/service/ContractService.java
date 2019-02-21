@@ -175,7 +175,7 @@ public class ContractService extends AbstractService
     final ContractInterface contractInterface = deploymentResult.getContractInterface();
     final ContractFunction contractFunction = contractInterface.findFunction(functionName);
     assertNotNull(contractFunction,
-        () -> new ResourceNotFoundException("No " + functionName + " function."));
+        new ResourceNotFoundException("No " + functionName + " function."));
     return new Pair<>(contractTxHash, contractFunction);
   }
 

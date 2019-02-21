@@ -4,14 +4,14 @@
 
 package ship.build.res;
 
-import hera.util.DangerousConsumer;
-import hera.util.DangerousSupplier;
 import hera.util.IoUtils;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import lombok.RequiredArgsConstructor;
+import ship.util.DangerousConsumer;
+import ship.util.DangerousSupplier;
 
 @RequiredArgsConstructor
 public class Text {

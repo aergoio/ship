@@ -6,7 +6,6 @@ import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.spy;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 
-import hera.util.DangerousConsumer;
 import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +15,7 @@ import ship.AbstractTestCase;
 import ship.ProjectFile;
 import ship.build.ResourceChangeEvent;
 import ship.build.web.model.BuildDetails;
+import ship.util.DangerousConsumer;
 import ship.util.FileWatcher;
 
 @PrepareForTest(BuildProjectConsoleMode.class)

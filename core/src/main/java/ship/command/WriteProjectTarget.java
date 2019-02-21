@@ -1,11 +1,11 @@
 package ship.command;
 
-import hera.util.DangerousSupplier;
 import java.io.InputStream;
 import java.nio.file.Path;
 import lombok.Getter;
 import lombok.Setter;
 import ship.build.res.Project;
+import ship.util.DangerousSupplier;
 import ship.util.FileWriter;
 
 public class WriteProjectTarget extends AbstractCommand {

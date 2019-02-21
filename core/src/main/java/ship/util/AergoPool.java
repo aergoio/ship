@@ -1,6 +1,6 @@
 package ship.util;
 
-import static hera.util.IoUtils.tryClose;
+import static ship.util.IoUtils.tryClose;
 
 import hera.api.AergoApi;
 import hera.client.AergoClientBuilder;

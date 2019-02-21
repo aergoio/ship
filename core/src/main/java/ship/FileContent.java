@@ -4,13 +4,13 @@
 
 package ship;
 
-import hera.util.DangerousSupplier;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import ship.util.DangerousSupplier;
 
 @RequiredArgsConstructor
 public class FileContent implements Comparable<FileContent> {
@@ -18,7 +18,7 @@ public class FileContent implements Comparable<FileContent> {
   @NonNull
   protected final String path;
 
-  protected final DangerousSupplier<InputStream> conentSupplier;
+  protected final DangerousSupplier<InputStream> contentSupplier;
 
   /**
    * Open stream for content.
@@ -29,7 +29,7 @@ public class FileContent implements Comparable<FileContent> {
    */
   public InputStream open() throws IOException {
     try {
-      return conentSupplier.get();
+      return contentSupplier.get();
     } catch (final IOException ex) {
       throw ex;
     } catch (final Throwable ex) {

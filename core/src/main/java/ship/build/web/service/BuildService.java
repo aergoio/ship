@@ -6,7 +6,6 @@ package ship.build.web.service;
 
 import static java.util.stream.Collectors.toList;
 
-import hera.util.DangerousConsumer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -18,6 +17,7 @@ import javax.inject.Named;
 import lombok.NoArgsConstructor;
 import ship.build.web.model.BuildDetails;
 import ship.build.web.model.BuildSummary;
+import ship.util.DangerousConsumer;
 
 @NoArgsConstructor
 @Named

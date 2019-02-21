@@ -1,6 +1,5 @@
 package ship.util;
 
-import hera.util.DangerousConsumer;
 import hera.util.IoUtils;
 import java.io.InputStream;
 import java.io.OutputStream;

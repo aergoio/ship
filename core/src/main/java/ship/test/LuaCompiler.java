@@ -9,16 +9,14 @@ import static hera.util.IoUtils.redirect;
 import static hera.util.ValidationUtils.assertNotNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
-import hera.util.DangerousSupplier;
-import hera.util.IoUtils;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
-import java.io.StringReader;
 import org.slf4j.Logger;
 import ship.exception.BuildException;
+import ship.util.DangerousSupplier;
 
 public class LuaCompiler {
 
@@ -63,7 +61,7 @@ public class LuaCompiler {
           throw new BuildException("Fail to aergoluac");
         }
         final String line = new BufferedReader(compilerStdOut).readLine();
-        assertNotNull(line, () -> new BuildException("No result from aergoluac"));
+        assertNotNull(line, new BuildException("No result from aergoluac"));
         final String base58Encoded = line;
         logger.info("Encoded: {}", base58Encoded);
         return new LuaBinary(() -> base58Encoded);

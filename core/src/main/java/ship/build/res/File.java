@@ -4,7 +4,6 @@
 
 package ship.build.res;
 
-import hera.util.DangerousSupplier;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +11,7 @@ import java.io.InputStreamReader;
 import lombok.Getter;
 import lombok.Setter;
 import ship.build.Resource;
+import ship.util.DangerousSupplier;
 import ship.util.FileOpener;
 
 public class File extends Resource {

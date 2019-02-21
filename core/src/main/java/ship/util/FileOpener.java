@@ -1,6 +1,5 @@
 package ship.util;
 
-import hera.util.DangerousSupplier;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;

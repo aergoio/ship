@@ -12,11 +12,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import hera.util.DangerousConsumer;
 import org.junit.Before;
 import org.junit.Test;
 import ship.build.web.model.BuildDetails;
 import ship.build.web.model.BuildSummary;
+import ship.util.DangerousConsumer;
 
 public class BuildServiceTest {
 
