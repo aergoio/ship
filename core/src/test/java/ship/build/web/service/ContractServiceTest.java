@@ -1,6 +1,5 @@
 package ship.build.web.service;
 
-import static hera.util.Base58Utils.encodeWithCheck;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertNotNull;
@@ -57,8 +56,7 @@ public class ContractServiceTest extends AbstractTestCase {
 
   protected ContractService contractService;
 
-  protected AccountWithAddress account = new AccountWithAddress(new AccountAddress(
-      new BytesValue(('B' + randomUUID().toString()).getBytes())));
+  protected AccountWithAddress account = new AccountWithAddress(AccountAddressGen.generate());
 
   protected ContractTxReceipt contractTxReceipt;
 
@@ -86,16 +84,13 @@ public class ContractServiceTest extends AbstractTestCase {
     when(resourcePool.borrowResource()).thenReturn(aergoApi);
     when(Runtime.getRuntime()).thenReturn(runtime);
     when(runtime.exec(anyString(), any(String[].class))).thenReturn(p);
-    when(p.getInputStream()).thenReturn(new ByteArrayInputStream(
-        encodeWithCheck(randomUUID().toString().getBytes()).getBytes()));
+    when(p.getInputStream()).thenReturn(new ByteArrayInputStream(new PayloadGen().generate().getBytes()));
     when(p.getErrorStream()).thenReturn(new ByteArrayInputStream(new byte[] {}));
     when(p.getOutputStream()).thenReturn(new ByteArrayOutputStream());
     when(p.waitFor()).thenReturn(0);
 
-    final BytesValue accountAddressValue =
-        new BytesValue(('B' + randomUUID().toString()).getBytes());
-    final BytesValue contractAddressValue =
-        new BytesValue(('B' + randomUUID().toString()).getBytes());
+    final BytesValue accountAddressValue = AddressBytesValueGen.generate();
+    final BytesValue contractAddressValue = AddressBytesValueGen.generate();
 
     final AccountState accountState =
         new AccountState(new AccountAddress(accountAddressValue), 10, Aer.ZERO);
@@ -153,8 +148,7 @@ public class ContractServiceTest extends AbstractTestCase {
     when(contractOperation.execute(any(Account.class), any(), anyLong(), any()))
         .thenReturn(executedContractTxHash);
     final long nonce = Math.abs(new Random().nextLong()) + 1;
-    final AccountState accountState = new AccountState(new AccountAddress(new BytesValue(
-        ('B' + randomUUID().toString()).getBytes())), nonce, Aer.ZERO);
+    final AccountState accountState = new AccountState(AccountAddressGen.generate(), nonce, Aer.ZERO);
     when(accountOperation.getState(account)).thenReturn(accountState);
 
     // When

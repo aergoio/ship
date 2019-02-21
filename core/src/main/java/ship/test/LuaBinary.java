@@ -16,5 +16,4 @@ public class LuaBinary {
   public String getPayload() {
     return inputSupplier.get();
   }
-
 }

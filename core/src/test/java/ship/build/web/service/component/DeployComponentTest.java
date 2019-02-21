@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.slf4j.Logger;
 import ship.AbstractTestCase;
+import ship.build.web.service.PayloadGen;
 import ship.test.LuaBinary;
 import ship.util.AergoPool;
 
@@ -70,7 +71,7 @@ public class DeployComponentTest extends AbstractTestCase implements DeployCompo
 
     // When
     final LuaBinary luaBinary =
-        new LuaBinary(() -> encodeWithCheck(randomUUID().toString().getBytes()));
+        new LuaBinary(() -> new PayloadGen().generate());
     final ContractTxHash txHash = deploy(account, luaBinary);
 
     // Then

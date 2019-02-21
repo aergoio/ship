@@ -5,6 +5,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class IoUtils {
+
+  /**
+   * Try to close obj without any exception.
+   *
+   * @param obj object to close
+   */
   public static void tryClose(final Object obj) {
     try {
       if (obj instanceof InputStream) {
@@ -15,6 +21,7 @@ public class IoUtils {
         ((Closeable) obj).close();
       }
     } catch (final Throwable ex) {
+      ;// Ignore exception
     }
   }
 
