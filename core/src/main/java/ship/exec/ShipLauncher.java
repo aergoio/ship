@@ -100,7 +100,7 @@ public class ShipLauncher {
   protected void handleThrowable(final Command command, final Throwable throwable) {
     final String mainMessage = ExceptionUtils.buildExceptionMessage(null, throwable);
     System.err.println(mainMessage);
-    System.err.println(NL_3);
+    System.err.println(Messages.bind(NL_3));
     logger.debug("Unexpected exception: {}", throwable.getClass(), throwable);
     exit(-1);
   }

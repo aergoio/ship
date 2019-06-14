@@ -4,4 +4,5 @@
 rootProject.name = 'ship'
 
 include ':core'
+include ':bootstrap'
 include ':assembly'

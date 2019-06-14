@@ -33,6 +33,7 @@ allprojects {
 }
 def javaProjects = [
   project('core'),
+  project('bootstrap'),
   project('assembly')]
 
 def jmhProjects = [
