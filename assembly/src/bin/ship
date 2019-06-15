@@ -24,13 +24,14 @@ export SHIP_CONF=${SHIP_CONF:-$SHIP_HOME/conf}
 export SHIP_DOC=${SHIP_DOC:-$SHIP_HOME/doc}
 export SHIP_LIB=${SHIP_LIB:-$SHIP_HOME/lib}
 
-JARS=$(find "$SHIP_LIB" -name '*.jar' | tr '\n' ':')
+JARS=$(find "$SHIP_LIB" -name 'bootstrap-*.jar')
 
 #--add-exports java.base/java.lang=ALL-UNNAMED
 #--add-exports java.base/jdk.internal.misc=ALL-UNNAMED
-COMMAND="java -cp $SHIP_CONF:$JARS \
+java -cp "$JARS" \
 	-Dio.netty.tryReflectionSetAccessible=true \
 	-Dlogback.verbose=true \
-	-Dlogging.config=$SHIP_CONF/ship-logger.xml \
-	-Dlogback.configurationFile=$SHIP_CONF/ship-logger.xml ship.exec.ShipLauncher $@"
-$COMMAND
+	"-Dlogging.config=$SHIP_CONF/ship-logger.xml" \
+	"-Dship.lib=$SHIP_LIB" \
+	"-Dship.conf=$SHIP_CONF" \
+	"-Dlogback.configurationFile=$SHIP_CONF/ship-logger.xml" ship.exec.LoaderLauncher $@
