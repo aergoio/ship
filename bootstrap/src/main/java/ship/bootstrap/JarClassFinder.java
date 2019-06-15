@@ -7,6 +7,7 @@ package ship.bootstrap;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import lombok.Getter;
@@ -21,24 +22,30 @@ public class JarClassFinder implements ClassFinder, Debuggable {
   @Setter
   protected boolean debug = false;
 
+  protected HashSet<String> indices = null;
+
   @Override
   public URL find(final String path) throws IOException {
     final JarFile jarFile = new JarFile(file);
-    final JarEntry e = jarFile.getJarEntry(path);
-    if (null == e) {
-      return null;
-    }
-    if (e.isDirectory()) {
-      return null;
-    }
+    try {
+      final JarEntry e = jarFile.getJarEntry(path);
+      if (null == e) {
+        return null;
+      }
+      if (e.isDirectory()) {
+        return null;
+      }
 
-    if (debug) {
-      System.out.println(path + " found");
-    }
+      if (debug) {
+        System.out.println(path + " found");
+      }
 
-    final String canonicalEntryPath = (path.startsWith("/") ? path : ("/" + path));
-    final String fullPath = "jar:" + file.toURI().toURL() + "!" + canonicalEntryPath;
-    return new URL(fullPath);
+      final String canonicalEntryPath = (path.startsWith("/") ? path : ("/" + path));
+      final String fullPath = "jar:" + file.toURI().toURL() + "!" + canonicalEntryPath;
+      return new URL(fullPath);
+    } finally {
+      jarFile.close();
+    }
   }
 
   @Override
