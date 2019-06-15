@@ -29,7 +29,7 @@ repositories {
 
 allprojects {
   group 'io.aergo'
-  version '1.0-SNAPSHOT'
+  version '1.0-RC1'
 }
 def javaProjects = [
   project('core'),
