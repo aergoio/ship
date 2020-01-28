@@ -17,7 +17,7 @@ import ship.ship.command.LaunchCommand;
 import ship.ship.util.IoUtils;
 
 public class LoaderLauncher {
-  protected static final String PROP_DEBUG = "ship.bootstrap.verbosse";
+  protected static final String PROP_DEBUG = "ship.bootstrap.verbose";
   protected static final String PROP_LIB = "ship.lib";
   protected static final String PROP_CONF = "ship.conf";
 
