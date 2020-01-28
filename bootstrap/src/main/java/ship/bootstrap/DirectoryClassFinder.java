@@ -23,6 +23,9 @@ public class DirectoryClassFinder implements ClassFinder, Debuggable {
   public URL find(String path) throws IOException {
     final File f = new File(baseDir, path);
     if (f.exists() && f.isFile() && f.canRead()) {
+      if (debug) {
+        System.out.println("DirectoryClassFinder: " + path + " found");
+      }
       return f.toURI().toURL();
     }
     return null;

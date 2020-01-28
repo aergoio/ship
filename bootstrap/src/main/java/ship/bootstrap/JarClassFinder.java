@@ -37,7 +37,7 @@ public class JarClassFinder implements ClassFinder, Debuggable {
       }
 
       if (debug) {
-        System.out.println(path + " found");
+        System.out.println("JarClassFinder: " + path + " found in " + file);
       }
 
       final String canonicalEntryPath = (path.startsWith("/") ? path : ("/" + path));

@@ -29,11 +29,15 @@ public class Loader extends ClassLoader implements Debuggable {
       url = finder.find(path);
     } catch (Throwable ex) {
       if (debug) {
-        System.out.println("UNEXPECTED Exception");
+        System.out.println("findClass(" + name +
+                           "): UNEXPECTED exception finding url");
         ex.printStackTrace();
       }
     }
     if (null == url) {
+      if (debug) {
+        System.out.println("findClass(" + name + "): url is null");
+      }
       return super.findClass(name);
     } else {
       try {
@@ -44,7 +48,7 @@ public class Loader extends ClassLoader implements Debuggable {
         return defineClass(name, input, 0, input.length);
       } catch (Throwable ex) {
         if (debug) {
-          System.out.println("UNEXPECTED Exception");
+          System.out.println("findClass(" + name + "): UNEXPECTED Exception");
           ex.printStackTrace();
         }
         return super.findClass(name);
@@ -55,7 +59,7 @@ public class Loader extends ClassLoader implements Debuggable {
   @Override
   protected URL findResource(String name) {
     if (debug) {
-      System.out.println("Find " + name);
+      System.out.println("findResource " + name);
     }
     try {
       return finder.find(name);
@@ -67,7 +71,7 @@ public class Loader extends ClassLoader implements Debuggable {
   @Override
   protected Enumeration<URL> findResources(String name) throws IOException {
     if (debug) {
-      System.out.println("Find " + name);
+      System.out.println("findResources " + name);
     }
     return super.findResources(name);
   }
