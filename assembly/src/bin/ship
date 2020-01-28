@@ -35,3 +35,8 @@ java -cp "$JARS" \
 	"-Dship.lib=$SHIP_LIB" \
 	"-Dship.conf=$SHIP_CONF" \
 	"-Dlogback.configurationFile=$SHIP_CONF/ship-logger.xml" ship.exec.LoaderLauncher $@
+
+# Add this to debug the ship.bootstrap mechanism for loading classes
+# on startup:
+#
+#	-Dship.bootstrap.verbose=true \
