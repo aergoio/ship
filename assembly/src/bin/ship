@@ -24,7 +24,7 @@ export SHIP_CONF=${SHIP_CONF:-$SHIP_HOME/conf}
 export SHIP_DOC=${SHIP_DOC:-$SHIP_HOME/doc}
 export SHIP_LIB=${SHIP_LIB:-$SHIP_HOME/lib}
 
-JARS=$(find "$SHIP_LIB" -name 'bootstrap-*.jar')
+JARS="$(find "$SHIP_LIB" -name '*.jar' | tr '\n' ':')"
 
 #--add-exports java.base/java.lang=ALL-UNNAMED
 #--add-exports java.base/jdk.internal.misc=ALL-UNNAMED
