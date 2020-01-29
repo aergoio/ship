@@ -113,9 +113,9 @@ public class ConsoleServer extends AbstractServer {
     final int successes = node.getTheNumberOfSuccesses();
     final int runs = node.getTheNumberOfTests();
     if (0 < nFailures) {
-      printer.print(NL_6, name, successes, runs);
+      printer.println(NL_6, name, successes, runs);
     } else {
-      printer.print(NL_7, name, successes, runs);
+      printer.println(NL_7, name, successes, runs);
     }
     node.getChildren().forEach(child -> this.printCase((TestReportNode) child));
   }
