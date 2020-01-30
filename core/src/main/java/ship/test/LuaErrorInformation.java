@@ -5,6 +5,7 @@
 package ship.test;
 
 import lombok.Getter;
+import lombok.Setter;
 
 public class LuaErrorInformation {
 
@@ -16,6 +17,10 @@ public class LuaErrorInformation {
 
   @Getter
   protected final int columnNumber;
+
+  @Getter
+  @Setter
+  protected String codeSnippet;
 
   /**
    * Constructor with not parsed error message.
@@ -50,6 +55,10 @@ public class LuaErrorInformation {
 
   @Override
   public String toString() {
-    return lineNumber + ":" + columnNumber + " - Message: " + message;
+    String s = lineNumber + ":" + columnNumber + " - Message: " + message;
+    if (this.codeSnippet != null) {
+        s += "\n" + this.codeSnippet;
+    }
+    return s;
   }
 }

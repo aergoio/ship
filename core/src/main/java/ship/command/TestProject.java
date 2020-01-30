@@ -91,18 +91,17 @@ public class TestProject extends AbstractCommand {
     testReporter.start(testPath);
     final TestResult testResult = new LuaRunner().run(executable);
     final TestReportNode<LuaErrorInformation> testFile = testReporter.getCurrentTestFile();
-    if (!testResult.isSuccess()) {
-      logger.info("{} failed", testFile.getName());
-      testFile.setResult(TestReportNodeResult.Failure);
-      testFile.setResultDetail(testResult.getError());
-    }
-
-    logger.debug("Test {} => {}", testPath, testResult);
+    logger.debug("Test result for {} => {}", testPath, testResult);
     if (!testResult.isSuccess()) {
       final LuaErrorInformation error = testResult.getError();
       final int lineNumber = error.getLineNumber();
-      logger.debug("Lua Script:\n{}",
-          executable.toString(lineNumber - 5, lineNumber + 5, singletonList(lineNumber)));
+      String snippet = executable.toString(lineNumber - 5, lineNumber + 5,
+                                           singletonList(lineNumber));
+      error.setCodeSnippet(snippet.replaceAll("(?m)^", "    "));
+      logger.info("Test failure at {}:{}\n{}",
+                  testPath, error.toString(), snippet);
+      testFile.setResult(TestReportNodeResult.Failure);
+      testFile.setResultDetail(error);
     }
     testReporter.end();
   }
