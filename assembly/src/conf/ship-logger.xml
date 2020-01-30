@@ -9,9 +9,51 @@
       <Pattern>%d{HH:mm} %highlight(%-5level) %cyan(%logger{15}) - %msg%n</Pattern>
     </layout>
   </appender>
-  <root level="NONE">
-    <!--
-    <appender-ref ref="STDOUT" />
-    -->
-  </root>
+
+  <if condition='isDefined("SHIP_LOG")'>
+    <then>
+      <appender name="FILE-APPENDER" class="ch.qos.logback.core.FileAppender">
+        <file>${SHIP_LOG}/ship.log</file>
+        <append>true</append>
+        <!-- set immediateFlush to false for much higher logging throughput -->
+        <immediateFlush>true</immediateFlush>
+        <!-- encoders are assigned the type
+             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder>
+          <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+          <level>INFO</level>
+        </filter>
+      </appender>
+
+      <appender name="TRACE-APPENDER" class="ch.qos.logback.core.FileAppender">
+        <file>${SHIP_LOG}/trace.log</file>
+        <append>true</append>
+        <!-- set immediateFlush to false for much higher logging throughput -->
+        <immediateFlush>true</immediateFlush>
+        <!-- encoders are assigned the type
+             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder>
+          <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+        </encoder>
+      </appender>
+
+      <logger name="ship.util.AnsiMessagePrinter" level="INFO" />
+      <logger name="ship.util.FileWatcher" level="INFO" />
+      <logger name="ship.build.WebServer" level="DEBUG" />
+
+      <root level="TRACE">
+        <appender-ref ref="TRACE-APPENDER" />
+        <appender-ref ref="FILE-APPENDER" />
+      </root>
+    </then>
+    <else>
+      <root level="NONE">
+        <!--
+            <appender-ref ref="STDOUT" />
+        -->
+      </root>
+    </else>
+  </if>
 </configuration>
