@@ -42,6 +42,7 @@
       <logger name="ship.util.AnsiMessagePrinter" level="INFO" />
       <logger name="ship.util.FileWatcher" level="INFO" />
       <logger name="ship.build.WebServer" level="DEBUG" />
+      <logger name="ship.build.web.service.BuildService" level="INFO" />
 
       <root level="TRACE">
         <appender-ref ref="TRACE-APPENDER" />

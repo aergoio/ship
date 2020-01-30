@@ -42,7 +42,7 @@ public class BuildService extends AbstractService {
   public void save(final BuildDetails buildDetails) {
     buildDetails.setSequence(sequence.incrementAndGet());
     uuid2buildResult.put(buildDetails.getUuid(), buildDetails);
-    logger.info("New build detected: {}", buildDetails);
+    logger.debug("New build detected: {}", buildDetails);
     uuids.addFirst(buildDetails.getUuid());
     while (100 < uuids.size()) {
       final String uuid = uuids.removeLast();
