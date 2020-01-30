@@ -78,12 +78,12 @@ public class LuaSource {
    * @return formatted string
    */
   public String toString(final int from, final int to, final List<Integer> highlights) {
-    logger.debug("{} ~ {}", from, to);
+    logger.trace("toString({} ~ {})", from, to);
     final int digit = (int) (Math.log10(lines.length) + 1);
 
     assertTrue(from < to);
     final IntRange range = new IntRange(0, lines.length).select(new IntRange(from, to));
-    logger.trace("{}", range);
+    logger.trace("range: {}", range);
 
     final StringJoiner joiner = new StringJoiner("\n");
     IntStream.range(range.v1, range.v2)
