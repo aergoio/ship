@@ -87,7 +87,7 @@ public class TestProject extends AbstractCommand {
     final LuaSource executable = new LuaSource(buildDetails.getResult());
     testReporter.clear();
 
-    logger.trace("Executing test...");
+    logger.trace("Executing test {} ...", testPath);
     testReporter.start(testPath);
     final TestResult testResult = new LuaRunner().run(executable);
     final TestReportNode<LuaErrorInformation> testFile = testReporter.getCurrentTestFile();
