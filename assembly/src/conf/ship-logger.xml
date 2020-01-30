@@ -20,7 +20,7 @@
         <!-- encoders are assigned the type
              ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
         <encoder>
-          <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+          <pattern>%-4relative [%thread] %-5level %logger{35}:%line - %msg%n</pattern>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
           <level>INFO</level>
@@ -35,7 +35,7 @@
         <!-- encoders are assigned the type
              ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
         <encoder>
-          <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+          <pattern>%-4relative [%thread] %-5level %logger{35}:%line - %msg%n</pattern>
         </encoder>
       </appender>
 
