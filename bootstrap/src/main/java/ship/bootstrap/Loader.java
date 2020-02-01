@@ -4,10 +4,17 @@
 
 package ship.bootstrap;
 
+import static java.util.stream.Collectors.toList;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -15,7 +22,7 @@ import ship.ship.util.IoUtils;
 
 @RequiredArgsConstructor
 public class Loader extends ClassLoader implements Debuggable {
-  protected final ClassFinder finder;
+  protected final UrlFinder finder;
 
   @Getter
   @Setter
@@ -29,46 +36,81 @@ public class Loader extends ClassLoader implements Debuggable {
       url = finder.find(path);
     } catch (Throwable ex) {
       if (debug) {
-        System.out.println("UNEXPECTED Exception");
+        System.out.printf("findClass(%s): UNEXPECTED exception finding url", name);
         ex.printStackTrace();
       }
     }
+
     if (null == url) {
-      return super.findClass(name);
-    } else {
-      try {
-        byte[] input = null;
-        try (final InputStream in = url.openStream()) {
-          input = IoUtils.readFully(in, 1000);
-        }
-        return defineClass(name, input, 0, input.length);
-      } catch (Throwable ex) {
-        if (debug) {
-          System.out.println("UNEXPECTED Exception");
-          ex.printStackTrace();
-        }
-        return super.findClass(name);
+      if (debug) {
+        System.out.printf("findClass(%s): url is null%n", name);
       }
+      return super.findClass(name);
+    }
+
+    try {
+      byte[] input = null;
+      try (final InputStream in = url.openStream()) {
+        input = IoUtils.readFully(in, 1000);
+      }
+      final Class<?> clazz = defineClass(name, input, 0, input.length);
+      // define package
+      final int i = name.lastIndexOf('.');
+      final String packageName = name.substring(0, i);
+      if (null == getPackage(packageName)) {
+        definePackage(packageName, null, null, null, null, null, null, null);
+      }
+      return clazz;
+    } catch (Throwable ex) {
+      ex.printStackTrace();
+      if (debug) {
+        System.out.printf("findClass(%s): UNEXPECTED Exception%n", name);
+        ex.printStackTrace();
+      }
+      return super.findClass(name);
     }
   }
 
   @Override
-  protected URL findResource(String name) {
+  protected URL findResource(final String name) {
     if (debug) {
-      System.out.println("Find " + name);
+      System.out.printf("findResource(%s)%n", name);
     }
     try {
-      return finder.find(name);
+      final URL resource = finder.find(name);
+      if (null == resource) {
+        return super.findResource(name);
+      }
+      return resource;
     } catch (final Throwable ex) {
-      return null;
+      return super.findResource(name);
     }
   }
 
   @Override
-  protected Enumeration<URL> findResources(String name) throws IOException {
+  protected Enumeration<URL> findResources(final String name) throws IOException {
     if (debug) {
-      System.out.println("Find " + name);
+      System.out.printf("findResources(%s)%n", name);
     }
-    return super.findResources(name);
+    final Enumeration<URL> fromParent = super.findResources(name);
+    final Collection<URL> parentUrls = new ArrayList<>();
+    while (fromParent.hasMoreElements()) {
+      parentUrls.add(fromParent.nextElement());
+    }
+    final List<URL> urls = Stream.concat(finder.findUrls(name).stream(), parentUrls.stream())
+        .collect(toList());
+    return new Enumeration<URL>() {
+      protected Iterator<URL> it = urls.iterator();
+
+      @Override
+      public boolean hasMoreElements() {
+        return it.hasNext();
+      }
+
+      @Override
+      public URL nextElement() {
+        return it.next();
+      }
+    };
   }
 }

@@ -15,10 +15,14 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import org.luaj.vm2.LuaError;
 import org.slf4j.Logger;
+import ship.exception.CommandException;
+import ship.util.Messages;
 
 public class LuaRunner {
 
   protected final transient Logger logger = getLogger(getClass());
+
+  protected static final String NL_0 = LuaRunner.class.getName() + ".0";
 
   /**
    * Execute lua script.
@@ -32,9 +36,15 @@ public class LuaRunner {
     final TestResult testResult = new TestResult();
     try {
       logger.trace("Lua Script:\n{}", source);
-      final ScriptEngineManager mgr = new ScriptEngineManager();
-      final ScriptEngine engine = mgr.getEngineByName("lua");
-
+      ClassLoader classLoader = getClass().getClassLoader();
+      logger.trace("Current class loader: {}", classLoader);
+      final ScriptEngineManager mgr = new ScriptEngineManager(classLoader);
+      logger.debug("engine factories:\n{}", mgr.getEngineFactories());
+      final String engineName = "lua";
+      final ScriptEngine engine = mgr.getEngineByName(engineName);
+      if (null == engine) {
+          throw new CommandException(Messages.bind(NL_0, engineName));
+      }
       engine.getContext().setWriter(stringWriter);
       final Object result = engine.eval(source.getScript());
       logger.debug("Result: {}", result);

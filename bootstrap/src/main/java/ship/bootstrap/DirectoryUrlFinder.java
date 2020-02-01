@@ -4,15 +4,19 @@
 
 package ship.bootstrap;
 
+import static java.util.Collections.emptyList;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @RequiredArgsConstructor
-public class DirectoryClassFinder implements ClassFinder, Debuggable {
+public class DirectoryUrlFinder implements UrlFinder, Debuggable {
   protected final File baseDir;
 
   @Getter
@@ -20,12 +24,18 @@ public class DirectoryClassFinder implements ClassFinder, Debuggable {
   protected boolean debug = false;
 
   @Override
-  public URL find(String path) throws IOException {
+  public List<URL> findUrls(final String path) throws IOException {
     final File f = new File(baseDir, path);
     if (f.exists() && f.isFile() && f.canRead()) {
-      return f.toURI().toURL();
+      if (debug) {
+        System.out.println("DirectoryClassFinder: " + path + " found");
+      }
+      final URL url = f.toURI().toURL();
+      final List<URL> urls = new ArrayList<URL>();
+      urls.add(url);
+      return urls;
     }
-    return null;
+    return emptyList();
   }
 
   @Override

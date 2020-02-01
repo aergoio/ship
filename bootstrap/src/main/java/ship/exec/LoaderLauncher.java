@@ -9,15 +9,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
-import ship.bootstrap.ClassFinder;
-import ship.bootstrap.ClassFinderFactory;
-import ship.bootstrap.CompositeClassFinder;
+import ship.bootstrap.UrlFinder;
+import ship.bootstrap.UrlFinderFactory;
+import ship.bootstrap.CompositeUrlFinder;
 import ship.bootstrap.Loader;
 import ship.ship.command.LaunchCommand;
 import ship.ship.util.IoUtils;
 
 public class LoaderLauncher {
-  protected static final String PROP_DEBUG = "ship.bootstrap.verbosse";
+  protected static final String PROP_DEBUG = "ship.bootstrap.verbose";
   protected static final String PROP_LIB = "ship.lib";
   protected static final String PROP_CONF = "ship.conf";
 
@@ -37,14 +37,14 @@ public class LoaderLauncher {
    *
    * @param confDir conf directory path
    * @param libDir lib directory path
+   * @param debug print debug message or not
    *
    * @return class finder
    */
-  protected ClassFinder buildFinder(final String confDir, final String libDir) {
-    final boolean debug = Boolean.parseBoolean(System.getProperty(PROP_DEBUG));
-    final ClassFinderFactory factory = new ClassFinderFactory();
+  protected UrlFinder buildFinder(final String confDir, final String libDir, final boolean debug) {
+    final UrlFinderFactory factory = new UrlFinderFactory();
     factory.setDebug(debug);
-    final List<ClassFinder> finders = new ArrayList<>();
+    final List<UrlFinder> finders = new ArrayList<>();
     Optional.ofNullable(confDir)
         .map(File::new)
         .map(factory::create)
@@ -55,7 +55,7 @@ public class LoaderLauncher {
         .orElseGet(Stream::empty)
         .map(factory::create)
         .forEach(finders::add);
-    final CompositeClassFinder finder = new CompositeClassFinder(finders);
+    final CompositeUrlFinder finder = new CompositeUrlFinder(finders);
     finder.setDebug(debug);
     return finder;
   }
@@ -70,7 +70,9 @@ public class LoaderLauncher {
   public void run(final String[] args) throws Exception {
     final String libDir = System.getProperty(PROP_LIB);
     final String confDir = System.getProperty(PROP_CONF);
-    final Loader loader = new Loader(buildFinder(confDir, libDir));
+    final boolean debug = Boolean.parseBoolean(System.getProperty(PROP_DEBUG));
+    final Loader loader = new Loader(buildFinder(confDir, libDir, debug));
+    loader.setDebug(debug);
     new LaunchCommand(loader, "ship.exec.ShipLauncher", args).execute();
   }
 }

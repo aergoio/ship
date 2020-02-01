@@ -4,6 +4,9 @@
 
 package ship.bootstrap;
 
+import static java.util.stream.Collectors.toList;
+
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Objects;
@@ -12,25 +15,27 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @RequiredArgsConstructor
-public class CompositeClassFinder implements ClassFinder, Debuggable {
+public class CompositeUrlFinder implements UrlFinder, Debuggable {
 
-  protected final List<ClassFinder> finders;
+  protected final List<UrlFinder> finders;
 
-  @Getter @Setter
+  @Getter
+  @Setter
   protected boolean debug = false;
 
   @Override
-  public URL find(final String path) {
+  public List<URL> findUrls(final String name) throws IOException {
     return finders.stream()
-        .map(finder -> findInternal(finder, path))
+        .map(finder -> findInternal(finder, name))
         .filter(Objects::nonNull)
-        .findAny().orElse(null);
+        .collect(toList());
   }
 
-  protected URL findInternal(final ClassFinder finder, final String path) {
+  protected URL findInternal(final UrlFinder finder, final String path) {
     try {
       return finder.find(path);
     } catch (final Exception e) {
+      System.out.println("finder: " + finder);
       if (debug) {
         System.out.println("WARN: Fail to read " + path + " in " + finder);
       }
