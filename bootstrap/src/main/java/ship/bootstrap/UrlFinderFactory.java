@@ -8,33 +8,33 @@ import java.io.File;
 import lombok.Getter;
 import lombok.Setter;
 
-public class ClassFinderFactory implements Debuggable {
+public class UrlFinderFactory implements Debuggable {
 
   @Getter
   @Setter
   protected boolean debug = false;
 
   /**
-   * Create class finder for file.
+   * Create url finder for file.
    * <p>
-   * Create JarClassFinder if file is general file.
-   * Create DirectoryClassFinder if file is directory.
+   * Create {@link JarUrlFinder} if file is general file.
+   * Create {@link DirectoryUrlFinder} if file is directory.
    * </p>
    *
    * @param file input file
    *
    * @return class finder for file
    */
-  public ClassFinder create(final File file) {
+  public UrlFinder create(final File file) {
     if (debug) {
       System.out.println("FILE: " + file.getAbsolutePath());
     }
     if (file.isDirectory()) {
-      final DirectoryClassFinder finder = new DirectoryClassFinder(file);
+      final DirectoryUrlFinder finder = new DirectoryUrlFinder(file);
       finder.setDebug(debug);
       return finder;
     } else if (file.isFile()) {
-      final JarClassFinder finder = new JarClassFinder(file);
+      final JarUrlFinder finder = new JarUrlFinder(file);
       finder.setDebug(debug);
       return finder;
     } else {

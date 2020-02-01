@@ -36,7 +36,9 @@ public class LuaRunner {
     final TestResult testResult = new TestResult();
     try {
       logger.trace("Lua Script:\n{}", source);
-      final ScriptEngineManager mgr = new ScriptEngineManager();
+      ClassLoader classLoader = getClass().getClassLoader();
+      logger.trace("Current class loader: {}", classLoader);
+      final ScriptEngineManager mgr = new ScriptEngineManager(classLoader);
       logger.debug("engine factories:\n{}", mgr.getEngineFactories());
       final String engineName = "lua";
       final ScriptEngine engine = mgr.getEngineByName(engineName);

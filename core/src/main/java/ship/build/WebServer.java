@@ -5,6 +5,10 @@
 package ship.build;
 
 import static hera.DefaultConstants.DEFAULT_ENDPOINT;
+import static hera.server.ServerStatus.BOOTING;
+import static hera.server.ServerStatus.PROCESSING;
+import static hera.server.ServerStatus.TERMINATED;
+import static hera.server.StateConditionFactory.when;
 import static hera.util.StringUtils.nvl;
 
 import hera.server.ServerStatus;
@@ -41,6 +45,7 @@ public class WebServer extends ThreadServer {
    * <p>
    * Return 8080 as default port if not specified.
    * </p>
+   *
    * @return server port
    */
   public int getPort() {
@@ -76,6 +81,38 @@ public class WebServer extends ThreadServer {
       this.port = port;
     } else {
       throw new IllegalStateException("Server already started");
+    }
+  }
+
+  /**
+   * {@inheritDoc}.
+   *
+   * TODO: Make ThreadServer can set ClassLoader for thread
+   */
+  @Override
+  public void boot(final boolean isBlock) {
+    if (!state.changeState(BOOTING, when(TERMINATED))) {
+      logger.error("{} is not terminated status. status: {}", this, state);
+
+      throw new IllegalStateException();
+    }
+
+    thread = new Thread(this, getName());
+
+    // SpringApplicaton uses Thread.currentThread().getContextClassLoader()
+    // so we have to set it
+    // see also {@link SpringApplication#getSpringFactoriesInstances}.
+    final ClassLoader classLoader = getClass().getClassLoader();
+    logger.debug("{} runs with class loader: {}", this, classLoader);
+    thread.setContextClassLoader(classLoader);
+
+    logger.debug("Starting {}...", this);
+    thread.start();
+
+    logger.trace("Staring post-process for boot.");
+    postBoot();
+    if (isBlock) {
+      waitStatus(PROCESSING, TERMINATED);
     }
   }
 
