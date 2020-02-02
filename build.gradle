@@ -84,6 +84,8 @@ configure(javaProjects) {
     implementation 'org.slf4j:slf4j-api:1.7.25'
 
     runtime 'ch.qos.logback:logback-classic:1.2.3'
+    runtime 'org.codehaus.janino:janino:3.0.6'
+    runtime 'org.codehaus.janino:commons-compiler:3.0.6'
     testImplementation 'org.projectlombok:lombok:1.18.2'
     testImplementation 'junit:junit:4.12'
     testImplementation('org.powermock:powermock-api-mockito2:2.0.0-beta.5') {

@@ -23,6 +23,7 @@ export SHIP_BIN=${SHIP_BIN:-$SHIP_HOME/bin}
 export SHIP_CONF=${SHIP_CONF:-$SHIP_HOME/conf}
 export SHIP_DOC=${SHIP_DOC:-$SHIP_HOME/doc}
 export SHIP_LIB=${SHIP_LIB:-$SHIP_HOME/lib}
+export SHIP_LOG=${SHIP_LOG:-$SHIP_HOME/log}
 
 JARS=$(find "$SHIP_LIB" -name 'bootstrap-*.jar')
 
@@ -34,6 +35,7 @@ java -cp "$JARS" \
 	"-Dlogging.config=$SHIP_CONF/ship-logger.xml" \
 	"-Dship.lib=$SHIP_LIB" \
 	"-Dship.conf=$SHIP_CONF" \
+	"-Dship.log=$SHIP_LOG" \
 	"-Dlogback.configurationFile=$SHIP_CONF/ship-logger.xml" ship.exec.LoaderLauncher $@
 
 # Add this to debug the ship.bootstrap mechanism for loading classes
