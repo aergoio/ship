@@ -40,4 +40,13 @@ public class AergoMock {
     }
   };
 
+  public OneArgFunction print = new OneArgFunction() {
+    @Override
+    public LuaValue call(LuaValue msg) {
+      System.out.println(msg.tojstring());
+      logger.info(msg.tojstring());
+      return NIL;
+    }
+  };
+
 }
