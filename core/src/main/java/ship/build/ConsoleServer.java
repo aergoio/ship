@@ -102,7 +102,11 @@ public class ConsoleServer extends AbstractServer {
     if (node.isSuccess()) {
       printer.println(NL_4, node.getName());
     } else {
-      printer.println(NL_5, node.getName());
+      Object detail = node.getResultDetail();
+      if (detail == null) {
+        detail = "";
+      }
+      printer.println(NL_5, node.getName(), detail);
     }
     node.getChildren().forEach(child -> this.printSuite((TestReportNode) child));
   }
